@@ -1,0 +1,138 @@
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req: request, res });
+
+  // Refresh session if expired - required for Server Components
+  await supabase.auth.getSession();
+
+  // Get the current path
+  const path = request.nextUrl.pathname;
+
+  // Skip middleware for API routes - they handle their own authentication
+  if (path.startsWith('/api/')) {
+    return res;
+  }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Define public routes that don't require authentication
+  const publicRoutes = ['/', '/auth', '/auth/callback', '/partner/auth', '/partner/auth/callback', '/about', '/faq', '/contact', '/pricing'];
+  const isPublicRoute = publicRoutes.includes(path);
+
+  // Function to check if user is a partner
+  const checkIsPartner = async (userId: string) => {
+    try {
+      const { data: partnerData, error } = await supabase
+        .from('partners')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+        console.error('Error checking partner status:', error);
+        return false;
+      }
+
+      return !!partnerData;
+    } catch (error) {
+      console.error('Error in checkIsPartner:', error);
+      return false;
+    }
+  };
+
+  // Allow public routes for unauthenticated users
+  if (!session && isPublicRoute) {
+    return res; // Allow the request to proceed
+  }
+
+  // Handle partner routes
+  if (path.startsWith('/partner')) {
+    if (!session) {
+      // Store the intended destination for after login
+      const redirectUrl = new URL('/partner/auth', request.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    // Check if user is actually a partner
+    const isPartner = await checkIsPartner(session.user.id);
+    if (!isPartner) {
+      // Non-partners trying to access partner routes - redirect to user auth
+      const redirectUrl = new URL('/auth', request.url);
+      redirectUrl.searchParams.set('error', 'unauthorized_partner_access');
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // Handle user dashboard routes (non-partner routes)
+  if (path.startsWith('/dashboard') && !path.startsWith('/partner')) {
+    if (!session) {
+      // Store the intended destination for after login
+      const redirectUrl = new URL('/auth', request.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    // Check if user is a partner trying to access user routes
+    const isPartner = await checkIsPartner(session.user.id);
+    if (isPartner) {
+      // Partners trying to access user routes - redirect to partner dashboard
+      const redirectUrl = new URL('/partner/dashboard', request.url);
+      redirectUrl.searchParams.set('message', 'redirected_to_partner_dashboard');
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // Redirect authenticated users away from auth pages to their appropriate dashboard
+  if (session) {
+    if (path === '/auth' || path === '/auth/callback') {
+      const isPartner = await checkIsPartner(session.user.id);
+      return NextResponse.redirect(new URL(isPartner ? '/partner/dashboard' : '/dashboard', request.url));
+    }
+    if (path === '/partner/auth' || path === '/partner/auth/callback') {
+      const isPartner = await checkIsPartner(session.user.id);
+      if (isPartner) {
+        return NextResponse.redirect(new URL('/partner/dashboard', request.url));
+      } else {
+        // Non-partner trying to access partner auth - redirect to user dashboard
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
+  }
+
+  // Redirect unauthenticated users from protected routes
+  if (!session && !isPublicRoute) {
+    // Determine which auth page to redirect to based on the path
+    if (path.startsWith('/partner')) {
+      const redirectUrl = new URL('/partner/auth', request.url);
+      redirectUrl.searchParams.set('redirectedFrom', path);
+      return NextResponse.redirect(redirectUrl);
+    } else {
+      const redirectUrl = new URL('/auth', request.url);
+      redirectUrl.searchParams.set('redirectedFrom', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  return res;
+}
+
+// Specify which routes this middleware should run on
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+  ],
+}; 

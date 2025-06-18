@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card Background -->
+  <rect width="320" height="200" rx="12" fill="#059669"/>
+  
+  <!-- Card Logo -->
+  <circle cx="40" cy="40" r="20" fill="#34D399"/>
+  <text x="40" y="45" font-family="Arial" font-size="24" fill="white" text-anchor="middle" font-weight="bold">CB</text>
+  
+  <!-- Plus Text -->
+  <text x="280" y="40" font-family="Arial" font-size="16" fill="white" text-anchor="end">PLUS</text>
+  
+  <!-- Card Number -->
+  <text x="40" y="120" font-family="monospace" font-size="16" fill="white">**** **** **** 5678</text>
+  
+  <!-- Card Details -->
+  <text x="40" y="150" font-family="Arial" font-size="12" fill="white">CASHBACK</text>
+  <text x="40" y="170" font-family="Arial" font-size="12" fill="white">SIGNATURE</text>
+</svg> 
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card Background -->
+  <rect width="320" height="200" rx="12" fill="#059669"/>
+  
+  <!-- Card Logo -->
+  <circle cx="40" cy="40" r="20" fill="#34D399"/>
+  <text x="40" y="45" font-family="Arial" font-size="24" fill="white" text-anchor="middle" font-weight="bold">CB</text>
+  
+  <!-- Plus Text -->
+  <text x="280" y="40" font-family="Arial" font-size="16" fill="white" text-anchor="end">PLUS</text>
+  
+  <!-- Card Number -->
+  <text x="40" y="120" font-family="monospace" font-size="16" fill="white">**** **** **** 5678</text>
+  
+  <!-- Card Details -->
+  <text x="40" y="150" font-family="Arial" font-size="12" fill="white">CASHBACK</text>
+  <text x="40" y="170" font-family="Arial" font-size="12" fill="white">SIGNATURE</text>
+</svg> 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card Background -->
+  <rect width="320" height="200" rx="12" fill="#2B5797"/>
+  
+  <!-- TD Logo -->
+  <circle cx="40" cy="40" r="20" fill="white"/>
+  <text x="40" y="45" font-family="Arial" font-size="24" fill="#2B5797" text-anchor="middle" font-weight="bold">TD</text>
+  
+  <!-- Aeroplan Logo -->
+  <text x="280" y="40" font-family="Arial" font-size="16" fill="white" text-anchor="end">AEROPLAN</text>
+  
+  <!-- Card Number -->
+  <text x="40" y="120" font-family="monospace" font-size="16" fill="white">**** **** **** 5678</text>
+  
+  <!-- Card Details -->
+  <text x="40" y="150" font-family="Arial" font-size="12" fill="white">TD BANK</text>
+  <text x="40" y="170" font-family="Arial" font-size="12" fill="white">VISA INFINITE</text>
+</svg> 
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card Background -->
+  <rect width="320" height="200" rx="12" fill="#2B5797"/>
+  
+  <!-- TD Logo -->
+  <circle cx="40" cy="40" r="20" fill="white"/>
+  <text x="40" y="45" font-family="Arial" font-size="24" fill="#2B5797" text-anchor="middle" font-weight="bold">TD</text>
+  
+  <!-- Aeroplan Logo -->
+  <text x="280" y="40" font-family="Arial" font-size="16" fill="white" text-anchor="end">AEROPLAN</text>
+  
+  <!-- Card Number -->
+  <text x="40" y="120" font-family="monospace" font-size="16" fill="white">**** **** **** 5678</text>
+  
+  <!-- Card Details -->
+  <text x="40" y="150" font-family="Arial" font-size="12" fill="white">TD BANK</text>
+  <text x="40" y="170" font-family="Arial" font-size="12" fill="white">VISA INFINITE</text>
+</svg> 
