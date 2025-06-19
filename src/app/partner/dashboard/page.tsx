@@ -87,6 +87,65 @@ export default function PartnerDashboard() {
         
         if (userError || !user) {
           console.error('Error getting user:', userError)
+          
+          // In development, allow access even without auth if it's a rate limit issue
+          if (process.env.NODE_ENV === 'development' && 
+              (userError?.message?.includes('rate') || userError?.message?.includes('too many'))) {
+            console.log('Development mode: bypassing auth due to rate limit')
+            
+            // Set demo partner data for development
+            setPartnerInfo({
+              id: 'demo-user-id',
+              companyName: 'Demo Company (Dev Mode)',
+              subscriptionStatus: 'active',
+              subscriptionPlan: 'premium',
+              totalUsers: 1247,
+              activeUsers: 892,
+              totalAnalyses: 3456,
+              totalRevenue: 12450,
+              conversionRate: 7.2,
+              portalUrl: 'https://demo.cardwise.com',
+              portalActive: true,
+              cardSelections: 87
+            })
+
+            setPortalSettings(prev => ({
+              ...prev,
+              companyName: 'Demo Company (Dev Mode)'
+            }))
+
+            setRecentActivity([
+              {
+                id: '1',
+                type: 'card_application',
+                description: 'New card application submitted',
+                timestamp: new Date(Date.now() - 2 * 60 * 1000)
+              },
+              {
+                id: '2',
+                type: 'user_signup',
+                description: 'User completed profile setup',
+                timestamp: new Date(Date.now() - 15 * 60 * 1000)
+              },
+              {
+                id: '3',
+                type: 'revenue_earned',
+                description: 'Commission payment processed',
+                timestamp: new Date(Date.now() - 60 * 60 * 1000),
+                amount: 125.50
+              },
+              {
+                id: '4',
+                type: 'analysis_completed',
+                description: 'Card recommendation analysis completed',
+                timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000)
+              }
+            ])
+
+            setLoading(false)
+            return
+          }
+          
           router.push('/partner/auth')
           return
         }
@@ -165,6 +224,25 @@ export default function PartnerDashboard() {
 
       } catch (error) {
         console.error('Error loading partner data:', error)
+        
+        // In development, show error but don't redirect
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Development mode: continuing despite error')
+          setPartnerInfo({
+            id: 'demo-user-id',
+            companyName: 'Error State (Dev Mode)',
+            subscriptionStatus: 'active',
+            subscriptionPlan: 'premium',
+            totalUsers: 0,
+            activeUsers: 0,
+            totalAnalyses: 0,
+            totalRevenue: 0,
+            conversionRate: 0,
+            portalUrl: 'https://demo.cardwise.com',
+            portalActive: false,
+            cardSelections: 0
+          })
+        }
       } finally {
         setLoading(false)
       }

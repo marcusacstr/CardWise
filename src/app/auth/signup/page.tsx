@@ -69,6 +69,20 @@ function SignUpContent() {
     return Object.keys(newErrors).length === 0
   }
 
+  // Check if form is valid for button state
+  const isFormValid = () => {
+    return (
+      formData.firstName.trim() &&
+      formData.lastName.trim() &&
+      formData.email.trim() &&
+      /\S+@\S+\.\S+/.test(formData.email) &&
+      formData.password &&
+      formData.password.length >= 6 &&
+      formData.confirmPassword &&
+      formData.password === formData.confirmPassword
+    )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -230,7 +244,13 @@ function SignUpContent() {
                     type="text"
                     autoComplete="given-name"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, firstName: e.target.value})
+                      // Clear error when user starts typing
+                      if (errors.firstName && e.target.value.trim()) {
+                        setErrors({...errors, firstName: ''})
+                      }
+                    }}
                     className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                       errors.firstName ? 'border-red-300' : 'border-gray-300'
                     }`}
@@ -253,7 +273,13 @@ function SignUpContent() {
                     type="text"
                     autoComplete="family-name"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, lastName: e.target.value})
+                      // Clear error when user starts typing
+                      if (errors.lastName && e.target.value.trim()) {
+                        setErrors({...errors, lastName: ''})
+                      }
+                    }}
                     className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                       errors.lastName ? 'border-red-300' : 'border-gray-300'
                     }`}
@@ -278,7 +304,13 @@ function SignUpContent() {
                   type="email"
                   autoComplete="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({...formData, email: e.target.value})
+                    // Clear error when user starts typing valid email
+                    if (errors.email && e.target.value.trim() && /\S+@\S+\.\S+/.test(e.target.value)) {
+                      setErrors({...errors, email: ''})
+                    }
+                  }}
                   className={`appearance-none block w-full pl-10 pr-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
@@ -302,7 +334,17 @@ function SignUpContent() {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({...formData, password: e.target.value})
+                    // Clear error when password meets requirements
+                    if (errors.password && e.target.value.length >= 6) {
+                      setErrors({...errors, password: ''})
+                    }
+                    // Clear confirm password error if passwords now match
+                    if (errors.confirmPassword && formData.confirmPassword && e.target.value === formData.confirmPassword) {
+                      setErrors({...errors, confirmPassword: ''})
+                    }
+                  }}
                   className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
@@ -333,7 +375,13 @@ function SignUpContent() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({...formData, confirmPassword: e.target.value})
+                    // Clear error when passwords match
+                    if (errors.confirmPassword && formData.password && e.target.value === formData.password) {
+                      setErrors({...errors, confirmPassword: ''})
+                    }
+                  }}
                   className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                     errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   }`}
@@ -361,7 +409,7 @@ function SignUpContent() {
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={!isFormValid() || loading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
               >
                 {loading ? (

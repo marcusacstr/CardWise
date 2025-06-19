@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { User } from '@supabase/supabase-js'
-import { FaArrowLeft, FaUser, FaEnvelope, FaLock, FaSave, FaSpinner, FaCheck, FaEye, FaEyeSlash, FaBuilding, FaPhone, FaGlobe } from 'react-icons/fa'
+import { FaArrowLeft, FaUser, FaEnvelope, FaLock, FaSave, FaSpinner, FaCheck, FaEye, FaEyeSlash, FaBuilding, FaPhone, FaGlobe, FaImage } from 'react-icons/fa'
+import LogoUpload from '@/components/partner/LogoUpload'
 
 export default function PartnerAccountSettingsPage() {
   const router = useRouter()
@@ -22,6 +23,7 @@ export default function PartnerAccountSettingsPage() {
   const [companyName, setCompanyName] = useState('')
   const [phone, setPhone] = useState('')
   const [website, setWebsite] = useState('')
+  const [logoUrl, setLogoUrl] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -47,6 +49,17 @@ export default function PartnerAccountSettingsPage() {
         setCompanyName(user.user_metadata?.company_name || '')
         setPhone(user.user_metadata?.phone || '')
         setWebsite(user.user_metadata?.website || '')
+
+        // Load partner logo from partners table
+        const { data: partner, error: partnerError } = await supabase
+          .from('partners')
+          .select('logo_url')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!partnerError && partner) {
+          setLogoUrl(partner.logo_url || '')
+        }
       } catch (error) {
         console.error('Error getting user:', error)
         router.push('/partner/auth')
@@ -155,6 +168,11 @@ export default function PartnerAccountSettingsPage() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to delete account' })
     }
+  }
+
+  const handleLogoUpdate = (newLogoUrl: string) => {
+    setLogoUrl(newLogoUrl)
+    setMessage({ type: 'success', text: 'Logo updated successfully!' })
   }
 
   if (loading) {
@@ -302,6 +320,21 @@ export default function PartnerAccountSettingsPage() {
                   <span>{saving ? 'Saving...' : 'Save Business Info'}</span>
                 </button>
               </form>
+            </div>
+
+            {/* Logo Management */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <FaImage className="mr-2" />
+                Logo Management
+              </h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Upload your company logo to display on your customer portals and enhance your brand presence.
+              </p>
+              <LogoUpload
+                currentLogoUrl={logoUrl}
+                onLogoUpdate={handleLogoUpdate}
+              />
             </div>
 
             {/* Email Settings */}

@@ -122,52 +122,45 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
     
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' }, 
-        { status: 401 }
-      );
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
-    // Get partner ID for the authenticated user
-    const { data: partnerData, error: partnerError } = await supabase
+
+    const { data: partner, error: partnerError } = await supabase
       .from('partners')
-      .select('id')
+      .select('*')
       .eq('user_id', user.id)
       .single();
-    
-    if (partnerError || !partnerData) {
-      return NextResponse.json(
-        { error: 'Partner not found' }, 
-        { status: 404 }
-      );
+
+    if (partnerError || !partner) {
+      return NextResponse.json({ error: 'Partner record not found' }, { status: 404 });
     }
-    
-    // Get portals for this partner
+
     const { data: portals, error: portalsError } = await supabase
       .from('partner_portals')
-      .select('*')
-      .eq('partner_id', partnerData.id)
+      .select(`
+        *,
+        partner_portal_configs (*)
+      `)
+      .eq('partner_id', partner.id)
       .order('created_at', { ascending: false });
-    
+
     if (portalsError) {
-      console.error('Error fetching portals:', portalsError);
-      return NextResponse.json(
-        { error: 'Failed to fetch portals' }, 
-        { status: 500 }
-      );
+      return NextResponse.json({ 
+        error: 'Failed to fetch portals: ' + portalsError.message 
+      }, { status: 500 });
     }
-    
-    return NextResponse.json(portals || []);
-    
+
+    return NextResponse.json({
+      success: true,
+      portals: portals || []
+    });
+
   } catch (error) {
-    console.error('API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    );
+    console.error('Error fetching portals:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error' 
+    }, { status: 500 });
   }
 } 

@@ -102,60 +102,203 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
     try {
       setLoading(true)
       
-      // Fetch partner data
-      const { data: partnerData, error: partnerError } = await supabase
-        .from('partners')
-        .select('*')
-        .eq('portal_subdomain', params.subdomain)
-        .eq('portal_active', true)
+      // First try to get portal by subdomain from partner_portals table
+      const { data: portalData, error: portalError } = await supabase
+        .from('partner_portals')
+        .select(`
+          *,
+          partner_portal_configs (*),
+          partners (*)
+        `)
+        .eq('subdomain', params.subdomain)
+        .eq('status', 'published')
         .single()
 
-      if (partnerError || !partnerData) {
-        console.error('Partner not found:', partnerError)
+      if (portalError || !portalData) {
+        console.log('Portal not found in new structure, trying legacy...')
+        
+        // Fallback to legacy structure for existing portals
+        const { data: legacyPartnerData, error: legacyError } = await supabase
+          .from('partners')
+          .select('*')
+          .eq('portal_subdomain', params.subdomain)
+          .eq('portal_active', true)
+          .single()
+
+        if (legacyError || !legacyPartnerData) {
+          console.error('Partner not found:', legacyError)
+          setPartner(null)
+          return
+        }
+
+        // Convert legacy data to new format
+        setPartner({
+          id: legacyPartnerData.id,
+          company_name: legacyPartnerData.company_name,
+          custom_app_name: legacyPartnerData.custom_app_name,
+          custom_tagline: legacyPartnerData.custom_tagline,
+          welcome_message: legacyPartnerData.welcome_message,
+          footer_text: legacyPartnerData.footer_text,
+          primary_color: legacyPartnerData.primary_color,
+          secondary_color: legacyPartnerData.secondary_color,
+          accent_color: legacyPartnerData.accent_color,
+          font_family: legacyPartnerData.font_family,
+          logo_url: legacyPartnerData.logo_url,
+          hide_cardwise_branding: legacyPartnerData.hide_cardwise_branding
+        })
+
+        // Use legacy card selection method
+        const { data: cardSelections, error: cardError } = await supabase
+          .from('partner_card_selections')
+          .select(`
+            *,
+            credit_cards (*)
+          `)
+          .eq('partner_id', legacyPartnerData.id)
+          .eq('active', true)
+          .order('priority_order', { ascending: true })
+
+        if (!cardError && cardSelections) {
+          const transformedCards: CreditCard[] = cardSelections.map((selection: any) => ({
+            id: selection.credit_cards.id,
+            card_name: selection.credit_cards.name || selection.credit_cards.card_name,
+            issuer: selection.credit_cards.issuer,
+            card_image_url: selection.credit_cards.image_url || '/api/placeholder/300/200',
+            annual_fee: selection.credit_cards.annual_fee,
+            intro_apr: selection.credit_cards.intro_apr || '0%',
+            regular_apr: selection.credit_cards.regular_apr || 'Variable',
+            intro_bonus: selection.credit_cards.welcome_bonus || selection.credit_cards.intro_bonus,
+            bonus_requirement: selection.credit_cards.welcome_bonus_requirements || selection.credit_cards.bonus_requirement,
+            rewards_rate: `${selection.credit_cards.base_earn_rate}x ${selection.credit_cards.reward_type}`,
+            rewards_type: selection.credit_cards.reward_type,
+            key_benefits: selection.credit_cards.key_benefits || [],
+            best_for: selection.credit_cards.best_for || 'General use',
+            affiliate_link: selection.affiliate_link,
+            custom_description: selection.custom_description,
+            featured: selection.featured,
+            priority_order: selection.priority_order
+          }))
+          setCards(transformedCards)
+        }
+        
+        return
+      }
+
+      // New portal structure
+      const portal = portalData
+      const config = portal.partner_portal_configs?.[0]
+      const partnerInfo = portal.partners
+
+      if (!config || !partnerInfo) {
+        console.error('Portal configuration or partner info missing')
         setPartner(null)
         return
       }
 
-      setPartner(partnerData)
+      // Set partner data from new structure
+      setPartner({
+        id: partnerInfo.id,
+        company_name: config.company_name || partnerInfo.company_name,
+        custom_app_name: portal.portal_name,
+        custom_tagline: 'Smart Credit Card Recommendations',
+        welcome_message: config.welcome_message || 'Find the perfect credit card for your needs',
+        footer_text: `© ${new Date().getFullYear()} ${config.company_name}. All rights reserved.`,
+        primary_color: config.primary_color,
+        secondary_color: config.secondary_color,
+        accent_color: config.accent_color,
+        font_family: 'Inter, sans-serif',
+        logo_url: config.logo_url,
+        hide_cardwise_branding: false
+      })
 
-      // Fetch partner's selected cards
-      const { data: cardSelections, error: cardError } = await supabase
+      // Get cards for this portal
+      const { data: portalCards, error: cardsError } = await supabase
         .from('partner_card_selections')
         .select(`
           *,
           credit_cards (*)
         `)
-        .eq('partner_id', partnerData.id)
+        .eq('portal_id', portal.id)
         .eq('active', true)
         .order('priority_order', { ascending: true })
 
-      if (cardError) {
-        console.error('Error fetching cards:', cardError)
+      if (cardsError) {
+        console.error('Error fetching portal cards:', cardsError)
+        // Try fallback to partner cards
+        const { data: fallbackCards, error: fallbackError } = await supabase
+          .from('partner_card_selections')
+          .select(`
+            *,
+            credit_cards (*)
+          `)
+          .eq('partner_id', partnerInfo.id)
+          .eq('active', true)
+          .order('priority_order', { ascending: true })
+
+        if (!fallbackError && fallbackCards) {
+          const transformedCards: CreditCard[] = fallbackCards.map((selection: any) => ({
+            id: selection.credit_cards.id,
+            card_name: selection.credit_cards.name || selection.credit_cards.card_name,
+            issuer: selection.credit_cards.issuer,
+            card_image_url: selection.credit_cards.image_url || '/api/placeholder/300/200',
+            annual_fee: selection.credit_cards.annual_fee,
+            intro_apr: selection.credit_cards.intro_apr || '0%',
+            regular_apr: selection.credit_cards.regular_apr || 'Variable',
+            intro_bonus: selection.credit_cards.welcome_bonus || selection.credit_cards.intro_bonus,
+            bonus_requirement: selection.credit_cards.welcome_bonus_requirements || selection.credit_cards.bonus_requirement,
+            rewards_rate: `${selection.credit_cards.base_earn_rate}x ${selection.credit_cards.reward_type}`,
+            rewards_type: selection.credit_cards.reward_type,
+            key_benefits: selection.credit_cards.key_benefits || [],
+            best_for: selection.credit_cards.best_for || 'General use',
+            affiliate_link: selection.affiliate_link,
+            custom_description: selection.custom_description,
+            featured: selection.featured,
+            priority_order: selection.priority_order
+          }))
+          setCards(transformedCards)
+        }
         return
       }
 
-      // Transform the data
-      const transformedCards: CreditCard[] = cardSelections?.map((selection: any) => ({
+      // Transform portal cards
+      const transformedCards: CreditCard[] = (portalCards || []).map((selection: any) => ({
         id: selection.credit_cards.id,
-        card_name: selection.credit_cards.card_name,
+        card_name: selection.credit_cards.name || selection.credit_cards.card_name,
         issuer: selection.credit_cards.issuer,
-        card_image_url: selection.credit_cards.card_image_url || '/api/placeholder/300/200',
+        card_image_url: selection.credit_cards.image_url || '/api/placeholder/300/200',
         annual_fee: selection.credit_cards.annual_fee,
-        intro_apr: selection.credit_cards.intro_apr,
-        regular_apr: selection.credit_cards.regular_apr,
-        intro_bonus: selection.credit_cards.intro_bonus,
-        bonus_requirement: selection.credit_cards.bonus_requirement,
-        rewards_rate: selection.credit_cards.rewards_rate,
-        rewards_type: selection.credit_cards.rewards_type,
+        intro_apr: selection.credit_cards.intro_apr || '0%',
+        regular_apr: selection.credit_cards.regular_apr || 'Variable',
+        intro_bonus: selection.credit_cards.welcome_bonus || selection.credit_cards.intro_bonus,
+        bonus_requirement: selection.credit_cards.welcome_bonus_requirements || selection.credit_cards.bonus_requirement,
+        rewards_rate: `${selection.credit_cards.base_earn_rate}x ${selection.credit_cards.reward_type}`,
+        rewards_type: selection.credit_cards.reward_type,
         key_benefits: selection.credit_cards.key_benefits || [],
-        best_for: selection.credit_cards.best_for,
+        best_for: selection.credit_cards.best_for || 'General use',
         affiliate_link: selection.affiliate_link,
         custom_description: selection.custom_description,
         featured: selection.featured,
         priority_order: selection.priority_order
-      })) || []
+      }))
 
       setCards(transformedCards)
+
+      // Track visitor session
+      try {
+        await supabase
+          .from('partner_user_sessions')
+          .insert([{
+            partner_id: partnerInfo.id,
+            portal_id: portal.id,
+            user_email: 'anonymous',
+            session_id: `session-${Date.now()}`,
+            landing_page: '/',
+            analyses_completed: 0
+          }])
+      } catch (sessionError) {
+        console.error('Error tracking session:', sessionError)
+        // Don't fail the page load for tracking errors
+      }
 
     } catch (error) {
       console.error('Error fetching portal data:', error)
@@ -203,13 +346,48 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
     setCurrentStep(4)
   }
 
-  const handleApplyClick = (card: CreditCard) => {
-    // Track the click for analytics
+  const handleApplyClick = async (card: CreditCard) => {
+    // Track application click for analytics and commission
+    try {
+      if (partner) {
+        await supabase
+          .from('partner_card_applications')
+          .insert([{
+            partner_id: partner.id,
+            card_id: card.id,
+            user_email: userProfile.email || 'anonymous',
+            application_data: {
+              user_profile: userProfile,
+              spending_categories: spendingCategories,
+              timestamp: new Date().toISOString(),
+              card_name: card.card_name,
+              portal_subdomain: params.subdomain
+            },
+            status: 'pending'
+          }])
+
+        // Update session with application
+        await supabase
+          .from('partner_user_sessions')
+          .update({ 
+            card_applied: true,
+            ended_at: new Date().toISOString()
+          })
+          .eq('partner_id', partner.id)
+          .eq('user_email', userProfile.email || 'anonymous')
+          .order('created_at', { ascending: false })
+          .limit(1)
+      }
+    } catch (error) {
+      console.error('Error tracking application:', error)
+      // Don't prevent the application from proceeding
+    }
+
+    // Open application link
     if (card.affiliate_link) {
-      // Open affiliate link in new tab
       window.open(card.affiliate_link, '_blank', 'noopener,noreferrer')
     } else {
-      // Fallback to generic application
+      // Fallback to generic application search
       window.open(`https://www.google.com/search?q=${encodeURIComponent(card.card_name + ' ' + card.issuer + ' apply')}`, '_blank')
     }
   }

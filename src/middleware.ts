@@ -22,6 +22,7 @@ export async function middleware(request: NextRequest) {
     '/auth/callback',
     '/partner/register',
     '/partner/auth',
+    '/super-admin',
     '/preview',
     '/api',
     '/about',

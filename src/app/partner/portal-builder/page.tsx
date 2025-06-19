@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import LogoUpload from '@/components/partner/LogoUpload'
 import { 
   FaArrowLeft, 
   FaPalette, 
@@ -376,12 +377,25 @@ export default function PortalBuilder() {
   }
 
   const toggleFeaturedCard = (cardId: string) => {
-    setConfig(prev => ({
-      ...prev,
-      featuredCards: prev.featuredCards.includes(cardId)
-        ? prev.featuredCards.filter(id => id !== cardId)
-        : [...prev.featuredCards, cardId]
-    }))
+    const isSelected = config.featuredCards.includes(cardId)
+    if (isSelected) {
+      setConfig({
+        ...config,
+        featuredCards: config.featuredCards.filter(id => id !== cardId)
+      })
+    } else {
+      setConfig({
+        ...config,
+        featuredCards: [...config.featuredCards, cardId]
+      })
+    }
+  }
+
+  const handleLogoUpdate = (logoUrl: string) => {
+    setConfig({
+      ...config,
+      logoUrl: logoUrl
+    })
   }
 
   const tabs = [
@@ -604,14 +618,11 @@ export default function PortalBuilder() {
 
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Logo URL
+                        Logo Upload
                       </label>
-                      <input
-                        type="url"
-                        value={config.logoUrl}
-                        onChange={(e) => setConfig({...config, logoUrl: e.target.value})}
-                        placeholder="https://example.com/logo.png"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      <LogoUpload
+                        currentLogoUrl={config.logoUrl}
+                        onLogoUpdate={handleLogoUpdate}
                       />
                     </div>
                   </div>
