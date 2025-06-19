@@ -1091,6 +1091,55 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* File Selected Confirmation - Show when file is selected but not uploaded */}
+        {file && !result && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <FaUpload className="text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">File Selected</h3>
+                  <p className="text-sm text-gray-500">{file.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setFile(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleUpload}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium disabled:bg-gray-400 flex items-center space-x-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <FaUpload />
+                    <span>Analyze File</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => document.getElementById('file-upload')?.click()}
+                className="text-green-600 hover:text-green-700 font-medium"
+              >
+                Change File
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Current Card Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -2021,6 +2070,15 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Hidden File Input */}
+      <input
+        id="file-upload"
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </div>
   );
 } 
