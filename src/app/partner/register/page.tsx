@@ -79,6 +79,9 @@ export default function PartnerRegister() {
         email: contactEmail,
         password,
         options: {
+          emailRedirectTo: process.env.NODE_ENV === 'production' 
+            ? `${process.env.NEXTAUTH_URL || 'https://card-wise-7u2k840fv-marcus-projects-04c74091.vercel.app'}/auth/callback`
+            : `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`,
           data: {
             company_name: companyName,
             is_partner: true

@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { User } from '@supabase/supabase-js'
-import { FaArrowLeft, FaUser, FaEnvelope, FaLock, FaSave, FaSpinner, FaCheck, FaEye, FaEyeSlash, FaBuilding, FaPhone, FaGlobe } from 'react-icons/fa'
+import { FaArrowLeft, FaUser, FaEnvelope, FaLock, FaSave, FaSpinner, FaCheck, FaEye, FaEyeSlash } from 'react-icons/fa'
 
-export default function PartnerAccountSettingsPage() {
+export default function UserSettingsPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
   const [user, setUser] = useState<User | null>(null)
@@ -19,9 +19,6 @@ export default function PartnerAccountSettingsPage() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [website, setWebsite] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -36,7 +33,7 @@ export default function PartnerAccountSettingsPage() {
         if (error) throw error
         
         if (!user) {
-          router.push('/partner/auth')
+          router.push('/auth')
           return
         }
         
@@ -44,12 +41,9 @@ export default function PartnerAccountSettingsPage() {
         setFirstName(user.user_metadata?.first_name || '')
         setLastName(user.user_metadata?.last_name || '')
         setEmail(user.email || '')
-        setCompanyName(user.user_metadata?.company_name || '')
-        setPhone(user.user_metadata?.phone || '')
-        setWebsite(user.user_metadata?.website || '')
       } catch (error) {
         console.error('Error getting user:', error)
-        router.push('/partner/auth')
+        router.push('/auth')
       } finally {
         setLoading(false)
       }
@@ -68,9 +62,6 @@ export default function PartnerAccountSettingsPage() {
         data: {
           first_name: firstName,
           last_name: lastName,
-          company_name: companyName,
-          phone: phone,
-          website: website,
         }
       })
 
@@ -140,11 +131,11 @@ export default function PartnerAccountSettingsPage() {
   }
 
   const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your partner account? This will also delete all your portals and data.')) {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       return
     }
 
-    if (!confirm('This will permanently delete your partner account, portals, and all associated data. Are you absolutely sure?')) {
+    if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) {
       return
     }
 
@@ -172,13 +163,13 @@ export default function PartnerAccountSettingsPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <Link href="/partner/dashboard" className="inline-flex items-center text-green-600 hover:text-green-800 mb-4">
+              <Link href="/dashboard" className="inline-flex items-center text-green-600 hover:text-green-800 mb-4">
                 <FaArrowLeft className="mr-2" />
                 Back to Dashboard
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Partner Account Settings</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
               <p className="text-sm text-gray-600 mt-1">
-                Manage your partner account information and business details
+                Manage your account information and preferences
               </p>
             </div>
           </div>
@@ -207,26 +198,10 @@ export default function PartnerAccountSettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Business Information */}
+            {/* Profile Information */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Business Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
               <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name
-                  </label>
-                  <div className="relative">
-                    <FaBuilding className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <input
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="Enter your company name"
-                    />
-                  </div>
-                </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -259,47 +234,13 @@ export default function PartnerAccountSettingsPage() {
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <FaPhone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Enter your phone number"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Website
-                    </label>
-                    <div className="relative">
-                      <FaGlobe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <input
-                        type="url"
-                        value={website}
-                        onChange={(e) => setWebsite(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="https://your-website.com"
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 <button
                   type="submit"
                   disabled={saving}
                   className="flex items-center space-x-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors font-medium"
                 >
                   {saving ? <FaSpinner className="animate-spin" /> : <FaSave />}
-                  <span>{saving ? 'Saving...' : 'Save Business Info'}</span>
+                  <span>{saving ? 'Saving...' : 'Save Profile'}</span>
                 </button>
               </form>
             </div>
@@ -401,14 +342,14 @@ export default function PartnerAccountSettingsPage() {
           <div className="space-y-6">
             {/* Account Summary */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Partner Account</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Summary</h3>
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-500">Account Type</p>
-                  <p className="font-medium">Partner Account</p>
+                  <p className="font-medium">User Account</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Partner Since</p>
+                  <p className="text-sm text-gray-500">Member Since</p>
                   <p className="font-medium">
                     {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
                   </p>
@@ -422,42 +363,17 @@ export default function PartnerAccountSettingsPage() {
               </div>
             </div>
 
-            {/* Quick Links */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
-              <div className="space-y-2">
-                <Link 
-                  href="/partner/portal" 
-                  className="block text-green-600 hover:text-green-800 text-sm"
-                >
-                  Manage Portals
-                </Link>
-                <Link 
-                  href="/partner/analytics" 
-                  className="block text-green-600 hover:text-green-800 text-sm"
-                >
-                  View Analytics
-                </Link>
-                <Link 
-                  href="/partner/billing" 
-                  className="block text-green-600 hover:text-green-800 text-sm"
-                >
-                  Billing Settings
-                </Link>
-              </div>
-            </div>
-
             {/* Danger Zone */}
             <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-4">Danger Zone</h3>
               <p className="text-sm text-gray-600 mb-4">
-                Deleting your partner account will permanently remove all your portals, data, and configurations.
+                Once you delete your account, there is no going back. Please be certain.
               </p>
               <button
                 onClick={handleDeleteAccount}
                 className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
               >
-                Delete Partner Account
+                Delete Account
               </button>
             </div>
           </div>

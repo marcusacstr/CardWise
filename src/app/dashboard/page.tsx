@@ -1617,6 +1617,49 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Initial Upload Interface - Show when no analysis exists yet */}
+        {!result && !file && (
+          <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-sm border border-green-200 p-8 mb-8 text-center">
+            <div className="max-w-2xl mx-auto">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaUpload className="text-green-600 text-2xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Let's Analyze Your Spending
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Upload your credit card statement (CSV) or enter your spending manually to get personalized card recommendations.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  className="flex items-center justify-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg transition-colors shadow-md"
+                >
+                  <FaUpload className="mr-3" />
+                  Upload CSV Statement
+                </button>
+                <button 
+                  onClick={() => setShowManualEntry(true)}
+                  className="flex items-center justify-center px-8 py-4 border-2 border-green-600 text-green-600 hover:bg-green-50 rounded-lg font-semibold text-lg transition-colors"
+                >
+                  <FaEdit className="mr-3" />
+                  Enter Manually
+                </button>
+              </div>
+              
+              <div className="mt-8 text-sm text-gray-500">
+                <p className="mb-2">
+                  <strong>CSV Format:</strong> Upload your bank or credit card statement with transaction data
+                </p>
+                <p>
+                  <strong>Supported columns:</strong> description, amount, date, merchant category (optional)
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <input
           id="file-upload"
           type="file"
@@ -1625,21 +1668,34 @@ export default function Dashboard() {
           className="hidden"
         />
 
-        {/* Show file selection only when no analysis exists yet */}
+        {/* Show file selection confirmation when file is chosen */}
         {!result && file && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">Selected File: {file.name}</p>
-                <p className="text-sm text-gray-500">Ready to analyze your spending</p>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <FaUpload className="text-green-600 text-lg" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Selected File: {file.name}</p>
+                  <p className="text-sm text-gray-500">Ready to analyze your spending</p>
+                </div>
               </div>
-              <button
-                onClick={handleUpload}
-                disabled={loading}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-              >
-                {loading ? 'Processing...' : 'Analyze Transactions'}
-              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setFile(null)}
+                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Change File
+                </button>
+                <button
+                  onClick={handleUpload}
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  {loading ? 'Processing...' : 'Analyze Transactions'}
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -1,20 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/client'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // Check database connectivity
-    const { data, error } = await supabase
-      .from('credit_cards')
-      .select('count(*)')
-      .limit(1)
-      .single()
+    // Check if Supabase environment variables are available
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    let databaseStatus = 'not_configured'
+    
+    // Only attempt database connection if environment variables are present
+    if (supabaseUrl && supabaseKey && supabaseUrl !== 'https://placeholder.supabase.co') {
+      try {
+        const { supabase } = await import('@/lib/supabase/client')
+        
+        const { data, error } = await supabase
+          .from('credit_cards')
+          .select('count(*)')
+          .limit(1)
+          .single()
 
-    if (error) {
-      throw new Error(`Database check failed: ${error.message}`)
+        if (error) {
+          databaseStatus = `error: ${error.message}`
+        } else {
+          databaseStatus = 'connected'
+        }
+      } catch (dbError) {
+        databaseStatus = `connection_failed: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`
+      }
     }
 
     // System health check
@@ -23,9 +38,10 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      database: 'connected',
+      database: databaseStatus,
       version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      supabase_configured: !!(supabaseUrl && supabaseKey && supabaseUrl !== 'https://placeholder.supabase.co')
     }
 
     return NextResponse.json(healthData, { status: 200 })

@@ -8,13 +8,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Add output configuration for Vercel
-  output: 'standalone',
-  
-  // Skip build-time database checks that cause failures
-  generateBuildId: async () => {
-    return 'cardwise-' + new Date().getTime()
-  },
   
   images: {
     domains: ['localhost', 'supabase.co'],
@@ -24,6 +17,7 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
   },
 
   async rewrites() {
@@ -69,18 +63,6 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
         ],
       },
       // Cache static assets
@@ -102,12 +84,26 @@ const nextConfig = {
   // Disable experimental features that may cause issues
   experimental: {
     scrollRestoration: true,
+    missingSuspenseWithCSRBailout: false,
   },
-  
-  // Ignore build errors from API routes during static generation
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
+
+  // Add generateBuildId for consistent deployments
+  generateBuildId: async () => {
+    return process.env.VERCEL_GIT_COMMIT_SHA ?? 'development'
+  },
+
+  // Add custom webpack config to handle environment variables better
+  webpack: (config, { isServer }) => {
+    // Ignore certain modules during build to prevent errors
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    return config
   },
 }
 

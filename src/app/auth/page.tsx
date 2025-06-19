@@ -65,7 +65,9 @@ export default function UserAuth() {
           email,
           password,
           options: {
-            emailRedirectTo: `${location.origin}/auth/callback`,
+            emailRedirectTo: process.env.NODE_ENV === 'production' 
+              ? `${process.env.NEXTAUTH_URL || 'https://card-wise-7u2k840fv-marcus-projects-04c74091.vercel.app'}/auth/callback`
+              : `${location.origin}/auth/callback`,
           },
         });
         if (error) throw error;

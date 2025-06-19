@@ -80,6 +80,9 @@ function SignUpContent() {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: process.env.NODE_ENV === 'production' 
+            ? `${process.env.NEXTAUTH_URL || 'https://card-wise-7u2k840fv-marcus-projects-04c74091.vercel.app'}/auth/callback`
+            : `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
@@ -133,10 +136,10 @@ function SignUpContent() {
               )}
               <div className="mt-4">
                 <Link
-                  href="/auth/signin"
+                  href={formData.accountType === 'partner' ? '/partner/auth' : '/auth/signin'}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
                 >
-                  Go to Sign In
+                  {formData.accountType === 'partner' ? 'Go to Partner Sign In' : 'Go to Sign In'}
                 </Link>
               </div>
             </div>
@@ -149,6 +152,19 @@ function SignUpContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        {/* Back Button */}
+        <div className="mb-4">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+        
         <div className="flex justify-center">
           <FaCreditCard className="h-12 w-12 text-green-600" />
         </div>
@@ -157,8 +173,11 @@ function SignUpContent() {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/auth/signin" className="font-medium text-green-600 hover:text-green-500">
-            Sign in
+          <Link 
+            href={formData.accountType === 'partner' ? '/partner/auth' : '/auth/signin'} 
+            className="font-medium text-green-600 hover:text-green-500"
+          >
+            Sign in {formData.accountType === 'partner' ? 'as Partner' : ''}
           </Link>
         </p>
       </div>
