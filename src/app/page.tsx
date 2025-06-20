@@ -290,7 +290,7 @@ export default function Home() {
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaUpload className="text-xl text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Let Users Upload Their Spending</h3>
@@ -300,7 +300,7 @@ export default function Home() {
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaDollarSign className="text-xl text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Recommend Cards — and Earn</h3>
