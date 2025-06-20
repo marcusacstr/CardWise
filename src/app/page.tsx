@@ -6,6 +6,34 @@ import { FaPlane, FaUpload, FaPen, FaTrashAlt, FaRegFileAlt, FaCcVisa, FaCcMaste
 import CardStackGraphic from '@/components/CardStackGraphic'
 
 
+// FAQ Item Component
+const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+  
+  return (
+    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-green-200 transition-colors">
+      <button
+        className="flex w-full text-left items-center justify-between"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <h3 className="text-lg font-semibold text-gray-900 pr-4">{question}</h3>
+        <div className="flex-shrink-0">
+          {isOpen ? (
+            <FaChevronUp className="w-5 h-5 text-green-600" />
+          ) : (
+            <FaChevronDown className="w-5 h-5 text-green-600" />
+          )}
+        </div>
+      </button>
+      {isOpen && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-gray-600 leading-relaxed">{answer}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Partner Portal Mockup Component
 const PartnerPortalMockup = () => (
   <div className="w-full max-w-6xl mx-auto">

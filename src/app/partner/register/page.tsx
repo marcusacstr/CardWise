@@ -24,25 +24,25 @@ export default function PartnerRegister() {
 
   const pricingPlans = [
     {
-      id: 'basic',
-      name: 'Basic',
-      price: '$49/month',
-      description: 'Perfect for small businesses and startups',
-      features: ['Up to 100 users', 'Basic analytics', 'Email support', '1 custom domain']
+      id: 'starter',
+      name: 'Starter',
+      price: '$99/month',
+      description: 'Perfect for individual advisors and small practices',
+      features: ['Up to 100 card recommendations per month', 'White-label platform', 'Basic AI recommendations', 'Standard branding customization', 'Basic analytics dashboard', 'Email support']
     },
     {
-      id: 'professional',
-      name: 'Professional', 
-      price: '$99/month',
-      description: 'Ideal for growing businesses',
-      features: ['Up to 500 users', 'Advanced analytics', 'Priority support', '3 custom domains', 'White-label branding']
+      id: 'pro',
+      name: 'Pro', 
+      price: '$179/month',
+      description: 'For growing practices and established professionals',
+      features: ['Up to 500 card recommendations per month', 'Advanced AI recommendations', 'Full branding customization', 'Advanced analytics & reporting', 'Priority support', 'Custom integrations available']
     },
     {
       id: 'enterprise',
       name: 'Enterprise',
-      price: '$199/month', 
-      description: 'For large organizations',
-      features: ['Unlimited users', 'Enterprise analytics', '24/7 support', 'Unlimited domains', 'Full customization', 'Dedicated account manager']
+      price: 'Contact for pricing', 
+      description: 'For large organizations requiring unlimited scale',
+      features: ['Unlimited card recommendations', 'Premium AI recommendations', 'Complete custom branding', 'Enterprise analytics suite', 'Dedicated account manager', 'Custom integrations & API access']
     }
   ]
 

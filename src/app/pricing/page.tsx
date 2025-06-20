@@ -7,50 +7,64 @@ import { FaRegChartBar, FaRegGem, FaRegLightbulb, FaRegCheckCircle, FaRegUser, F
 export default function PricingPage() {
   const pricingTiers = [
     {
-      name: 'Free',
-      price: '$0',
-      description: 'Get started and earn with our revenue share model.',
-      features: [
-        '50 Recommendations per month',
-        'Partners keep 50% of referral/affiliate payments',
-        'Basic Analytics',
-        'Core AI Recommendations',
-        'Client management tools',
-        'Email Support',
-      ],
-      highlight: false,
-    },
-    {
       name: 'Starter',
-      price: '$79.99/month',
-      description: 'For growing advisors looking to offer a branded experience.',
+      price: '$99',
+      period: '/month',
+      description: 'Perfect for individual advisors and small practices getting started.',
       features: [
-        '150 Recommendations per month',
+        'Up to 100 card recommendations per month',
         'White-Label Platform',
-        'Premium AI Recommendations',
+        'Basic AI Recommendations',
         'Standard Branding Customization',
         'Partners keep 100% of referral/affiliate payments',
-        'Advanced Analytics',
-        'Priority Support',
+        'Basic Analytics Dashboard',
+        'Email Support',
         'Client management tools'
       ],
       highlight: true,
+      buttonText: 'Get Started',
+      buttonLink: '/contact'
     },
     {
       name: 'Pro',
-      price: '$149.99/month',
-      description: 'For established practices needing full customization and support.',
+      price: '$179',
+      period: '/month',
+      description: 'For growing practices and established financial professionals.',
       features: [
-        '500 Recommendations per month',
+        'Up to 500 card recommendations per month',
+        'White-Label Platform',
+        'Advanced AI Recommendations',
+        'Full Branding Customization',
+        'Partners keep 100% of referral/affiliate payments',
+        'Advanced Analytics & Reporting',
+        'Priority Support',
+        'Client management tools',
+        'Custom integrations available'
+      ],
+      highlight: false,
+      buttonText: 'Contact Sales',
+      buttonLink: '/contact'
+    },
+    {
+      name: 'Enterprise',
+      price: 'Custom',
+      period: 'pricing',
+      description: 'For large organizations requiring unlimited scale and dedicated support.',
+      features: [
+        'Unlimited card recommendations',
         'White-Label Platform',
         'Premium AI Recommendations',
-        'Standard Branding Customization',
+        'Complete Custom Branding',
         'Partners keep 100% of referral/affiliate payments',
-        'Advanced Analytics',
-        'Priority Support',
-        'Client management tools'
+        'Enterprise Analytics Suite',
+        'Dedicated Account Manager',
+        'Custom integrations & API access',
+        'Priority technical support',
+        'Custom onboarding & training'
       ],
-      highlight: false
+      highlight: false,
+      buttonText: 'Contact Sales',
+      buttonLink: '/contact'
     },
   ];
 
@@ -85,7 +99,7 @@ export default function PricingPage() {
               <p className={`text-4xl font-bold mb-6 ${
                 tier.highlight ? 'text-primary' : 'text-foreground'
               }`}>
-                {tier.price}
+                {tier.price} {tier.period}
               </p>
               <ul className="text-left text-muted-foreground mb-8 space-y-4 min-h-[160px]">
                 {tier.features.map((feature, featureIndex) => (
@@ -96,14 +110,14 @@ export default function PricingPage() {
                 ))}
               </ul>
               <Link
-                href={tier.name === 'Free' ? '/partner/auth' : '/contact'}
+                href={tier.buttonLink}
                 className={`mt-auto w-full text-center py-3 px-4 rounded-md text-lg font-semibold transition ${
                   tier.highlight 
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
                     : 'bg-background text-foreground border border-border hover:bg-muted'
                 }`}
               >
-                {tier.name === 'Free' ? 'Sign Up' : 'Contact Sales'}
+                {tier.buttonText}
               </Link>
             </div>
           ))}
