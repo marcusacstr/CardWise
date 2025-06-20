@@ -10,7 +10,8 @@ import { testUserSessionsTable, getUserSessionCount } from '@/lib/testPersistenc
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding } from 'react-icons/fa';
+import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck } from 'react-icons/fa';
+import EnhancedRecommendations from '@/components/EnhancedRecommendations';
 
 interface AnalysisResult {
   transactions: any[];
@@ -83,6 +84,9 @@ export default function Dashboard() {
     companyName: string
     logoUrl?: string
   } | null>(null);
+  
+  // Enhanced AI System State
+  const [useEnhancedAI, setUseEnhancedAI] = useState(false);
 
   const spendingCategories = [
     'Dining', 'Groceries', 'Gas', 'Transit', 'Travel', 'Streaming',
@@ -981,12 +985,58 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome back{user ? `, ${user.email?.split('@')[0]}` : ''}!
-          </h2>
-          <p className="text-gray-600">
-            Optimize your credit card rewards with AI-powered recommendations
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Welcome back{user ? `, ${user.email?.split('@')[0]}` : ''}!
+              </h2>
+              <p className="text-gray-600">
+                Optimize your credit card rewards with AI-powered recommendations
+              </p>
+            </div>
+            
+            {/* Enhanced AI Toggle */}
+            <div className="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-2 rounded-lg border border-purple-200">
+              <span className="text-sm font-medium text-gray-700">Enhanced AI</span>
+              <button
+                onClick={() => setUseEnhancedAI(!useEnhancedAI)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  useEnhancedAI ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  useEnhancedAI ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+              {useEnhancedAI && (
+                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full font-medium">
+                  🤖 AI-Powered
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* AI Enhancement Description */}
+          {useEnhancedAI && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <div className="flex items-start space-x-3">
+                <span className="text-2xl">🧠</span>
+                <div>
+                  <h3 className="font-semibold text-blue-900">Enhanced AI Analysis Active</h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Using advanced algorithms with real-world point valuations, risk assessment, and personalized optimization tips.
+                    Get more accurate recommendations based on actual redemption values.
+                  </p>
+                  <div className="flex items-center space-x-4 mt-2 text-xs text-blue-600">
+                    <span>✓ Dynamic point valuations (0.6¢ - 2.2¢)</span>
+                    <span>✓ Risk factor analysis</span>
+                    <span>✓ Optimization strategies</span>
+                    <span>✓ AI confidence scoring</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Debug Section - Remove in production */}
@@ -1400,8 +1450,20 @@ export default function Dashboard() {
                   <FaCreditCard className="text-green-600 text-lg" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">🎯 Your Top Recommendation</h3>
-                  <p className="text-sm text-gray-600">Based on your spending analysis</p>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {useEnhancedAI ? '🤖 AI-Enhanced Recommendations' : '🎯 Your Top Recommendation'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {useEnhancedAI 
+                      ? 'Advanced AI analysis with real-world point valuations and risk assessment' 
+                      : 'Based on your spending analysis'
+                    }
+                  </p>
+                  {useEnhancedAI && (
+                    <div className="mt-2 text-xs text-blue-600 font-medium">
+                      ✨ Enhanced AI Mode: Dynamic valuations • Risk analysis • Optimization tips
+                    </div>
+                  )}
                 </div>
               </div>
               {/* Show data period indicator */}
