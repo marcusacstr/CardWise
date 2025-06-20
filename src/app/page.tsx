@@ -267,22 +267,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Impactful Statistic */}
-      <section className="w-full py-8 bg-gradient-to-r from-blue-50 to-green-50">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-6 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">26%</div>
-              <p className="text-lg text-gray-700 font-medium">
-                of Americans Have Used ChatGPT for Credit Card Recommendations
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                The AI revolution in financial advice is here. Give your audience the tools they want.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* How It Works Section */}
       <section className="w-full py-16 bg-white">
