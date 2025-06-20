@@ -123,51 +123,6 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Additional Information */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-card p-8 rounded-lg border border-border">
-            <h3 className="text-2xl font-semibold text-foreground mb-4">Revenue Sharing Model</h3>
-            <p className="text-muted-foreground mb-4">
-              Our revenue sharing model is designed to maximize your earnings while providing value to your clients:
-            </p>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <FaRegChartBar className="w-5 h-5 text-primary mr-2 mt-1" />
-                <span className="text-muted-foreground">Earn a percentage of referral bonuses for successful card applications.</span>
-              </li>
-              <li className="flex items-start">
-                <FaRegGem className="w-5 h-5 text-primary mr-2 mt-1" />
-                <span className="text-muted-foreground">Higher tiers offer increased revenue share percentages.</span>
-              </li>
-              <li className="flex items-start">
-                <FaRegStar className="w-5 h-5 text-primary mr-2 mt-1" />
-                <span className="text-muted-foreground">No cost to get started with the Free tier.</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-card p-8 rounded-lg border border-border">
-            <h3 className="text-2xl font-semibold text-foreground mb-4">Partner Benefits</h3>
-            <p className="text-muted-foreground mb-4">
-              Every plan includes these core benefits to help you succeed:
-            </p>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <FaRegLightbulb className="w-5 h-5 text-primary mr-2 mt-1" />
-                <span className="text-muted-foreground">AI-powered card recommendations</span>
-              </li>
-              <li className="flex items-start">
-                <FaRegUser className="w-5 h-5 text-primary mr-2 mt-1" />
-                <span className="text-muted-foreground">Client management tools</span>
-              </li>
-              <li className="flex items-start">
-                <FaRegCheckCircle className="w-5 h-5 text-primary mr-2 mt-1" />
-                <span className="text-muted-foreground">Regular platform updates and improvements</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
         {/* CTA Section */}
         <div className="mt-16 text-center">
           <h3 className="text-2xl font-semibold text-foreground mb-4">Ready to Get Started?</h3>
