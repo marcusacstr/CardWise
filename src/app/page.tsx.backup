@@ -1,0 +1,9 @@
+'use client'
+import React from 'react'
+import Link from 'next/link'
+import { FaRegLightbulb, FaDollarSign, FaRegGem } from 'react-icons/fa'
+import CardStackGraphic from '@/components/CardStackGraphic'
+import PartnerPortalMockup from '@/components/PartnerPortalMockup'
+
+const ValuePropositionFlow = () => (
+
