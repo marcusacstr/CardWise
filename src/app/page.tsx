@@ -296,6 +296,49 @@ export default function Home() {
       </section>
 
       <section className="w-full py-16 bg-green-600 text-white">
+      {/* FAQ Section */}
+      <section className="w-full py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 sm:text-5xl mb-6">Frequently Asked Questions</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Everything you need to know about CardWise and our partner program
+            </p>
+          </div>
+          
+          <div className="space-y-6">
+            <FAQItem 
+              question="How does the CardWise platform work?"
+              answer="CardWise provides a white-label credit card recommendation platform. Your clients upload their spending data or enter it manually, and our AI analyzes their habits to recommend the best credit cards for maximizing rewards. You earn affiliate commissions on successful applications."
+            />
+            
+            <FAQItem 
+              question="What's included in each pricing tier?"
+              answer="Starter ($99/month) includes up to 100 card recommendations per month with basic customization. Pro ($179/month) includes up to 500 recommendations with advanced features. Enterprise offers unlimited recommendations with full customization and dedicated support."
+            />
+            
+            <FAQItem 
+              question="How much can I earn with CardWise?"
+              answer="Earnings vary based on your client volume and the cards they apply for. Our partners typically earn $50-200 per successful card application. With our Pro plan allowing 500 recommendations per month, top partners generate $5,000-15,000 in monthly affiliate revenue."
+            />
+            
+            <FAQItem 
+              question="Is client data secure?"
+              answer="Absolutely. We use bank-level encryption and never store sensitive financial information like account numbers. Spending data is analyzed and then securely deleted. We're SOC 2 compliant and follow all financial data protection regulations."
+            />
+            
+            <FAQItem 
+              question="How long does setup take?"
+              answer="Most partners are up and running within 24-48 hours. Our team handles the technical setup while you focus on customizing your branding and preparing your client outreach."
+            />
+            
+            <FAQItem 
+              question="Can I customize the platform for my brand?"
+              answer="Yes! All paid plans include white-label customization. You can add your logo, colors, domain name, and messaging. Pro and Enterprise plans offer advanced customization options including custom workflows and integrations."
+            />
+          </div>
+        </div>
+      </section>
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
           <p className="text-xl mb-8">Join forward-thinking financial professionals who are already earning with CardWise</p>
