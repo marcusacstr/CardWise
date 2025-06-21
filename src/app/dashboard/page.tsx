@@ -335,12 +335,14 @@ export default function Dashboard() {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input clicked, event triggered');
     const selectedFile = event.target.files?.[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
+    if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.type === 'application/csv' || selectedFile.type === 'text/plain' || selectedFile.name.toLowerCase().endsWith('.csv'))) {
+      console.log(`File accepted: ${selectedFile.name}, type: ${selectedFile.type}, size: ${selectedFile.size} bytes`);
       setFile(selectedFile);
       setError(null);
     } else {
-      setError('Please select a valid CSV file');
+      setError(`Please select a valid CSV file. Selected file: ${selectedFile.name}, type: ${selectedFile.type}`);
       setFile(null);
     }
   };
@@ -1112,7 +1114,7 @@ export default function Dashboard() {
         {!result && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <button
-              onClick={() => document.getElementById('file-upload')?.click()}
+              onClick={() => { console.log('Upload button clicked, triggering file input'); const fileInput = document.getElementById('file-upload'); console.log('File input element:', fileInput); fileInput?.click(); }}
               className="bg-green-600 hover:bg-green-700 text-white rounded-lg p-6 flex flex-col items-center space-y-2 transition-colors"
             >
               <FaUpload className="text-2xl" />
@@ -1181,7 +1183,7 @@ export default function Dashboard() {
                 )}
               </button>
               <button
-                onClick={() => document.getElementById('file-upload')?.click()}
+                onClick={() => { console.log('Upload button clicked, triggering file input'); const fileInput = document.getElementById('file-upload'); console.log('File input element:', fileInput); fileInput?.click(); }}
                 className="text-green-600 hover:text-green-700 font-medium"
               >
                 Change File
@@ -1712,7 +1714,7 @@ export default function Dashboard() {
               </div>
               <div className="flex space-x-3">
                 <button
-                  onClick={() => document.getElementById('file-upload')?.click()}
+                  onClick={() => { console.log('Upload button clicked, triggering file input'); const fileInput = document.getElementById('file-upload'); console.log('File input element:', fileInput); fileInput?.click(); }}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                 >
                   Upload New Statement
@@ -1744,7 +1746,7 @@ export default function Dashboard() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => document.getElementById('file-upload')?.click()}
+                  onClick={() => { console.log('Upload button clicked, triggering file input'); const fileInput = document.getElementById('file-upload'); console.log('File input element:', fileInput); fileInput?.click(); }}
                   className="flex items-center justify-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg transition-colors shadow-md"
                 >
                   <FaUpload className="mr-3" />
