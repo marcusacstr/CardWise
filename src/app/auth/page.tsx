@@ -3,7 +3,7 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { FaGoogle, FaGithub, FaExclamationTriangle, FaUser, FaBuilding, FaArrowLeft } from 'react-icons/fa';
+import { FaGoogle, FaExclamationTriangle, FaUser, FaBuilding, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
 import { validatePassword } from '@/utils/validation';
 
@@ -108,7 +108,7 @@ export default function UserAuth() {
     }
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
+  const handleOAuthLogin = async (provider: 'google') => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -155,23 +155,21 @@ export default function UserAuth() {
         </div>
 
         {/* Account Type Indicator */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center">
-            <FaUser className="h-5 w-5 text-green-600 mr-3" />
+            <FaUser className="h-5 w-5 text-blue-600 mr-3" />
             <div>
-              <h3 className="text-sm font-medium text-green-800">User Portal</h3>
-              <p className="text-xs text-green-600 mt-1">
-                Get personalized credit card recommendations and optimize your rewards
-              </p>
+              <h3 className="text-sm font-medium text-blue-800">Personal User Account</h3>
+              <p className="text-sm text-blue-600">Get personalized credit card recommendations</p>
             </div>
           </div>
         </div>
 
-        {/* Auth Form */}
+        {/* Form */}
         <form className="mt-8 space-y-6" onSubmit={handleAuth}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
                 Email address
               </label>
               <input
@@ -180,14 +178,14 @@ export default function UserAuth() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <input
@@ -196,7 +194,7 @@ export default function UserAuth() {
                 type="password"
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm ${isSignUp ? 'rounded-none' : 'rounded-b-md'}`}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -204,17 +202,17 @@ export default function UserAuth() {
             </div>
             {isSignUp && (
               <div>
-                <label htmlFor="confirm-password" className="sr-only">
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm Password
                 </label>
                 <input
                   id="confirm-password"
-                  name="confirm-password"
+                  name="confirmPassword"
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm Password"
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Confirm password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
@@ -222,7 +220,7 @@ export default function UserAuth() {
             )}
           </div>
 
-          {/* Password validation errors */}
+          {/* Password Requirements */}
           {isSignUp && passwordErrors.length > 0 && (
             <div className="mt-2">
               <ul className="text-sm text-red-600 space-y-1">
@@ -268,7 +266,7 @@ export default function UserAuth() {
           </div>
         </form>
 
-        {/* OAuth Options */}
+        {/* OAuth Options - Only Google now */}
         {!isSignUp && (
           <div className="mt-6">
             <div className="relative">
@@ -282,20 +280,13 @@ export default function UserAuth() {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6">
               <button
                 onClick={() => handleOAuthLogin('google')}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
                 <FaGoogle className="h-5 w-5" />
                 <span className="ml-2">Google</span>
-              </button>
-              <button
-                onClick={() => handleOAuthLogin('github')}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <FaGithub className="h-5 w-5" />
-                <span className="ml-2">GitHub</span>
               </button>
             </div>
           </div>
@@ -355,17 +346,17 @@ export default function UserAuth() {
         {/* Terms */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            By signing up, you agree to our{' '}
-            <a href="#" className="text-green-600 hover:text-green-500">
+            By signing in, you agree to our{' '}
+            <Link href="/terms" className="text-green-600 hover:text-green-500">
               Terms of Service
-            </a>{' '}
+            </Link>{' '}
             and{' '}
-            <a href="#" className="text-green-600 hover:text-green-500">
+            <Link href="/privacy" className="text-green-600 hover:text-green-500">
               Privacy Policy
-            </a>
+            </Link>
           </p>
         </div>
       </div>
     </div>
-  );
+  )
 } 

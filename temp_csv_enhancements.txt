@@ -1,0 +1,96 @@
+// Enhanced merchant extraction patterns (matching PDF parser)
+const MERCHANT_PATTERNS = [
+  // Remove common prefixes
+  /^(PURCHASE\s+|PAYMENT\s+|DEBIT\s+|CREDIT\s+|POS\s+|ATM\s+|RECURRING\s+|ACH\s+|CHECK\s+)/i,
+  // Remove location/state info
+  /\s+[A-Z]{2}\s+\d{5}.*$/,
+  // Remove date suffixes
+  /\s+\d{2}\/\d{2}.*$/,
+  // Remove reference numbers
+  /\s+#\d+.*$/,
+  // Remove card ending info
+  /\s+XXXX\d{4}.*$/i,
+  // Remove authorization codes
+  /\s+AUTH\s+\d+.*$/i,
+  // Remove transaction IDs
+  /\s+ID\s*:\s*\d+.*$/i
+];
+
+// Enhanced categorization with more sophisticated matching (matching PDF parser)
+const CATEGORY_RULES = {
+  'Dining': [
+    /restaurant|dining|food|cafe|coffee|pizza|burger|taco|sushi|bar|pub|grill|bistro|deli|bakery/i,
+    /mcdonald|subway|starbucks|chipotle|panera|domino|kfc|taco bell|wendy|burger king/i,
+    /doordash|ubereats|grubhub|postmates|seamless|deliveroo/i
+  ],
+  'Groceries': [
+    /grocery|supermarket|market|kroger|safeway|whole foods|trader joe|costco|walmart|target/i,
+    /publix|wegmans|giant|harris teeter|food lion|stop shop|aldi|fresh market|sprouts/i
+  ],
+  'Gas': [
+    /gas|fuel|shell|exxon|bp|chevron|mobil|texaco|arco|citgo|marathon|sunoco|valero/i,
+    /speedway|wawa|sheetz|circle k|7-eleven.*gas|pilot|flying j/i
+  ],
+  'Travel': [
+    /airline|flight|hotel|airbnb|booking|expedia|priceline|kayak|orbitz/i,
+    /uber|lyft|taxi|airport|rental car|hertz|avis|budget|enterprise|alamo/i,
+    /marriott|hilton|hyatt|ihg|choice|wyndham|delta|american airlines|united/i
+  ],
+  'Transit': [
+    /metro|subway|bus|train|transit|parking|toll|mta|bart|septa|uber|lyft/i
+  ],
+  'Entertainment': [
+    /movie|theater|cinema|netflix|spotify|hulu|disney|amazon prime|apple music/i,
+    /concert|ticket|entertainment|amc|regal|cinemark|ticketmaster/i
+  ],
+  'Shopping': [
+    /amazon|ebay|target|walmart|best buy|apple store|microsoft|google play/i,
+    /macy|nordstrom|tj maxx|marshalls|ross|old navy|gap|nike|adidas/i
+  ],
+  'Utilities': [
+    /electric|gas company|water|sewer|internet|phone|cable|utility|power|energy/i,
+    /verizon|att|tmobile|sprint|comcast|spectrum|cox|dish|directv/i
+  ],
+  'Healthcare': [
+    /medical|doctor|hospital|pharmacy|cvs|walgreens|rite aid|health|dental|vision/i
+  ],
+  'Streaming': [
+    /netflix|hulu|disney|amazon prime|spotify|apple music|youtube|twitch|paramount/i
+  ],
+  'Department Stores': [
+    /target|walmart|costco|sams club|bjs|macy|nordstrom|kohls|jcpenney/i
+  ]
+};
+
+function extractMerchant(description: string): string {
+  if (!description) return '';
+  
+  let merchant = description.trim();
+  
+  // Apply merchant cleaning patterns
+  for (const pattern of MERCHANT_PATTERNS) {
+    merchant = merchant.replace(pattern, '');
+  }
+  
+  // Take first meaningful part
+  const parts = merchant.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return parts.slice(0, 2).join(' ');
+  }
+  
+  return parts[0] || merchant.substring(0, 50).trim();
+}
+
+function categorizeTransaction(description: string): string {
+  const desc = description.toLowerCase();
+  
+  for (const [category, patterns] of Object.entries(CATEGORY_RULES)) {
+    for (const pattern of patterns) {
+      if (pattern.test(desc)) {
+        return category;
+      }
+    }
+  }
+  
+  return 'Other';
+}

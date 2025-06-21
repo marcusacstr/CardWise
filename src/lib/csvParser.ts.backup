@@ -219,116 +219,13 @@ function cleanDescription(description: string): string {
 function extractMerchant(description: string): string {
   if (!description) return '';
   
-  // Enhanced merchant extraction with pattern cleaning
-  let merchant = description.trim();
-  
-  // Remove common prefixes
-  merchant = merchant.replace(/^(PURCHASE\s+|PAYMENT\s+|DEBIT\s+|CREDIT\s+|POS\s+|ATM\s+|RECURRING\s+|ACH\s+|CHECK\s+)/i, '');
-  // Remove location/state info
-  merchant = merchant.replace(/\s+[A-Z]{2}\s+\d{5}.*$/, '');
-  // Remove date suffixes
-  merchant = merchant.replace(/\s+\d{2}\/\d{2}.*$/, '');
-  // Remove reference numbers
-  merchant = merchant.replace(/\s+#\d+.*$/, '');
-  // Remove card ending info
-  merchant = merchant.replace(/\s+XXXX\d{4}.*$/i, '');
-  
-  // Take first meaningful part
-  const parts = merchant.trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return parts.slice(0, 2).join(' ');
+  // Simple merchant extraction - take first part before common separators
+  const parts = description.split(/[\-#*]/);
+  if (parts.length > 0) {
+    return parts[0].trim();
   }
   
-  return parts[0] || description.substring(0, 50).trim();
-}
-
-// Enhanced categorization function
-function categorizeTransaction(description: string): string {
-  const desc = description.toLowerCase();
-  
-  // Dining
-  if (desc.match(/restaurant|dining|food|cafe|coffee|pizza|burger|taco|sushi|bar|pub|grill|bistro|deli|bakery/)) {
-    return 'Dining';
-  }
-  if (desc.match(/mcdonald|subway|starbucks|chipotle|panera|domino|kfc|taco bell|wendy|burger king/)) {
-    return 'Dining';
-  }
-  if (desc.match(/doordash|ubereats|grubhub|postmates|seamless|deliveroo/)) {
-    return 'Dining';
-  }
-  
-  // Groceries
-  if (desc.match(/grocery|supermarket|market|kroger|safeway|whole foods|trader joe|costco|walmart|target/)) {
-    return 'Groceries';
-  }
-  if (desc.match(/publix|wegmans|giant|harris teeter|food lion|stop shop|aldi|fresh market|sprouts/)) {
-    return 'Groceries';
-  }
-  
-  // Gas
-  if (desc.match(/gas|fuel|shell|exxon|bp|chevron|mobil|texaco|arco|citgo|marathon|sunoco|valero/)) {
-    return 'Gas';
-  }
-  if (desc.match(/speedway|wawa|sheetz|circle k|7-eleven.*gas|pilot|flying j/)) {
-    return 'Gas';
-  }
-  
-  // Travel
-  if (desc.match(/airline|flight|hotel|airbnb|booking|expedia|priceline|kayak|orbitz/)) {
-    return 'Travel';
-  }
-  if (desc.match(/uber|lyft|taxi|airport|rental car|hertz|avis|budget|enterprise|alamo/)) {
-    return 'Travel';
-  }
-  if (desc.match(/marriott|hilton|hyatt|ihg|choice|wyndham|delta|american airlines|united/)) {
-    return 'Travel';
-  }
-  
-  // Transit
-  if (desc.match(/metro|subway|bus|train|transit|parking|toll|mta|bart|septa/)) {
-    return 'Transit';
-  }
-  
-  // Entertainment
-  if (desc.match(/movie|theater|cinema|netflix|spotify|hulu|disney|amazon prime|apple music/)) {
-    return 'Entertainment';
-  }
-  if (desc.match(/concert|ticket|entertainment|amc|regal|cinemark|ticketmaster/)) {
-    return 'Entertainment';
-  }
-  
-  // Shopping
-  if (desc.match(/amazon|ebay|target|walmart|best buy|apple store|microsoft|google play/)) {
-    return 'Shopping';
-  }
-  if (desc.match(/macy|nordstrom|tj maxx|marshalls|ross|old navy|gap|nike|adidas/)) {
-    return 'Shopping';
-  }
-  
-  // Utilities
-  if (desc.match(/electric|gas company|water|sewer|internet|phone|cable|utility|power|energy/)) {
-    return 'Utilities';
-  }
-  if (desc.match(/verizon|att|tmobile|sprint|comcast|spectrum|cox|dish|directv/)) {
-    return 'Utilities';
-  }
-  
-  // Healthcare
-  if (desc.match(/medical|doctor|hospital|pharmacy|cvs|walgreens|rite aid|health|dental|vision/)) {
-    return 'Healthcare';
-  }
-  
-  // Streaming
-  if (desc.match(/netflix|hulu|disney|amazon prime|spotify|apple music|youtube|twitch|paramount/)) {
-    return 'Streaming';
-  }
-  
-  // Department Stores
-  if (desc.match(/target|walmart|costco|sams club|bjs|macy|nordstrom|kohls|jcpenney/)) {
-    return 'Department Stores';
-  }
-  
-  return 'Other';
+  return description.substring(0, 50).trim();
 }
 
 function detectIfFirstRowIsData(firstRow: RawTransaction): boolean {
@@ -758,11 +655,9 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
           original_data: row
         };
 
-        // Add category - use provided category or auto-categorize
-        if (categoryColumn && row[categoryColumn] && row[categoryColumn].trim()) {
+        // Add category if available
+        if (categoryColumn && row[categoryColumn]) {
           transaction.category = row[categoryColumn].trim();
-        } else {
-          transaction.category = categorizeTransaction(cleanDescription(descStr));
         }
 
         // Add balance if available
