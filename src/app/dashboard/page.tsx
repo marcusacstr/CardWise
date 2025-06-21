@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { parseCSVStatements } from '@/lib/csvParser';
+import { parsePDFStatement } from '@/lib/pdfParser';
 import { analyzeTransactions } from '@/lib/transactionAnalyzer';
 import { generateCardRecommendations, saveUserRecommendations, calculateCurrentCardRewards } from '@/lib/cardRecommendations';
 import { saveReport, getUserReports } from '@/lib/reportStorage';
@@ -357,12 +358,29 @@ export default function Dashboard() {
     setError(null);
 
     try {
-      // Parse CSV
-      const csvText = await file.text();
-      const parseResult = parseCSVStatements(csvText);
+      let parseResult;
+      const fileExtension = file.name.toLowerCase().split('.').pop();
       
-      if (parseResult.transactions.length === 0) {
-        throw new Error('No transactions found in the CSV file');
+      if (fileExtension === 'pdf') {
+        // Handle PDF files
+        const arrayBuffer = await file.arrayBuffer();
+        parseResult = await parsePDFStatement(arrayBuffer);
+        
+        if (parseResult.errors.length > 0) {
+          console.warn('PDF parsing warnings:', parseResult.errors);
+        }
+        
+        if (parseResult.transactions.length === 0) {
+          throw new Error('No transactions found in the PDF file. Please ensure this is a credit card statement with transaction details.');
+        }
+      } else {
+        // Handle CSV files (default)
+        const csvText = await file.text();
+        parseResult = parseCSVStatements(csvText);
+        
+        if (parseResult.transactions.length === 0) {
+          throw new Error('No transactions found in the CSV file');
+        }
       }
 
       // Analyze transactions
@@ -1782,7 +1800,7 @@ export default function Dashboard() {
                   className="flex items-center justify-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg transition-colors shadow-md"
                 >
                   <FaUpload className="mr-3" />
-                  Upload CSV Statement
+                  Upload Statement (CSV/PDF)
                 </button>
                 <button 
                   onClick={() => setShowManualEntry(true)}
@@ -1795,7 +1813,7 @@ export default function Dashboard() {
               
               <div className="mt-8 text-sm text-gray-500">
                 <p className="mb-2">
-                  <strong>CSV Format:</strong> Upload your bank or credit card statement with transaction data
+                  <strong>Supported Formats:</strong> Upload your bank or credit card statement (CSV or PDF) with transaction data
                 </p>
                 <p>
                   <strong>Supported columns:</strong> description, amount, date, merchant category (optional)
@@ -1808,7 +1826,7 @@ export default function Dashboard() {
         <input
           id="file-upload"
           type="file"
-          accept=".csv"
+          accept=".csv,.pdf"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -2171,7 +2189,7 @@ export default function Dashboard() {
       <input
         id="file-upload"
         type="file"
-        accept=".csv"
+        accept=".csv,.pdf"
         onChange={handleFileChange}
         className="hidden"
       />
