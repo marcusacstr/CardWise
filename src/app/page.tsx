@@ -2,7 +2,7 @@
 import React from 'react'
 import Link from 'next/link'
 // Import necessary icons
-import { FaPlane, FaUpload, FaPen, FaTrashAlt, FaRegFileAlt, FaCcVisa, FaCcMastercard, FaCcAmex, FaRegChartBar, FaRegLightbulb, FaRegCreditCard, FaRegUser, FaRegGem, FaRegCheckCircle, FaRegFolderOpen, FaRegStar, FaDollarSign, FaChevronDown, FaRegCopy, FaLock } from 'react-icons/fa'
+import { FaPlane, FaUpload, FaPen, FaTrashAlt, FaRegFileAlt, FaCcVisa, FaCcMastercard, FaCcAmex, FaRegChartBar, FaRegLightbulb, FaRegCreditCard, FaRegUser, FaRegGem, FaRegCheckCircle, FaRegFolderOpen, FaRegStar, FaDollarSign, FaChevronDown, FaChevronUp, FaRegCopy, FaLock } from 'react-icons/fa'
 import CardStackGraphic from '@/components/CardStackGraphic'
 
 
