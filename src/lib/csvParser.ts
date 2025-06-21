@@ -12,6 +12,7 @@ export interface ParsedTransaction {
   amount: number;
   category?: string;
   merchant?: string;
+  mcc?: string; // Merchant Category Code
   type: 'debit' | 'credit';
   balance?: number;
   original_data: RawTransaction;
@@ -53,37 +54,43 @@ const COLUMN_MAPPINGS: { [key: string]: { [key: string]: string[] } } = {
     description: ['Description', 'Merchant', 'Transaction Description', 'Payee', 'Memo'],
     amount: ['Amount', 'Transaction Amount', 'Debit', 'Credit', 'Transaction Amount', 'Charge Amount'],
     category: ['Category', 'Type', 'Transaction Type'],
+    mcc: ['MCC', 'Merchant Category Code', 'Category Code', 'MCC Code'],
     balance: ['Balance', 'Running Balance', 'Account Balance']
   },
   citi: {
     date: ['Date', 'Transaction Date', 'Posting Date'],
     description: ['Description', 'Merchant Name', 'Payee'],
     amount: ['Debit', 'Credit', 'Amount', 'Transaction Amount'],
-    category: ['Category', 'Type']
+    category: ['Category', 'Type'],
+    mcc: ['MCC', 'Merchant Category Code', 'Category Code']
   },
   amex: {
     date: ['Date', 'Transaction Date', 'Posting Date'],
     description: ['Description', 'Merchant', 'Payee'],
     amount: ['Amount', 'Charge Amount', 'Transaction Amount'],
-    category: ['Category', 'Extended Details', 'Type']
+    category: ['Category', 'Extended Details', 'Type'],
+    mcc: ['MCC', 'Merchant Category Code', 'Category Code']
   },
   capital_one: {
     date: ['Transaction Date', 'Date', 'Posting Date'],
     description: ['Description', 'Merchant', 'Payee'],
     amount: ['Debit', 'Credit', 'Amount', 'Transaction Amount'],
-    category: ['Category', 'Type']
+    category: ['Category', 'Type'],
+    mcc: ['MCC', 'Merchant Category Code', 'Category Code']
   },
   discover: {
     date: ['Trans. Date', 'Transaction Date', 'Date', 'Posting Date'],
     description: ['Description', 'Merchant', 'Payee'],
     amount: ['Amount', 'Transaction Amount', 'Charge Amount'],
-    category: ['Category', 'Type']
+    category: ['Category', 'Type'],
+    mcc: ['MCC', 'Merchant Category Code', 'Category Code']
   },
   generic: {
     date: ['Date', 'Transaction Date', 'Trans Date', 'Post Date', 'Posting Date', 'Trans. Date'],
     description: ['Description', 'Merchant', 'Payee', 'Transaction Description', 'Memo', 'Reference'],
     amount: ['Amount', 'Transaction Amount', 'Debit', 'Credit', 'Charge Amount', 'Payment Amount', 'Withdrawal', 'Deposit'],
     category: ['Category', 'Type', 'Transaction Type', 'Class'],
+    mcc: ['MCC', 'Merchant Category Code', 'Category Code', 'MCC Code'],
     balance: ['Balance', 'Running Balance', 'Account Balance', 'Current Balance']
   }
 };
@@ -102,23 +109,23 @@ function detectDateFormat(dateString: string): string | null {
   return null;
 }
 
-function parseDate(dateString: string, detectedFormat?: string): Date | null {
-  if (!dateString || dateString.trim() === '') return null;
-  
-  const cleanDate = dateString.trim();
-  
-  if (detectedFormat) {
+function parseDate(dateString: string, preferredFormat?: string): Date | null {
+  // Try preferred format first
+  if (preferredFormat) {
     try {
-      const parsed = parse(cleanDate, detectedFormat, new Date());
-      if (isValid(parsed)) return parsed;
+      const parsed = parse(dateString, preferredFormat, new Date());
+      if (isValid(parsed)) {
+        return parsed;
+      }
     } catch {
       // Fall through to try other formats
     }
   }
-  
+
+  // Try all formats
   for (const format of DATE_FORMATS) {
     try {
-      const parsed = parse(cleanDate, format, new Date());
+      const parsed = parse(dateString, format, new Date());
       if (isValid(parsed)) {
         return parsed;
       }
@@ -131,79 +138,50 @@ function parseDate(dateString: string, detectedFormat?: string): Date | null {
 }
 
 function parseAmount(amountString: string): number | null {
-  if (!amountString || amountString.trim() === '') return null;
+  if (!amountString) return null;
   
-  // Remove common currency symbols and whitespace
-  const cleanAmount = amountString
-    .replace(/[$,\s]/g, '')
-    .replace(/[()]/g, '-') // Handle parentheses as negative
-    .trim();
+  // Remove currency symbols, spaces, and convert parentheses to negative
+  let cleanAmount = amountString
+    .trim()
+    .replace(/[$€£¥₹₽]/g, '') // Remove currency symbols
+    .replace(/\s/g, '') // Remove spaces
+    .replace(/,/g, ''); // Remove thousands separators
+  
+  // Handle parentheses notation for negative amounts
+  if (cleanAmount.startsWith('(') && cleanAmount.endsWith(')')) {
+    cleanAmount = '-' + cleanAmount.slice(1, -1);
+  }
   
   const parsed = parseFloat(cleanAmount);
   return isNaN(parsed) ? null : parsed;
 }
 
-function detectCSVFormat(headers: string[]): string {
+function findColumn(headers: string[], possibleNames: string[]): string | null {
   const headerLower = headers.map(h => h.toLowerCase());
   
-  // Score each format based on header matches
-  const scores: { [key: string]: number } = {};
-  
-  for (const [format, mappings] of Object.entries(COLUMN_MAPPINGS)) {
-    scores[format] = 0;
-    for (const possibleHeaders of Object.values(mappings)) {
-      for (const header of possibleHeaders) {
-        if (headerLower.some(h => h.includes(header.toLowerCase()))) {
-          scores[format] += 1;
-        }
-      }
-    }
-  }
-  
-  // Return the format with the highest score
-  const bestFormat = Object.entries(scores).reduce((a, b) => 
-    scores[a[0]] > scores[b[0]] ? a : b
-  )[0];
-  
-  return bestFormat || 'generic';
-}
-
-function findColumn(headers: string[], possibleNames: string[]): string | null {
-  const headerLower = headers.map(h => h.toLowerCase().trim());
-  
-  // First try exact matches
   for (const name of possibleNames) {
-    const exactIndex = headerLower.findIndex(h => h === name.toLowerCase());
-    if (exactIndex !== -1) {
-      return headers[exactIndex];
-    }
-  }
-  
-  // Then try contains matches
-  for (const name of possibleNames) {
-    const index = headerLower.findIndex(h => 
-      h.includes(name.toLowerCase()) || 
-      name.toLowerCase().includes(h)
-    );
-    if (index !== -1) {
-      return headers[index];
-    }
-  }
-  
-  // Finally try partial word matches
-  for (const name of possibleNames) {
-    const words = name.toLowerCase().split(' ');
-    for (const word of words) {
-      if (word.length > 2) { // Only check words longer than 2 characters
-        const index = headerLower.findIndex(h => h.includes(word));
-        if (index !== -1) {
-          return headers[index];
-        }
-      }
-    }
+    const nameLower = name.toLowerCase();
+    const exactMatch = headers.find(h => h.toLowerCase() === nameLower);
+    if (exactMatch) return exactMatch;
+    
+    // Try partial matches
+    const partialMatch = headers.find(h => h.toLowerCase().includes(nameLower));
+    if (partialMatch) return partialMatch;
   }
   
   return null;
+}
+
+function detectCSVFormat(headers: string[]): string {
+  const headerStr = headers.join(' ').toLowerCase();
+  
+  if (headerStr.includes('chase') || headerStr.includes('jpmorgan')) return 'chase';
+  if (headerStr.includes('citi') || headerStr.includes('citibank')) return 'citi';
+  if (headerStr.includes('american express') || headerStr.includes('amex')) return 'amex';
+  if (headerStr.includes('capital one')) return 'capital_one';
+  if (headerStr.includes('discover')) return 'discover';
+  
+  return 'generic';
 }
 
 function cleanDescription(description: string): string {
@@ -240,6 +218,20 @@ function extractMerchant(description: string): string {
   }
   
   return parts[0] || description.substring(0, 50).trim();
+}
+
+function validateMCC(mcc: string): string | null {
+  if (!mcc) return null;
+  
+  // Clean the MCC string
+  const cleanMCC = mcc.trim().replace(/[^\d]/g, '');
+  
+  // MCC should be 4 digits
+  if (cleanMCC.length === 4 && /^\d{4}$/.test(cleanMCC)) {
+    return cleanMCC;
+  }
+  
+  return null;
 }
 
 // Enhanced categorization function
@@ -331,6 +323,32 @@ function categorizeTransaction(description: string): string {
   return 'Other';
 }
 
+function detectIfFirstRowIsDataFromArray(firstRow: string[]): boolean {
+  // Check if any value looks like a date
+  const hasDateLikeValue = firstRow.some(value => {
+    if (!value || typeof value !== 'string') return false;
+    return DATE_FORMATS.some(format => {
+      try {
+        const parsed = parse(value.trim(), format, new Date());
+        return isValid(parsed);
+      } catch {
+        return false;
+      }
+    });
+  });
+
+  // Check if any value looks like a numeric amount
+  const hasNumericValue = firstRow.some(value => {
+    if (!value || typeof value !== 'string') return false;
+    const cleanValue = value.trim().replace(/[$,\s]/g, '').replace(/[()]/g, '-');
+    const num = parseFloat(cleanValue);
+    return !isNaN(num) && Math.abs(num) < 100000; // Reasonable transaction amount
+  });
+
+  // If we find both date-like and numeric values, it's likely data
+  return hasDateLikeValue && hasNumericValue;
+}
+
 function detectIfFirstRowIsData(firstRow: RawTransaction): boolean {
   const values = Object.values(firstRow);
   
@@ -359,37 +377,12 @@ function detectIfFirstRowIsData(firstRow: RawTransaction): boolean {
   return hasDateLikeValue && hasNumericValue;
 }
 
-function detectIfFirstRowIsDataFromArray(firstRow: string[]): boolean {
-  // Check if any value looks like a date
-  const hasDateLikeValue = firstRow.some(value => {
-    if (!value || typeof value !== 'string') return false;
-    return DATE_FORMATS.some(format => {
-      try {
-        const parsed = parse(value.trim(), format, new Date());
-        return isValid(parsed);
-      } catch {
-        return false;
-      }
-    });
-  });
-
-  // Check if any value looks like a numeric amount
-  const hasNumericValue = firstRow.some(value => {
-    if (!value || typeof value !== 'string') return false;
-    const cleanValue = value.trim().replace(/[$,\s]/g, '').replace(/[()]/g, '-');
-    const num = parseFloat(cleanValue);
-    return !isNaN(num) && Math.abs(num) < 100000; // Reasonable transaction amount
-  });
-
-  // If we find both date-like and numeric values, it's likely data
-  return hasDateLikeValue && hasNumericValue;
-}
-
-function inferColumnStructure(data: RawTransaction[]): { 
+function inferColumnStructureFromHeaders(data: RawTransaction[]): { 
   dateColumn: string; 
   descColumn: string; 
   amountColumn: string; 
   categoryColumn?: string; 
+  mccColumn?: string;
   balanceColumn?: string;
 } | null {
   if (data.length === 0) return null;
@@ -604,7 +597,7 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
 
     let data: RawTransaction[];
     let dateColumn: string, descColumn: string, amountColumn: string;
-    let categoryColumn: string | undefined, balanceColumn: string | undefined;
+    let categoryColumn: string | undefined, mccColumn: string | undefined, balanceColumn: string | undefined;
     
     if (firstRowIsData) {
       // CSV has no headers - create column names and convert to objects
@@ -678,6 +671,7 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
       descColumn = findColumn(headers, mappings.description || ['Description']) || '';
       amountColumn = findColumn(headers, mappings.amount || ['Amount']) || '';
       categoryColumn = findColumn(headers, mappings.category || ['Category']);
+      mccColumn = findColumn(headers, mappings.mcc || ['MCC']);
       balanceColumn = findColumn(headers, mappings.balance || ['Balance']);
 
       console.log('Column mapping results:', {
@@ -685,6 +679,7 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
         descColumn,
         amountColumn,
         categoryColumn,
+        mccColumn,
         balanceColumn
       });
 
@@ -765,18 +760,27 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
           transaction.category = categorizeTransaction(cleanDescription(descStr));
         }
 
+        // Add MCC if available
+        if (mccColumn && row[mccColumn]) {
+          const validMCC = validateMCC(row[mccColumn]);
+          if (validMCC) {
+            transaction.mcc = validMCC;
+          }
+        }
+
         // Add balance if available
         if (balanceColumn && row[balanceColumn]) {
-          const parsedBalance = parseAmount(row[balanceColumn]);
-          if (parsedBalance !== null) {
-            transaction.balance = parsedBalance;
+          const balanceAmount = parseAmount(row[balanceColumn]);
+          if (balanceAmount !== null) {
+            transaction.balance = balanceAmount;
           }
         }
 
         result.transactions.push(transaction);
         result.metadata.validRows++;
+
       } catch (error) {
-        result.errors.push(`Row ${index + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        result.warnings.push(`Row ${index + 1}: Error processing transaction - ${error}`);
         result.metadata.invalidRows++;
       }
     });
@@ -787,12 +791,15 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
       end: maxDate
     };
 
-    console.log('Parse result metadata:', result.metadata);
-    console.log('Parse errors:', result.errors);
-    console.log('Parse warnings:', result.warnings);
+    console.log(`Parsed ${result.metadata.validRows} valid transactions out of ${result.metadata.totalRows} total rows`);
+    
+    if (result.metadata.validRows === 0) {
+      result.errors.push('No valid transactions found in the CSV file');
+    }
 
   } catch (error) {
-    result.errors.push(`Failed to parse CSV: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('CSV parsing error:', error);
+    result.errors.push(`Failed to parse CSV: ${error}`);
   }
 
   return result;

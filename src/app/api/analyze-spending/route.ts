@@ -127,52 +127,154 @@ async function categorizeWithCatMyTransaction(description: string): Promise<stri
   }
 }
 
+// MCC to Internal Category Mapping - Enhanced with comprehensive database
+const mccCategoryMap: { [key: string]: string } = {
+  // GROCERIES & FOOD STORES
+  '5411': 'groceries', // Grocery Stores, Supermarkets
+  '5412': 'groceries', // Grocery Stores (Non-Supermarket)
+  '5422': 'groceries', // Freezer and Locker Meat Provisioners
+  '5441': 'groceries', // Candy, Nut, and Confectionery Stores
+  '5451': 'groceries', // Dairy Products Stores
+  '5462': 'groceries', // Bakeries
+  '5499': 'groceries', // Miscellaneous Food Stores
+  '5300': 'groceries', // Wholesale Clubs
+
+  // DINING & RESTAURANTS
+  '5811': 'dining', // Caterers
+  '5812': 'dining', // Eating Places, Restaurants
+  '5813': 'dining', // Drinking Places (Alcoholic Beverages)
+  '5814': 'dining', // Fast Food Restaurants
+
+  // GAS STATIONS & AUTOMOTIVE
+  '5541': 'gas', // Service Stations (Gasoline)
+  '5542': 'gas', // Automated Fuel Dispensers
+  '5531': 'gas', // Auto and Home Supply Stores
+  '5532': 'gas', // Automotive Tire Stores
+  '5533': 'gas', // Automotive Parts and Accessories Stores
+  '5571': 'gas', // Motorcycle Shops and Dealers
+  '7531': 'gas', // Auto Body Repair Shops
+  '7534': 'gas', // Tire Retreading and Repair
+  '7535': 'gas', // Auto Paint Shops
+  '7538': 'gas', // Auto Service Shops
+  '7549': 'gas', // Towing Services
+
+  // TRAVEL & TRANSPORTATION
+  '4111': 'travel', // Transportation - Suburban and Local Commuter
+  '4112': 'travel', // Passenger Railways
+  '4119': 'travel', // Ambulance Services
+  '4121': 'travel', // Taxicabs/Limousines
+  '4131': 'travel', // Bus Lines
+  '4214': 'travel', // Motor Freight Carriers and Trucking
+  '4215': 'travel', // Courier Services
+  '4225': 'travel', // Public Warehousing and Storage
+  '4511': 'travel', // Airlines, Air Carriers
+  '4582': 'travel', // Airports, Flying Fields
+  '4722': 'travel', // Travel Agencies, Tour Operators
+  '7011': 'travel', // Hotels, Motels, and Resorts
+  '7012': 'travel', // Timeshares
+  '7033': 'travel', // Trailer Parks, Campgrounds
+  '7512': 'travel', // Car Rental Agencies
+  '7513': 'travel', // Truck and Utility Trailer Rentals
+  '7519': 'travel', // Recreational Vehicle Rentals
+
+  // DEPARTMENT STORES & RETAIL
+  '5311': 'other', // Department Stores
+  '5331': 'other', // Variety Stores
+  '5399': 'other', // Miscellaneous General Merchandise
+  '5200': 'other', // Home Supply Warehouse Stores
+  '5211': 'other', // Lumber, Building Materials Stores
+  '5231': 'other', // Glass, Paint, and Wallpaper Stores
+  '5251': 'other', // Hardware Stores
+  '5261': 'other', // Nurseries, Lawn and Garden Supply Stores
+
+  // CLOTHING & ACCESSORIES
+  '5611': 'other', // Men's and Boy's Clothing and Accessories
+  '5621': 'other', // Women's Ready-To-Wear Stores
+  '5631': 'other', // Women's Accessory and Specialty Shops
+  '5641': 'other', // Children's and Infant's Wear Stores
+  '5651': 'other', // Family Clothing Stores
+  '5661': 'other', // Shoe Stores
+  '5681': 'other', // Furriers and Fur Shops
+  '5691': 'other', // Men's, Women's Clothing Stores
+  '5697': 'other', // Tailors, Alterations
+  '5698': 'other', // Wig and Toupee Stores
+  '5699': 'other', // Miscellaneous Apparel and Accessory Shops
+
+  // ELECTRONICS & TECHNOLOGY
+  '5732': 'other', // Electronics Stores
+  '5733': 'other', // Music Stores-Musical Instruments, Pianos
+  '5734': 'other', // Computer Software Stores
+  '5735': 'other', // Record Stores
+  '5816': 'other', // Digital Goods Media
+  '5817': 'other', // Digital Goods Games
+  '5818': 'other', // Digital Goods Applications
+
+  // UTILITIES
+  '4814': 'other', // Telecommunication Equipment and Telephone Sales
+  '4815': 'other', // Monthly Summary Telephone Charges
+  '4816': 'other', // Computer Network Services
+  '4821': 'other', // Telegraph Services
+  '4829': 'other', // Wires, Money Orders
+  '4899': 'other', // Cable, Satellite, and Other Pay Television and Radio
+  '4900': 'other', // Utilities
+
+  // HEALTHCARE
+  '8011': 'other', // Doctors
+  '8021': 'other', // Dentists, Orthodontists
+  '8031': 'other', // Osteopaths
+  '8041': 'other', // Chiropractors
+  '8042': 'other', // Optometrists, Ophthalmologist
+  '8043': 'other', // Opticians, Eyeglasses
+  '8049': 'other', // Podiatrists, Chiropodists
+  '8050': 'other', // Nursing/Personal Care
+  '8062': 'other', // Hospitals
+  '8071': 'other', // Medical and Dental Labs
+  '8099': 'other', // Medical Services
+  '5912': 'other', // Drug Stores and Pharmacies
+  '5975': 'other', // Hearing Aids Sales and Supplies
+  '5976': 'other', // Orthopedic Goods
+
+  // ENTERTAINMENT & RECREATION
+  '7832': 'other', // Motion Picture Theaters
+  '7841': 'other', // Video Tape Rental Stores
+  '7911': 'other', // Dance Halls, Studios, Schools
+  '7922': 'other', // Theatrical Ticket Agencies
+  '7929': 'other', // Bands, Orchestras
+  '7932': 'other', // Pool and Billiard Halls
+  '7933': 'other', // Bowling Alleys
+  '7941': 'other', // Sports Clubs/Fields
+  '7991': 'other', // Tourist Attractions and Exhibits
+  '7992': 'other', // Golf Courses - Public
+  '7993': 'other', // Video Amusement Game Supplies
+  '7994': 'other', // Video Game Arcades
+  '7995': 'other', // Betting/Casino Gambling
+  '7996': 'other', // Amusement Parks/Carnivals
+  '7997': 'other', // Country Clubs
+  '7998': 'other', // Aquariums
+  '7999': 'other', // Recreation Services
+
+  // FINANCIAL SERVICES
+  '6010': 'other', // Manual Cash Disburse
+  '6011': 'other', // Automated Cash Disburse
+  '6012': 'other', // Financial Institutions
+  '6051': 'other', // Non-FI, Money Orders
+  '6211': 'other', // Security Brokers/Dealers
+  '6300': 'other', // Insurance Underwriting, Premiums
+  '6513': 'other', // Real Estate Agents and Managers - Rentals
+
+  // STREAMING & DIGITAL SERVICES
+  '5815': 'other', // Digital Goods Media - Books, Movies, Music
+  '5967': 'other', // Direct Marketing - Inbound Telemarketing
+};
+
 // Helper function to categorize spending
 async function categorizeSpending(transactions: Transaction[]): Promise<Record<string, number>> {
-  const categories: Record<string, number> = {
+  const categories = {
     groceries: 0,
     dining: 0,
     travel: 0,
     gas: 0,
     other: 0,
-  };
-
-  // MCC to Internal Category Mapping
-  const mccCategoryMap: { [key: string]: string } = {
-    // Groceries
-    '5411': 'groceries', // Grocery Stores
-    '5462': 'groceries', // Bakeries
-    '5499': 'groceries', // Miscellaneous Food Stores
-    '5300': 'groceries', // Wholesale Clubs
-
-    // Dining
-    '5811': 'dining', // Eating Places, Restaurants
-    '5812': 'dining', // Eating Places, Restaurants (Cont.)
-    '5813': 'dining', // Drinking Places
-    '5814': 'dining', // Fast Food Restaurants
-
-    // Travel
-    '4111': 'travel', // Transportation
-    '4511': 'travel', // Airlines
-    '4722': 'travel', // Travel Agencies
-    '7011': 'travel', // Hotels
-    '7512': 'travel', // Car Rental
-
-    // Gas
-    '5541': 'gas', // Service Stations
-    '5542': 'gas', // Fuel Dispensers
-  };
-
-  // Map CatMyTransaction categories to our internal categories
-  const categoryMapping: { [key: string]: string } = {
-    'groceries': 'groceries',
-    'food and drink': 'dining',
-    'eating out': 'dining',
-    'travel': 'travel',
-    'transportation': 'travel',
-    'gas': 'gas',
-    'fuel': 'gas',
-    // Add more mappings as needed
   };
 
   for (const transaction of transactions) {
@@ -181,16 +283,44 @@ async function categorizeSpending(transactions: Transaction[]): Promise<Record<s
 
     if (amount <= 0) continue;
 
-    // First try MCC if available
+    // PRIORITY 1: Use MCC if available (most accurate)
     if (transaction.mcc && mccCategoryMap[transaction.mcc]) {
-      categories[mccCategoryMap[transaction.mcc]] += amount;
+      const category = mccCategoryMap[transaction.mcc];
+      categories[category as keyof typeof categories] += amount;
+      console.log(`MCC Categorization: ${transaction.mcc} -> ${category} ($${amount})`);
       continue;
     }
 
-    // Then try CatMyTransaction API
-    const catMyTransactionCategory = await categorizeWithCatMyTransaction(description);
-    const mappedCategory = categoryMapping[catMyTransactionCategory] || 'other';
-    categories[mappedCategory] += amount;
+    // PRIORITY 2: Enhanced description-based categorization
+    let categorized = false;
+
+    // Groceries - enhanced patterns
+    if (description.match(/grocery|supermarket|market|food.*store|kroger|safeway|whole foods|trader joe|costco.*food|walmart.*grocery|target.*grocery|publix|wegmans|giant.*food|harris teeter|food lion|stop.*shop|aldi|fresh market|sprouts|produce|organic/)) {
+      categories.groceries += amount;
+      categorized = true;
+    }
+    // Dining - enhanced patterns  
+    else if (description.match(/restaurant|dining|cafe|coffee|pizza|burger|taco|sushi|bar|pub|grill|bistro|deli|bakery|mcdonald|subway|starbucks|chipotle|panera|domino|kfc|taco bell|wendy|burger king|doordash|ubereats|grubhub|postmates|seamless|eat|meal|lunch|dinner|breakfast/)) {
+      categories.dining += amount;
+      categorized = true;
+    }
+    // Gas - enhanced patterns
+    else if (description.match(/gas|fuel|shell|exxon|bp|chevron|mobil|texaco|arco|citgo|marathon|sunoco|valero|speedway|wawa|sheetz|circle k|7-eleven.*gas|pilot|flying j|station|petroleum/)) {
+      categories.gas += amount;
+      categorized = true;
+    }
+    // Travel - enhanced patterns
+    else if (description.match(/airline|flight|hotel|airbnb|booking|expedia|priceline|kayak|uber|lyft|taxi|airport|rental car|hertz|avis|budget|enterprise|marriott|hilton|hyatt|delta|american airlines|united|vacation|trip|resort/)) {
+      categories.travel += amount;
+      categorized = true;
+    }
+
+    // If not categorized by enhanced patterns, try CatMyTransaction API
+    if (!categorized) {
+      const catMyTransactionCategory = await categorizeWithCatMyTransaction(description);
+      const mappedCategory = categoryMapping[catMyTransactionCategory] || 'other';
+      categories[mappedCategory as keyof typeof categories] += amount;
+    }
   }
 
   return categories;
