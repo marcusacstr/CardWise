@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import Link from 'next/link';
+import { FaChevronDown, FaChevronUp, FaArrowLeft, FaQuestionCircle, FaShieldAlt, FaCogs, FaHandshake } from 'react-icons/fa';
 
 interface FAQItem {
   question: string;
@@ -64,6 +65,26 @@ const faqs: FAQItem[] = [
 
 const categories = Array.from(new Set(faqs.map(faq => faq.category)));
 
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'Platform': return FaQuestionCircle;
+    case 'Security & Data': return FaShieldAlt;
+    case 'Integration': case 'Support': return FaCogs;
+    case 'Partnership': case 'Branding': case 'Getting Started': return FaHandshake;
+    default: return FaQuestionCircle;
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'Platform': return 'bg-blue-100 text-blue-700 border-blue-200';
+    case 'Security & Data': return 'bg-red-100 text-red-700 border-red-200';
+    case 'Integration': case 'Support': return 'bg-purple-100 text-purple-700 border-purple-200';
+    case 'Partnership': case 'Branding': case 'Getting Started': return 'bg-green-100 text-green-700 border-green-200';
+    default: return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+};
+
 export default function FAQPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
@@ -85,87 +106,216 @@ export default function FAQPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-br from-primary/10 to-primary/5 py-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Frequently Asked Questions for Partners
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Find answers to common questions about the CardWise white-label platform and how it can benefit your business.
+      <section className="bg-gradient-to-br from-green-50 via-blue-50 to-green-50 section-padding">
+        <div className="max-w-7xl mx-auto container-padding">
+          <div className="text-center">
+            <Link 
+              href="/" 
+              className="inline-flex items-center text-green-600 hover:text-green-500 mb-8 font-medium"
+            >
+              <FaArrowLeft className="mr-2 h-4 w-4" />
+              Back to Home
+            </Link>
+            
+            <div className="max-w-4xl mx-auto">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-2xl mb-8">
+                <FaQuestionCircle className="w-10 h-10 text-green-600" />
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+                Frequently Asked 
+                <span className="text-gradient block mt-2">Questions</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                Find answers to common questions about the CardWise white-label platform and how it can benefit your business.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Category Overview */}
+      <section className="section-padding bg-gray-50">
+        <div className="max-w-7xl mx-auto container-padding">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Browse by Category
+            </h2>
+            <p className="text-xl text-gray-600">
+              Find the information you need quickly
             </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {categories.map(category => {
+              const IconComponent = getCategoryIcon(category);
+              const colorClass = getCategoryColor(category);
+              const count = faqs.filter(faq => faq.category === category).length;
+              
+              return (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`card p-6 text-left group hover:shadow-xl transition-all duration-300 ${
+                    selectedCategory === category ? 'ring-2 ring-green-500 shadow-lg' : ''
+                  }`}
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClass} border`}>
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+                        {category}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {count} question{count !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Category Filter Pills */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              onClick={() => setSelectedCategory('All')}
+              className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategory === 'All'
+                  ? 'bg-green-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 border border-gray-200 hover:border-green-200 hover:bg-green-50'
+              }`}
+            >
+              All Questions ({faqs.length})
+            </button>
+            {categories.map(category => {
+              const count = faqs.filter(faq => faq.category === category).length;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                    selectedCategory === category
+                      ? 'bg-green-600 text-white shadow-lg'
+                      : 'bg-white text-gray-700 border border-gray-200 hover:border-green-200 hover:bg-green-50'
+                  }`}
+                >
+                  {category} ({count})
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-6 md:px-8">
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-4 mb-8">
-            <button
-              onClick={() => setSelectedCategory('All')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === 'All'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
-            >
-              All
-            </button>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+      <section className="section-padding">
+        <div className="max-w-4xl mx-auto container-padding">
+          {selectedCategory !== 'All' && (
+            <div className="text-center mb-12">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                {selectedCategory} Questions
+              </h3>
+              <p className="text-gray-600">
+                {filteredFaqs.length} question{filteredFaqs.length !== 1 ? 's' : ''} in this category
+              </p>
+            </div>
+          )}
 
           {/* FAQ Items */}
           <div className="space-y-4">
-            {filteredFaqs.map((faq, index) => (
-              <div
-                key={index}
-                className="bg-card rounded-lg border border-border overflow-hidden"
-              >
-                <button
-                  onClick={() => toggleItem(index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-muted/50 transition-colors"
+            {filteredFaqs.map((faq, index) => {
+              const isExpanded = expandedItems.has(index);
+              return (
+                <div
+                  key={index}
+                  className={`card overflow-hidden transition-all duration-300 ${
+                    isExpanded ? 'shadow-lg' : 'hover:shadow-lg'
+                  }`}
                 >
-                  <span className="font-medium text-foreground">{faq.question}</span>
-                  {expandedItems.has(index) ? (
-                    <FaChevronUp className="text-muted-foreground" />
-                  ) : (
-                    <FaChevronDown className="text-muted-foreground" />
+                  <button
+                    onClick={() => toggleItem(index)}
+                    className="w-full px-6 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex-1 pr-4">
+                      <div className="flex items-start space-x-3">
+                        <div className={`mt-1 px-2 py-1 rounded-md text-xs font-medium ${getCategoryColor(faq.category)} border`}>
+                          {faq.category}
+                        </div>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mt-3 group-hover:text-green-600 transition-colors">
+                        {faq.question}
+                      </h4>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {isExpanded ? (
+                        <FaChevronUp className="w-5 h-5 text-green-600" />
+                      ) : (
+                        <FaChevronDown className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors" />
+                      )}
+                    </div>
+                  </button>
+                  {isExpanded && (
+                    <div className="px-6 py-6 border-t border-gray-100 bg-gray-50">
+                      <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                    </div>
                   )}
-                </button>
-                {expandedItems.has(index) && (
-                  <div className="px-6 py-4 border-t border-border">
-                    <p className="text-muted-foreground">{faq.answer}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Contact Section */}
-          <div className="mt-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              Still have questions? We're here to help.
-            </p>
-            <a
+          {filteredFaqs.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <FaQuestionCircle className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No questions found
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Try selecting a different category or contact us directly.
+              </p>
+              <button
+                onClick={() => setSelectedCategory('All')}
+                className="btn btn-outline"
+              >
+                Show All Questions
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="section-padding bg-gradient-to-br from-green-600 to-green-700 text-white">
+        <div className="max-w-4xl mx-auto container-padding text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-8">
+            <FaHandshake className="w-8 h-8 text-white" />
+          </div>
+          
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Still Have Questions?
+          </h2>
+          <p className="text-xl text-green-100 mb-8 leading-relaxed">
+            Our team is here to help you understand how CardWise can transform your business. 
+            Get personalized answers and see the platform in action.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
               href="/contact"
-              className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-md font-semibold hover:bg-primary/90 transition-colors"
+              className="bg-white text-green-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
             >
-              Contact Us
-            </a>
+              Contact Our Team
+            </Link>
+            <Link
+              href="/contact"
+              className="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-green-600 transition-colors"
+            >
+              Request Demo
+            </Link>
           </div>
         </div>
       </section>

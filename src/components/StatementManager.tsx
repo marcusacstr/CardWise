@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { FaTrash, FaCalendar, FaFileAlt, FaBank, FaDollarSign } from 'react-icons/fa';
+import { FaTrash, FaCalendar, FaFileAlt, FaUniversity, FaDollarSign } from 'react-icons/fa';
 
 interface Statement {
   id: string;
@@ -19,22 +19,57 @@ interface Statement {
 
 interface StatementManagerProps {
   onStatementDeleted?: () => void;
+  refreshTrigger?: number;
+  recentUploads?: string[];
 }
 
-export default function StatementManager({ onStatementDeleted }: StatementManagerProps) {
+export default function StatementManager({ onStatementDeleted, refreshTrigger, recentUploads = [] }: StatementManagerProps) {
   const [statements, setStatements] = useState<Statement[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStatements = async () => {
     try {
+      setLoading(true);
+      console.log('StatementManager: Fetching statements...');
+      
       const response = await fetch('/api/delete-statement');
-      if (response.ok) {
-        const data = await response.json();
-        setStatements(data.statements || []);
+      console.log('StatementManager: Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('StatementManager: Error response:', errorText);
+        
+        if (response.status === 500 && errorText.includes('42P01')) {
+          setError('Database table not set up yet. Please contact support.');
+          return;
+        }
+        
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
-    } catch (error) {
-      console.error('Error fetching statements:', error);
+      
+      const data = await response.json();
+      console.log('StatementManager: Received data:', data);
+      
+      if (data.error) {
+        console.error('StatementManager: API error:', data.error);
+        setError(data.error);
+        return;
+      }
+      
+      setStatements(data.statements || []);
+      setError(null);
+      
+    } catch (err) {
+      console.error('StatementManager: Fetch error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch statements';
+      
+      if (errorMessage.includes('42P01')) {
+        setError('Database not set up yet. Please visit /api/setup-db to initialize.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -83,12 +118,24 @@ export default function StatementManager({ onStatementDeleted }: StatementManage
 
   useEffect(() => {
     fetchStatements();
-  }, []);
+  }, [refreshTrigger]);
+
+  const handleRefresh = () => {
+    fetchStatements();
+  };
 
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">Uploaded Statements</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Uploaded Statements</h3>
+          <button 
+            onClick={handleRefresh}
+            className="text-blue-600 hover:text-blue-800 text-sm"
+          >
+            Refresh
+          </button>
+        </div>
         <div className="animate-pulse">
           <div className="h-4 bg-gray-200 rounded mb-2"></div>
           <div className="h-4 bg-gray-200 rounded mb-2"></div>
@@ -98,14 +145,53 @@ export default function StatementManager({ onStatementDeleted }: StatementManage
     );
   }
 
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Uploaded Statements</h3>
+          <button 
+            onClick={handleRefresh}
+            className="text-blue-600 hover:text-blue-800 text-sm"
+          >
+            Retry
+          </button>
+        </div>
+        <div className="text-center py-8">
+          <FaFileAlt className="mx-auto h-12 w-12 text-red-400 mb-4" />
+          <p className="text-red-600 mb-2">Error loading statements</p>
+          <p className="text-sm text-gray-500">{error}</p>
+          <button 
+            onClick={handleRefresh}
+            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (statements.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">Uploaded Statements</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Uploaded Statements</h3>
+          <button 
+            onClick={handleRefresh}
+            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Refresh
+          </button>
+        </div>
         <div className="text-center py-8">
           <FaFileAlt className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-gray-500">No statements uploaded yet</p>
           <p className="text-sm text-gray-400 mt-2">Upload a statement to see it here</p>
+          <div className="mt-4 text-xs text-gray-400">
+            <p>If you just uploaded a statement, try clicking Refresh above.</p>
+            <p>Note: You must be signed in to see saved statements.</p>
+          </div>
         </div>
       </div>
     );
@@ -113,7 +199,18 @@ export default function StatementManager({ onStatementDeleted }: StatementManage
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Uploaded Statements</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Uploaded Statements</h3>
+        <div className="flex items-center space-x-2">
+          <span className="text-xs text-gray-500">Last refresh: {new Date().toLocaleTimeString()}</span>
+          <button 
+            onClick={handleRefresh}
+            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
       
       <div className="space-y-4">
         {statements.map((statement) => (
@@ -125,7 +222,7 @@ export default function StatementManager({ onStatementDeleted }: StatementManage
                   <h4 className="font-medium text-gray-900">{statement.filename}</h4>
                   {statement.bank_name && (
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      <FaBank className="w-3 h-3" />
+                      <FaUniversity className="w-3 h-3" />
                       {statement.bank_name}
                     </span>
                   )}

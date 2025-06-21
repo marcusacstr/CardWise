@@ -68,6 +68,9 @@ export async function POST(request: NextRequest) {
     let statementId = null;
     if (user) {
       try {
+        console.log('✅ User authenticated, attempting to save statement to database...');
+        console.log('User ID:', user.id);
+        
         const { data: statementData, error: statementError } = await supabase
           .from('user_statements')
           .insert({
@@ -80,21 +83,34 @@ export async function POST(request: NextRequest) {
             account_number: parseResult.statementPeriod.accountNumber,
             transaction_count: parseResult.transactions.length,
             total_amount: spendingAnalysis.totalSpent,
-            categories: spendingAnalysis.categoryBreakdown,
-            created_at: new Date().toISOString()
+            categories: spendingAnalysis.categoryBreakdown
           })
           .select()
           .single();
 
         if (statementError) {
-          console.error('Error saving statement:', statementError);
+          console.error('❌ Error saving statement:', statementError);
+          
+          if (statementError.code === '42P01') {
+            console.warn('⚠️ user_statements table does not exist in production database');
+            console.warn('💡 To fix this, visit: https://card-wise-nsxeoa95s-marcus-projects-04c74091.vercel.app/api/setup-db');
+          } else if (statementError.code === 'PGRST116') {
+            console.warn('⚠️ RLS policy may be blocking the insert - user might not have permission');
+          } else {
+            console.error('Statement error details:', JSON.stringify(statementError, null, 2));
+          }
+          
+          console.warn('⚠️ Statement was not saved to database, but analysis will continue');
         } else {
           statementId = statementData.id;
-          console.log(`Statement saved with ID: ${statementId}`);
+          console.log(`✅ Statement saved successfully with ID: ${statementId}`);
         }
       } catch (saveError) {
-        console.error('Error saving statement info:', saveError);
+        console.error('❌ Exception while saving statement:', saveError);
+        console.warn('⚠️ Statement was not saved to database, but analysis will continue');
       }
+    } else {
+      console.warn('❌ User not authenticated - statement will not be saved to database');
     }
 
     // Save report to database
@@ -121,6 +137,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       statementId,
+      userAuthenticated: !!user,
+      userId: user?.id || null,
       statementPeriod: parseResult.statementPeriod,
       analysis: spendingAnalysis,
       recommendations: cardRecommendations,

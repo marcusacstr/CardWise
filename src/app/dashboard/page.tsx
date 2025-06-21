@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { parseCSVStatements } from '@/lib/csvParser';
 import { parsePDFStatement } from '@/lib/pdfParser';
 import { analyzeTransactions } from '@/lib/transactionAnalyzer';
@@ -11,7 +11,7 @@ import { testUserSessionsTable, getUserSessionCount } from '@/lib/testPersistenc
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck } from 'react-icons/fa';
+import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck, FaFileAlt, FaToggleOn, FaToggleOff, FaInfoCircle, FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa';
 import EnhancedRecommendations from '@/components/EnhancedRecommendations';
 import StatementManager from '@/components/StatementManager';
 
@@ -39,6 +39,9 @@ interface CurrentCard {
 export default function Dashboard() {
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // State variables
   const [user, setUser] = useState<User | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -89,6 +92,8 @@ export default function Dashboard() {
   
   // Enhanced AI System State
   const [useEnhancedAI, setUseEnhancedAI] = useState(true); // Always enabled
+  const [statementRefreshKey, setStatementRefreshKey] = useState(0);
+  const [localStatements, setLocalStatements] = useState<any[]>([]); // Store statements locally as fallback
 
   const spendingCategories = [
     'Dining', 'Groceries', 'Gas', 'Transit', 'Travel', 'Streaming',
@@ -350,108 +355,70 @@ export default function Dashboard() {
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      setError('Please select a file first');
-      return;
-    }
+    if (!file) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      let parseResult;
-      const fileExtension = file.name.toLowerCase().split('.').pop();
-      
-      if (fileExtension === 'pdf') {
-        // Handle PDF files
-        const arrayBuffer = await file.arrayBuffer();
-        parseResult = await parsePDFStatement(arrayBuffer);
-        
-        if (parseResult.errors.length > 0) {
-          console.warn('PDF parsing warnings:', parseResult.errors);
-        }
-        
-        if (parseResult.transactions.length === 0) {
-          throw new Error('No transactions found in the PDF file. Please ensure this is a credit card statement with transaction details.');
-        }
-      } else {
-        // Handle CSV files (default)
-        const csvText = await file.text();
-        parseResult = parseCSVStatements(csvText);
-        
-        if (parseResult.transactions.length === 0) {
-          throw new Error('No transactions found in the CSV file');
-        }
-      }
+      const formData = new FormData();
+      formData.append('file', file);
 
-      // Analyze transactions
-      const analysis = analyzeTransactions(parseResult.transactions);
-      
-      // Calculate current card rewards based on spending data
-      const currentCardRewardsData = await calculateCurrentCardRewards(analysis, currentCard.id);
-      
-      // Update current card with calculated rewards
-      setCurrentCard(prev => ({
-        ...prev,
-        estimatedAnnualRewards: currentCardRewardsData.annualRewards
-      }));
-      
-      // Get recommendations
-      const recommendations = await generateCardRecommendations(analysis, currentCardRewardsData.annualRewards);
-
-      // Update monthly rewards data for chart (using current month data)
-      const currentMonth = new Date().getMonth();
-      const newCurrentRewards = [...monthlyRewardsData.currentCardRewards];
-      const newRecommendedRewards = [...monthlyRewardsData.recommendedCardRewards];
-      
-      // Set current month data
-      newCurrentRewards[currentMonth] = currentCardRewardsData.annualRewards / 12; // Monthly amount
-      newRecommendedRewards[currentMonth] = recommendations.recommendations[0]?.annualRewards / 12 || 0;
-      
-      setMonthlyRewardsData(prev => ({
-        ...prev,
-        currentCardRewards: newCurrentRewards,
-        recommendedCardRewards: newRecommendedRewards
-      }));
-
-      // Add to uploaded files list and clear file selection
-      setUploadedFiles(prev => [...prev, file.name]);
-      setFile(null);
-
-      // Save report to database
-      try {
-        await saveReport(analysis, recommendations, file.name);
-        
-        // Also save user recommendations separately for quick access
-        if (user) {
-          await saveUserRecommendations(user.id, recommendations.recommendations);
-          
-          // Refresh reports list
-          const reports = await getUserReports(user.id);
-          setRecentReports(reports.slice(0, 5));
-        }
-      } catch (saveError) {
-        console.warn('Failed to save report:', saveError);
-      }
-
-      setResult({
-        transactions: parseResult.transactions,
-        analysis,
-        recommendations: recommendations.recommendations,
-        currentCardRewards: currentCardRewardsData.annualRewards
+      const response = await fetch('/api/upload-statement', {
+        method: 'POST',
+        body: formData,
       });
 
-      // Manually save session after successful upload
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload file');
+      }
+
+      console.log('Upload successful:', data);
+
+      // Check if statement was actually saved to database
+      if (data.statementId) {
+        console.log('✅ Statement saved to database with ID:', data.statementId);
+      } else {
+        console.warn('⚠️ Statement was not saved to database (user might not be authenticated)');
+      }
+
+      // Update uploaded files list
+      setUploadedFiles(prev => [...prev, file.name]);
+      
+      // Refresh statement manager to show the new statement (with delay to ensure DB operation completes)
       setTimeout(() => {
-        if (user) {
-          console.log('🔄 Manually saving session after file upload');
-          saveCurrentSession();
-        }
-      }, 1000);
+        console.log('🔄 Refreshing StatementManager...');
+        setStatementRefreshKey(prev => prev + 1);
+      }, 2000); // Increase delay to 2 seconds
+
+      // Also try a second refresh after 5 seconds in case the first one was too early
+      setTimeout(() => {
+        console.log('🔄 Second refresh attempt...');
+        setStatementRefreshKey(prev => prev + 1);
+      }, 5000);
+
+      // Set the analysis result
+      setResult({
+        transactions: data.analysis?.transactions || [],
+        analysis: data.analysis,
+        recommendations: data.recommendations?.recommendations || [],
+        currentCardRewards: data.recommendations?.currentCardRewards || 0
+      });
+
+      // Save to session storage for persistence
+      await saveCurrentSession();
+
+      // Clear the file input
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to process file');
+      setError(err instanceof Error ? err.message : 'An error occurred during upload');
     } finally {
       setLoading(false);
     }
@@ -1037,27 +1004,7 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* AI Enhancement Description */}
-          {useEnhancedAI && (
-            <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-              <div className="flex items-start space-x-3">
-                <span className="text-2xl">🧠</span>
-                <div>
-                  <h3 className="font-semibold text-blue-900">Enhanced AI Analysis Active</h3>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Using advanced algorithms with real-world point valuations, risk assessment, and personalized optimization tips.
-                    Get more accurate recommendations based on actual redemption values.
-                  </p>
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-blue-600">
-                    <span>✓ Dynamic point valuations (0.6¢ - 2.2¢)</span>
-                    <span>✓ Risk factor analysis</span>
-                    <span>✓ Optimization strategies</span>
-                    <span>✓ AI confidence scoring</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* AI Enhancement Description - REMOVED */}
         </div>
 
         {/* Debug Section - Remove in production */}
@@ -1131,33 +1078,33 @@ export default function Dashboard() {
 
         {/* Upload Section - Only show if no result */}
         {!result && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
             <button
               onClick={() => { console.log('Upload button clicked, triggering file input'); const fileInput = document.getElementById('file-upload'); console.log('File input element:', fileInput); fileInput?.click(); }}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-lg p-6 flex flex-col items-center space-y-2 transition-colors"
+              className="bg-green-600 hover:bg-green-700 text-white rounded-lg p-4 md:p-6 flex flex-col items-center space-y-2 transition-colors mobile-button touch-button min-h-[120px]"
             >
-              <FaUpload className="text-2xl" />
-              <span className="text-lg font-semibold">Upload Statement</span>
-              <span className="text-sm opacity-90">Get personalized recommendations</span>
+              <FaUpload className="text-xl md:text-2xl" />
+              <span className="text-base md:text-lg font-semibold text-center">Upload Statement</span>
+              <span className="text-sm md:text-sm opacity-90 text-center">Get personalized recommendations</span>
             </button>
             <button 
               onClick={() => setShowManualEntry(true)}
-              className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg p-6 flex flex-col items-center space-y-2 transition-colors"
+              className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg p-4 md:p-6 flex flex-col items-center space-y-2 transition-colors mobile-button touch-button min-h-[120px]"
             >
-              <FaEdit className="text-2xl" />
-              <span className="text-lg font-semibold">Enter Spending Manually</span>
-              <span className="text-sm text-gray-500">Quick analysis tool</span>
+              <FaEdit className="text-xl md:text-2xl" />
+              <span className="text-base md:text-lg font-semibold text-center">Enter Spending Manually</span>
+              <span className="text-sm md:text-sm text-gray-500 text-center">Quick analysis tool</span>
             </button>
             <button 
               onClick={generateSampleData}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-6 flex flex-col items-center space-y-2 transition-colors disabled:opacity-50"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-4 md:p-6 flex flex-col items-center space-y-2 transition-colors disabled:opacity-50 mobile-button touch-button min-h-[120px] sm:col-span-2 lg:col-span-1"
             >
-              <FaChartLine className="text-2xl" />
-              <span className="text-lg font-semibold">
+              <FaChartLine className="text-xl md:text-2xl" />
+              <span className="text-base md:text-lg font-semibold text-center">
                 {loading ? 'Loading...' : 'Try Sample Data'}
               </span>
-              <span className="text-sm opacity-90">Test all features</span>
+              <span className="text-sm md:text-sm opacity-90 text-center">Test all features</span>
             </button>
           </div>
         )}
@@ -1249,21 +1196,21 @@ export default function Dashboard() {
 
         {/* Card Selection Modal */}
         {showCardSelection && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-              <div className="p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mobile-modal max-h-[90vh] overflow-y-auto">
+              <div className="p-4 md:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">Select Your Current Card</h3>
+                    <h3 className="text-lg md:text-xl font-semibold text-gray-900">Select Your Current Card</h3>
                     <p className="text-sm text-gray-500">
                       {availableCards.length} cards available • {filteredCards.length} showing
                     </p>
                   </div>
                   <button
                     onClick={() => setShowCardSelection(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 mobile-button touch-button p-2"
                   >
-                    <FaTimes className="text-xl" />
+                    <FaTimes className="text-lg md:text-xl" />
                   </button>
                 </div>
 
@@ -1274,7 +1221,7 @@ export default function Dashboard() {
                     placeholder="Search for your card..."
                     value={cardSearchTerm}
                     onChange={(e) => setCardSearchTerm(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 mobile-input focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                 </div>
 
@@ -1826,6 +1773,7 @@ export default function Dashboard() {
 
         <input
           id="file-upload"
+          ref={fileInputRef}
           type="file"
           accept=".csv,.pdf"
           onChange={handleFileChange}
@@ -1864,31 +1812,17 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Show uploaded statements after analysis */}
-        {result && uploadedFiles.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Your Uploaded Statements</h3>
-              <span className="text-sm text-gray-500">{uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''} analyzed</span>
-            </div>
-            <div className="space-y-2">
-              {uploadedFiles.map((fileName, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <FaUpload className="text-green-600 text-sm" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{fileName}</p>
-                      <p className="text-sm text-gray-500">Processed successfully</p>
-                    </div>
-                  </div>
-                  <div className="text-green-600 text-sm font-medium">✓ Analyzed</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Always show uploaded statements section */}
+        <div className="mb-8">
+          <StatementManager 
+            refreshTrigger={statementRefreshKey}
+            onStatementDeleted={() => {
+              // Refresh the component and optionally clear analysis if no statements remain
+              setStatementRefreshKey(prev => prev + 1);
+              console.log('Statement deleted successfully');
+            }} 
+          />
+        </div>
 
         {/* Manual Entry Modal */}
         {showManualEntry && (
@@ -2189,6 +2123,7 @@ export default function Dashboard() {
       {/* Hidden File Input */}
       <input
         id="file-upload"
+        ref={fileInputRef}
         type="file"
         accept=".csv,.pdf"
         onChange={handleFileChange}

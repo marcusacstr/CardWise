@@ -54,7 +54,12 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('GET /api/delete-statement: User not authenticated');
+      return NextResponse.json({ 
+        statements: [],
+        authenticated: false,
+        message: 'User not authenticated - no statements to show'
+      });
     }
 
     // Get all statements for the user
@@ -66,16 +71,26 @@ export async function GET(request: NextRequest) {
 
     if (fetchError) {
       console.error('Error fetching statements:', fetchError);
-      return NextResponse.json({ error: 'Failed to fetch statements' }, { status: 500 });
+      return NextResponse.json({ 
+        statements: [],
+        error: 'Failed to fetch statements',
+        details: fetchError.message
+      });
     }
 
-    return NextResponse.json({ statements });
+    return NextResponse.json({ 
+      statements: statements || [],
+      authenticated: true
+    });
 
   } catch (error) {
     console.error('Fetch statements error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        statements: [],
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
     );
   }
 } 

@@ -157,51 +157,74 @@ export default function UserSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Link href="/dashboard" className="inline-flex items-center text-green-600 hover:text-green-800 mb-4">
-                <FaArrowLeft className="mr-2" />
-                Back to Dashboard
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Manage your account information and preferences
+      <section className="bg-gradient-to-br from-green-50 via-blue-50 to-green-50 section-padding">
+        <div className="max-w-7xl mx-auto container-padding">
+          <div className="text-center">
+            <Link 
+              href="/dashboard" 
+              className="inline-flex items-center text-green-600 hover:text-green-500 mb-8 font-medium"
+            >
+              <FaArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Link>
+            
+            <div className="max-w-4xl mx-auto">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-2xl mb-8">
+                <FaUser className="w-10 h-10 text-green-600" />
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Account 
+                <span className="text-gradient block mt-2">Settings</span>
+              </h1>
+              <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                Manage your account information, security settings, and preferences
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto container-padding section-padding">
         {/* Success/Error Messages */}
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
+          <div className={`mb-8 p-6 rounded-xl border-2 ${
             message.type === 'success' 
-              ? 'bg-green-50 border border-green-200 text-green-800' 
-              : 'bg-red-50 border border-red-200 text-red-800'
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-red-50 border-red-200 text-red-800'
           }`}>
             <div className="flex items-center">
               {message.type === 'success' ? (
-                <FaCheck className="mr-2" />
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <FaCheck className="w-4 h-4 text-green-600" />
+                </div>
               ) : (
-                <span className="mr-2">⚠️</span>
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-red-600">⚠️</span>
+                </div>
               )}
-              {message.text}
+              <span className="font-medium">{message.text}</span>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             {/* Profile Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div className="card p-8">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                  <FaUser className="text-green-600 w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">Profile Information</h2>
+                  <p className="text-gray-600">Update your personal information</p>
+                </div>
+              </div>
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -213,7 +236,7 @@ export default function UserSettingsPage() {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="input pl-12"
                         placeholder="Enter your first name"
                       />
                     </div>
@@ -228,7 +251,7 @@ export default function UserSettingsPage() {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="input pl-12"
                         placeholder="Enter your last name"
                       />
                     </div>
@@ -237,7 +260,7 @@ export default function UserSettingsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center space-x-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors font-medium"
+                  className="btn btn-primary flex items-center space-x-2"
                 >
                   {saving ? <FaSpinner className="animate-spin" /> : <FaSave />}
                   <span>{saving ? 'Saving...' : 'Save Profile'}</span>
@@ -246,8 +269,16 @@ export default function UserSettingsPage() {
             </div>
 
             {/* Email Settings */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Email Settings</h2>
+            <div className="card p-8">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                  <FaEnvelope className="text-blue-600 w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">Email Settings</h2>
+                  <p className="text-gray-600">Update your email preferences</p>
+                </div>
+              </div>
               <form onSubmit={handleUpdateEmail} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
