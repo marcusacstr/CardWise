@@ -324,7 +324,7 @@ export default function Home() {
             
             <FAQItem 
               question="Is client data secure?"
-              answer="Absolutely. We use bank-level encryption and never store sensitive financial information like account numbers. Spending data is analyzed and then securely deleted. We're SOC 2 compliant and follow all financial data protection regulations."
+              answer="Absolutely. We don't store or share any personal information - only credit card usage patterns for analysis. No account numbers, personal details, or sensitive data is retained. Your clients' privacy is fully protected."
             />
             
             <FAQItem 
