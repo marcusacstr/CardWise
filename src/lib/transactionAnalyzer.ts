@@ -54,231 +54,331 @@ export interface MerchantSpending {
 }
 
 export interface SpendingInsight {
-  type: 'warning' | 'info' | 'positive';
+  type: 'positive' | 'warning' | 'info';
   title: string;
   description: string;
-  impact: 'high' | 'medium' | 'low';
+  impact: 'low' | 'medium' | 'high';
   actionable: boolean;
   recommendation?: string;
 }
 
-// Predefined spending categories aligned with credit card MCC (Merchant Category Codes)
+// Enhanced merchant pattern recognition for common POS systems and merchant codes
+const MERCHANT_PATTERNS = [
+  // Square POS patterns
+  { pattern: /^sq \*/i, category: 'Dining', confidence: 0.8 },
+  { pattern: /^square\s/i, category: 'Dining', confidence: 0.7 },
+  
+  // E-commerce patterns
+  { pattern: /^amazon\./i, category: 'Online Shopping', confidence: 0.9 },
+  { pattern: /^amzn\s/i, category: 'Online Shopping', confidence: 0.9 },
+  { pattern: /^amazon\s/i, category: 'Online Shopping', confidence: 0.9 },
+  { pattern: /^paypal \*/i, category: 'Online Shopping', confidence: 0.7 },
+  { pattern: /^apple\.com/i, category: 'Online Shopping', confidence: 0.8 },
+  { pattern: /^google \*/i, category: 'Online Shopping', confidence: 0.7 },
+  
+  // Transportation
+  { pattern: /^uber\s/i, category: 'Transit', confidence: 0.9 },
+  { pattern: /^lyft\s/i, category: 'Transit', confidence: 0.9 },
+  
+  // Streaming services
+  { pattern: /^spotify/i, category: 'Streaming', confidence: 0.9 },
+  { pattern: /^netflix/i, category: 'Streaming', confidence: 0.9 },
+  { pattern: /^hulu/i, category: 'Streaming', confidence: 0.9 },
+  { pattern: /^disney/i, category: 'Streaming', confidence: 0.8 },
+  
+  // Food delivery
+  { pattern: /^doordash/i, category: 'Dining', confidence: 0.9 },
+  { pattern: /^uber.*eats/i, category: 'Dining', confidence: 0.9 },
+  { pattern: /^grubhub/i, category: 'Dining', confidence: 0.9 },
+  
+  // Gas stations
+  { pattern: /^shell\s/i, category: 'Gas', confidence: 0.9 },
+  { pattern: /^exxon/i, category: 'Gas', confidence: 0.9 },
+  { pattern: /^bp\s/i, category: 'Gas', confidence: 0.9 },
+  
+  // Other POS systems
+  { pattern: /^tst\*/i, category: 'Dining', confidence: 0.7 }, // Toast POS
+  { pattern: /^pos\s/i, category: 'General Retail', confidence: 0.5 }, // Generic POS
+  { pattern: /^visa\s/i, category: 'Financial Services', confidence: 0.8 },
+  { pattern: /^mastercard\s/i, category: 'Financial Services', confidence: 0.8 },
+];
+
+// Comprehensive spending categories with extensive keyword matching
 const SPENDING_CATEGORIES: SpendingCategory[] = [
   {
-    name: 'Dining', // MCC 5812 (Restaurants), 5814 (Fast Food)
+    name: 'Dining',
     icon: '🍽️',
     keywords: [
-      // Restaurants & Fast Food (MCC 5812, 5814)
-      'restaurant', 'cafe', 'coffee', 'starbucks', 'mcdonalds', 'burger', 'pizza',
-      'food', 'dining', 'kitchen', 'diner', 'bistro', 'grill', 'bakery', 'bar', 'pub', 'tavern',
-      'kfc', 'subway', 'wendys', 'taco bell', 'chipotle', 'panera', 'dunkin', 'tim hortons',
-      'dairy queen', 'sonic', 'arbys', 'popeyes', 'chick-fil-a', 'five guys', 'in-n-out',
-      'dominos', 'papa johns', 'little caesars', 'pizza hut', 'papa murphys',
-      // Delivery & Takeout
-      'delivery', 'doordash', 'uber eats', 'grubhub', 'postmates', 'skip the dishes', 'foodora',
-      'seamless', 'caviar', 'eat24', 'takeout', 'take-out',
-      // International & Specific Cuisines
+      // Fast food chains
+      'mcdonalds', 'mcdonald', 'burger king', 'wendys', 'wendy', 'taco bell', 'kfc', 'subway',
+      'chipotle', 'panera', 'dunkin', 'starbucks', 'tim hortons', 'dairy queen', 'sonic',
+      'arbys', 'popeyes', 'chick-fil-a', 'chick fil a', 'five guys', 'in-n-out', 'white castle',
+      
+      // Pizza chains
+      'dominos', 'domino', 'papa johns', 'papa john', 'pizza hut', 'little caesars', 'papa murphys',
+      'casey', 'godfather', 'marco', 'pizza', 'pizzeria',
+      
+      // Coffee shops
+      'starbucks', 'dunkin', 'tim hortons', 'coffee', 'cafe', 'espresso', 'latte', 'cappuccino',
+      
+      // Food delivery
+      'doordash', 'door dash', 'uber eats', 'ubereats', 'grubhub', 'postmates', 'seamless',
+      'skip the dishes', 'foodora', 'caviar', 'delivery', 'takeout', 'take-out',
+      
+      // Restaurant categories
+      'restaurant', 'dining', 'bistro', 'grill', 'steakhouse', 'diner', 'buffet', 'bakery',
+      'bar', 'pub', 'tavern', 'brewery', 'winery', 'food truck', 'catering',
+      
+      // Cuisine types
       'sushi', 'chinese', 'thai', 'indian', 'mexican', 'italian', 'japanese', 'korean',
-      'mediterranean', 'greek', 'vietnamese', 'pho', 'ramen', 'bbq', 'steakhouse',
-      // Square & Common POS patterns
-      'sq *', 'square', 'toast pos', 'clover', 'tasting room', 'dolce amore'
+      'mediterranean', 'greek', 'vietnamese', 'pho', 'ramen', 'bbq', 'barbecue',
+      
+      // Generic food terms
+      'food', 'eat', 'meal', 'lunch', 'dinner', 'breakfast', 'brunch'
     ],
-    subcategories: ['Restaurants', 'Fast Food', 'Coffee Shops', 'Food Delivery']
+    subcategories: ['Fast Food', 'Restaurants', 'Coffee Shops', 'Food Delivery']
   },
   {
-    name: 'Groceries', // MCC 5411 (Grocery Stores), 5441 (Candy/Nut stores)
+    name: 'Groceries',
     icon: '🛒',
     keywords: [
-      // Grocery Stores (MCC 5411)
-      'grocery', 'supermarket', 'walmart', 'target', 'safeway', 'kroger', 'whole foods',
-      'trader joes', 'costco', 'sams club', 'bjs', 'aldi', 'food lion', 'harris teeter',
-      'publix', 'wegmans', 'giant', 'stop & shop', 'king soopers', 'fred meyer',
-      // Canadian Chains
+      // Major grocery chains
+      'walmart', 'target', 'costco', 'sams club', 'sam club', 'bjs', 'kroger', 'safeway',
+      'whole foods', 'trader joe', 'trader joes', 'aldi', 'food lion', 'harris teeter',
+      'publix', 'wegmans', 'giant', 'stop shop', 'king soopers', 'fred meyer',
+      'meijer', 'heb', 'winco', 'food 4 less', 'ralphs', 'vons', 'albertsons',
+      
+      // Canadian chains
       'loblaws', 'metro', 'sobeys', 'freshco', 'no frills', 'real canadian superstore',
-      'food basics', 'fortinos', 'zehrs', 'valu-mart', 'independent',
-      // General Terms
-      'market', 'fresh', 'organic', 'produce', 'superstore', 'food store',
-      'grocery store', 'food mart'
+      'food basics', 'fortinos', 'zehrs', 'valu-mart', 'independent', 'provigo',
+      
+      // Specialty stores
+      'whole foods', 'fresh market', 'sprouts', 'natural grocers', 'earth fare',
+      
+      // Generic terms
+      'grocery', 'supermarket', 'market', 'food store', 'superstore', 'hypermarket'
     ],
     subcategories: ['Supermarkets', 'Warehouse Clubs', 'Organic/Specialty']
   },
   {
-    name: 'Gas', // MCC 5541 (Service Stations/Automated Fuel Dispensers)
+    name: 'Gas',
     icon: '⛽',
     keywords: [
-      // Gas Stations (MCC 5541)
-      'gas', 'fuel', 'shell', 'exxon', 'bp', 'chevron', 'mobil', 'station', 'petro',
-      'texaco', 'marathon', 'phillips 66', 'conoco', 'sunoco', 'citgo', 'speedway',
-      'wawa', '7-eleven', 'circle k', 'pilot', 'loves', 'flying j',
-      // Canadian Gas
-      'petro-canada', 'esso', 'husky', 'pioneer', 'fas gas', 'mohawk'
+      // Major gas station chains
+      'shell', 'exxon', 'mobil', 'bp', 'chevron', 'texaco', 'marathon', 'phillips 66',
+      'conoco', 'sunoco', 'citgo', 'speedway', 'wawa', '7-eleven', '7 eleven', 'circle k',
+      'pilot', 'loves', 'flying j', 'ta', 'petro', 'valero', 'arco', 'gulf',
+      
+      // Canadian gas stations
+      'petro-canada', 'petro canada', 'esso', 'husky', 'pioneer', 'fas gas', 'mohawk',
+      'ultramar', 'irving', 'co-op',
+      
+      // Generic terms
+      'gas', 'fuel', 'gasoline', 'station', 'petroleum'
     ],
     subcategories: ['Gas Stations', 'Fuel']
   },
   {
-    name: 'Transit', // MCC 4111 (Transportation), 4112 (Passenger Railways)
-    icon: '��',
+    name: 'Transit',
+    icon: '🚗',
     keywords: [
-      // Public Transportation (MCC 4111, 4112)
-      'transit', 'subway', 'bus', 'metro', 'mta', 'ttc', 'translink', 'oc transpo',
-      'uber', 'lyft', 'taxi', 'rideshare', 'ride share', 'car2go', 'zipcar',
-      // Parking (often grouped with transit for rewards)
-      'parking', 'toll', 'parking meter', 'parkade', 'impark', 'easypark'
+      // Rideshare
+      'uber', 'lyft', 'taxi', 'cab', 'rideshare', 'ride share', 'car2go', 'zipcar',
+      
+      // Public transit
+      'metro', 'subway', 'bus', 'train', 'transit', 'mta', 'bart', 'cta', 'septa',
+      'ttc', 'translink', 'oc transpo', 'go transit', 'via rail', 'amtrak',
+      
+      // Parking and tolls
+      'parking', 'parkade', 'garage', 'meter', 'toll', 'bridge', 'tunnel', 'impark',
+      'easypark', 'parkopedia'
     ],
-    subcategories: ['Public Transit', 'Rideshare', 'Parking']
+    subcategories: ['Rideshare', 'Public Transit', 'Parking', 'Tolls']
   },
   {
-    name: 'Travel', // MCC 3000-3299 (Airlines), 3501-3999 (Hotels), 7512 (Car Rental)
+    name: 'Travel',
     icon: '✈️',
     keywords: [
-      // Airlines (MCC 3000-3299)
-      'airline', 'flight', 'airways', 'american airlines', 'delta', 'united',
-      'southwest', 'jetblue', 'alaska airlines', 'frontier', 'spirit',
-      'air canada', 'westjet', 'porter airlines', 'british airways', 'lufthansa',
-      // Hotels & Lodging (MCC 3501-3999)
+      // Airlines
+      'airline', 'airways', 'air', 'flight', 'american airlines', 'delta', 'united',
+      'southwest', 'jetblue', 'alaska', 'frontier', 'spirit', 'allegiant',
+      'air canada', 'westjet', 'porter', 'british airways', 'lufthansa', 'klm',
+      
+      // Hotels
       'hotel', 'motel', 'inn', 'resort', 'lodge', 'marriott', 'hilton', 'hyatt',
       'sheraton', 'westin', 'holiday inn', 'best western', 'comfort inn',
-      'hampton inn', 'fairfield inn', 'courtyard', 'residence inn',
-      'airbnb', 'vrbo', 'homeaway', 'booking.com', 'expedia', 'hotels.com',
-      // Car Rental (MCC 7512)
-      'car rental', 'rental car', 'hertz', 'avis', 'enterprise', 'budget',
-      'alamo', 'national', 'thrifty',
-      // General Travel Services
-      'travel', 'vacation', 'trip', 'booking', 'reservation', 'airport',
-      'cruise', 'carnival', 'royal caribbean', 'norwegian', 'disney cruise'
+      'hampton inn', 'fairfield inn', 'courtyard', 'residence inn', 'embassy suites',
+      
+      // Online travel
+      'airbnb', 'vrbo', 'homeaway', 'booking.com', 'booking com', 'expedia', 'hotels.com',
+      'hotels com', 'priceline', 'kayak', 'orbitz', 'travelocity',
+      
+      // Car rental
+      'hertz', 'avis', 'enterprise', 'budget', 'alamo', 'national', 'thrifty',
+      'dollar', 'payless', 'advantage', 'car rental', 'rental car',
+      
+      // Other travel
+      'cruise', 'carnival', 'royal caribbean', 'norwegian', 'disney cruise',
+      'travel', 'vacation', 'trip', 'tour', 'airport'
     ],
-    subcategories: ['Airlines', 'Hotels', 'Car Rental', 'Cruises']
+    subcategories: ['Airlines', 'Hotels', 'Car Rental', 'Cruises', 'Online Travel']
   },
   {
-    name: 'Streaming', // MCC 4899 (Cable/Pay TV), 5815 (Digital Goods)
+    name: 'Streaming',
     icon: '📺',
     keywords: [
-      // Streaming & Digital Services (MCC 4899, 5815)
-      'netflix', 'hulu', 'disney+', 'amazon prime', 'hbo', 'showtime', 'starz',
-      'spotify', 'apple music', 'youtube', 'twitch', 'patreon',
-      'cable', 'satellite', 'xfinity', 'comcast', 'spectrum', 'cox', 'directv', 'dish'
+      // Video streaming
+      'netflix', 'hulu', 'disney+', 'disney plus', 'amazon prime', 'prime video',
+      'hbo', 'hbo max', 'showtime', 'starz', 'paramount+', 'paramount plus',
+      'peacock', 'apple tv', 'youtube premium', 'crunchyroll', 'funimation',
+      
+      // Music streaming
+      'spotify', 'apple music', 'amazon music', 'youtube music', 'pandora',
+      'tidal', 'deezer', 'soundcloud',
+      
+      // Gaming/Other
+      'twitch', 'patreon', 'onlyfans',
+      
+      // Cable/Satellite
+      'cable', 'satellite', 'xfinity', 'comcast', 'spectrum', 'cox', 'directv',
+      'dish', 'fios', 'uverse'
     ],
     subcategories: ['Video Streaming', 'Music Streaming', 'Cable/Satellite TV']
   },
   {
-    name: 'Department Stores', // MCC 5311 (Department Stores)
-    icon: '🏬',
-    keywords: [
-      // Department Stores (MCC 5311)
-      'macys', 'nordstrom', 'bloomingdales', 'saks', 'neiman marcus', 'dillards',
-      'kohls', 'jc penney', 'sears', 'bon-ton', 'belk', 'von maur',
-      'department store', 'dept store'
-    ],
-    subcategories: ['Department Stores']
-  },
-  {
-    name: 'Warehouse Clubs', // MCC 5300 (Wholesale Clubs)
-    icon: '🏪',
-    keywords: [
-      // Warehouse/Wholesale Clubs (MCC 5300)
-      'costco', 'sams club', 'bjs', 'warehouse', 'wholesale', 'club'
-    ],
-    subcategories: ['Warehouse Clubs']
-  },
-  {
-    name: 'Drug Stores', // MCC 5912 (Drug Stores and Pharmacies)
-    icon: '💊',
-    keywords: [
-      // Pharmacies (MCC 5912)
-      'pharmacy', 'walgreens', 'cvs', 'rite aid', 'drug store', 'drugstore',
-      'shoppers drug mart', 'london drugs', 'pharmasave', 'rexall',
-      'prescription', 'medicine', 'rx'
-    ],
-    subcategories: ['Pharmacies', 'Drug Stores']
-  },
-  {
-    name: 'Online Shopping', // MCC varies by merchant
+    name: 'Shopping',
     icon: '🛍️',
     keywords: [
-      // E-commerce & Online Shopping
-      'amazon', 'amazon.com', 'amazon.ca', 'ebay', 'etsy', 'paypal', 'shopify',
-      'apple.com', 'google play', 'app store', 'microsoft store',
-      'online', 'web', 'internet'
+      // E-commerce
+      'amazon', 'ebay', 'etsy', 'shopify', 'paypal', 'apple.com', 'apple com',
+      'google play', 'microsoft store', 'steam', 'epic games',
+      
+      // Department stores
+      'target', 'walmart', 'costco', 'sams club', 'bjs', 'macys', 'macy',
+      'nordstrom', 'bloomingdales', 'saks', 'neiman marcus', 'dillards',
+      'kohls', 'jc penney', 'jcpenney', 'sears',
+      
+      // Clothing stores
+      'gap', 'old navy', 'banana republic', 'h&m', 'zara', 'forever 21',
+      'uniqlo', 'urban outfitters', 'american eagle', 'abercrombie', 'hollister',
+      'tj maxx', 'marshalls', 'ross', 'nordstrom rack', 'off 5th',
+      
+      // Electronics
+      'best buy', 'apple', 'microsoft', 'samsung', 'sony', 'dell', 'hp',
+      'lenovo', 'asus', 'acer', 'nintendo', 'xbox', 'playstation',
+      
+      // Home improvement
+      'home depot', 'lowes', 'menards', 'ace hardware', 'true value',
+      'canadian tire', 'rona', 'home hardware',
+      
+      // Furniture
+      'ikea', 'wayfair', 'overstock', 'bed bath beyond', 'pottery barn',
+      'west elm', 'crate barrel', 'ashley furniture',
+      
+      // Generic terms
+      'store', 'shop', 'retail', 'mall', 'outlet', 'marketplace'
     ],
-    subcategories: ['E-commerce', 'Digital Purchases']
+    subcategories: ['Online Shopping', 'Department Stores', 'Clothing', 'Electronics', 'Home Improvement']
   },
   {
-    name: 'Entertainment', // MCC 7832 (Motion Picture Theaters), 7922 (Theatrical Producers)
-    icon: '🎬',
+    name: 'Utilities',
+    icon: '⚡',
     keywords: [
-      // Entertainment (MCC 7832, 7922, etc.)
-      'movie', 'theater', 'cinema', 'amc', 'regal', 'cinemark', 'landmark',
-      'imax', 'dolby', 'fandango', 'movietickets', 'atom tickets',
-      'concert', 'event', 'ticket', 'ticketmaster', 'stubhub', 'seatgeek',
-      'live nation', 'eventbrite', 'venue', 'arena', 'stadium', 'amphitheater',
-      'gaming', 'game', 'steam', 'epic games', 'xbox live', 'playstation', 'nintendo',
-      'entertainment', 'hobby', 'arcade', 'bowling', 'mini golf', 'laser tag', 'escape room'
-    ],
-    subcategories: ['Movies', 'Live Events', 'Gaming', 'Recreation']
-  },
-  {
-    name: 'Telecommunications', // MCC 4814 (Telecommunication Services)
-    icon: '📱',
-    keywords: [
-      // Phone & Internet (MCC 4814)
-      'phone', 'cell', 'mobile', 'wireless', 'internet', 'telecom',
-      'verizon', 'att', 'at&t', 't-mobile', 'sprint', 'boost', 'cricket',
-      'metro pcs', 'straight talk', 'virgin mobile',
-      // Canadian Telecom
+      // Electric companies
+      'electric', 'electricity', 'power', 'energy', 'pge', 'pg&e', 'con edison',
+      'duke energy', 'southern california edison', 'florida power', 'national grid',
+      'xcel energy', 'dominion', 'entergy', 'aep', 'firstenergy',
+      
+      // Gas utilities
+      'gas company', 'natural gas', 'enbridge', 'atmos', 'centerpoint',
+      
+      // Water/Sewer
+      'water', 'sewer', 'wastewater', 'utilities', 'utility', 'municipal',
+      
+      // Internet/Phone
+      'internet', 'broadband', 'wifi', 'phone', 'telephone', 'landline',
+      'verizon', 'att', 'at&t', 't-mobile', 'tmobile', 'sprint', 'boost',
+      'cricket', 'metro pcs', 'straight talk', 'virgin mobile',
+      
+      // Canadian telecom
       'rogers', 'bell', 'telus', 'fido', 'koodo', 'chatr', 'public mobile',
       'shaw', 'videotron', 'cogeco', 'eastlink', 'sasktel', 'mts'
     ],
-    subcategories: ['Mobile Phone', 'Internet', 'Landline']
+    subcategories: ['Electric', 'Gas', 'Water', 'Internet/Phone']
   },
   {
-    name: 'Utilities', // MCC 4900 (Utilities)
-    icon: '⚡',
-    keywords: [
-      // Utilities (MCC 4900)
-      'electric', 'electricity', 'gas', 'water', 'sewer', 'utility', 'utilities',
-      'hydro', 'power', 'energy', 'pge', 'con edison', 'duke energy',
-      'southern california edison', 'florida power', 'national grid'
-    ],
-    subcategories: ['Electric', 'Gas', 'Water', 'Waste Management']
-  },
-  {
-    name: 'Healthcare', // MCC 8011 (Doctors), 8021 (Dentists), 8031 (Hospitals)
+    name: 'Healthcare',
     icon: '🏥',
     keywords: [
-      // Medical Services (MCC 8011, 8021, 8031, etc.)
-      'medical', 'doctor', 'physician', 'dr ', 'hospital', 'clinic', 'urgent care',
-      'emergency room', 'er', 'surgery', 'specialist', 'dentist', 'dental',
-      'orthodontist', 'optometrist', 'eye doctor', 'vision', 'glasses', 'contacts',
-      'veterinarian', 'vet', 'animal hospital', 'pet clinic',
-      'health', 'wellness', 'fitness', 'gym', 'yoga', 'massage', 'therapy',
-      'chiropractor', 'physical therapy', 'mental health', 'counseling'
+      // Medical
+      'medical', 'doctor', 'physician', 'hospital', 'clinic', 'urgent care',
+      'emergency', 'surgery', 'specialist', 'cardiology', 'dermatology',
+      'orthopedic', 'radiology', 'laboratory', 'pathology',
+      
+      // Dental
+      'dental', 'dentist', 'orthodontist', 'oral surgeon', 'hygienist',
+      
+      // Vision
+      'optometry', 'optometrist', 'eye doctor', 'vision', 'glasses', 'contacts',
+      'lenscrafters', 'pearle vision', 'visionworks',
+      
+      // Pharmacy
+      'pharmacy', 'cvs', 'walgreens', 'rite aid', 'drug store', 'drugstore',
+      'shoppers drug mart', 'london drugs', 'prescription', 'rx',
+      
+      // Veterinary
+      'veterinarian', 'vet', 'animal hospital', 'pet clinic', 'animal clinic',
+      
+      // Fitness/Wellness
+      'gym', 'fitness', 'yoga', 'pilates', 'massage', 'spa', 'therapy',
+      'physical therapy', 'chiropractor', 'acupuncture'
     ],
-    subcategories: ['Medical', 'Dental', 'Vision', 'Veterinary']
+    subcategories: ['Medical', 'Dental', 'Vision', 'Pharmacy', 'Veterinary', 'Fitness']
   },
   {
-    name: 'General Retail', // MCC 5999 (Miscellaneous Retail)
-    icon: '🛒',
+    name: 'Entertainment',
+    icon: '🎬',
     keywords: [
-      // General Retail (MCC 5999 and others)
-      'shop', 'store', 'retail', 'mall', 'outlet', 'marketplace', 'bazaar',
-      'clothing', 'fashion', 'apparel', 'shoes', 'footwear', 'accessories',
-      'h&m', 'zara', 'forever 21', 'gap', 'old navy', 'banana republic',
-      'uniqlo', 'urban outfitters', 'american eagle', 'abercrombie', 'hollister',
-      'electronics', 'best buy', 'apple', 'microsoft', 'samsung', 'sony',
-      'home depot', 'lowes', 'ikea', 'wayfair', 'furniture'
+      // Movies
+      'movie', 'theater', 'theatre', 'cinema', 'amc', 'regal', 'cinemark',
+      'landmark', 'imax', 'dolby', 'fandango', 'movietickets', 'atom tickets',
+      
+      // Live events
+      'concert', 'show', 'event', 'ticket', 'ticketmaster', 'stubhub', 'seatgeek',
+      'live nation', 'eventbrite', 'venue', 'arena', 'stadium', 'amphitheater',
+      'broadway', 'theater', 'opera', 'symphony', 'ballet',
+      
+      // Gaming
+      'gaming', 'game', 'steam', 'epic games', 'xbox live', 'playstation',
+      'nintendo', 'blizzard', 'ea', 'ubisoft', 'activision',
+      
+      // Recreation
+      'bowling', 'mini golf', 'golf', 'laser tag', 'escape room', 'arcade',
+      'amusement park', 'theme park', 'six flags', 'disney', 'universal',
+      'zoo', 'aquarium', 'museum', 'planetarium'
     ],
-    subcategories: ['Clothing', 'Electronics', 'Home Improvement', 'General Merchandise']
+    subcategories: ['Movies', 'Live Events', 'Gaming', 'Recreation', 'Sports']
   },
   {
-    name: 'Financial Services', // MCC 6011 (Financial Institutions), 6012 (Member Financial Institutions)
+    name: 'Financial Services',
     icon: '💰',
     keywords: [
-      // Banking & Financial (MCC 6011, 6012, etc.)
-      'bank', 'atm', 'fee', 'charge', 'interest', 'loan', 'credit', 'transfer',
-      'payment', 'overdraft', 'maintenance', 'service charge', 'wire transfer',
-      'foreign transaction', 'cash advance', 'late fee', 'annual fee',
+      // Banking fees
+      'bank', 'atm', 'fee', 'charge', 'service charge', 'maintenance',
+      'overdraft', 'nsf', 'wire transfer', 'foreign transaction', 'cash advance',
+      'late fee', 'annual fee', 'interest', 'finance charge',
+      
+      // Investment
       'investment', 'brokerage', 'trading', 'stock', 'mutual fund', 'etf',
-      'insurance', 'premium', 'policy', 'financial', 'advisor'
+      'fidelity', 'vanguard', 'schwab', 'td ameritrade', 'e*trade', 'robinhood',
+      
+      // Insurance
+      'insurance', 'premium', 'policy', 'auto insurance', 'home insurance',
+      'health insurance', 'life insurance', 'geico', 'state farm', 'allstate',
+      'progressive', 'farmers', 'liberty mutual',
+      
+      // Credit/Loans
+      'loan', 'mortgage', 'credit', 'financing', 'payment', 'installment'
     ],
     subcategories: ['Banking Fees', 'Investment', 'Insurance', 'Loans']
   },
@@ -290,28 +390,48 @@ const SPENDING_CATEGORIES: SpendingCategory[] = [
   }
 ];
 
-// Merchant pattern recognition for common POS systems and merchant codes
-const MERCHANT_PATTERNS = [
-  { pattern: /^sq \*/i, category: 'Dining', confidence: 0.8 }, // Square POS - usually restaurants
-  { pattern: /^amazon\./i, category: 'Online Shopping', confidence: 0.9 },
-  { pattern: /^amzn\s/i, category: 'Online Shopping', confidence: 0.9 },
-  { pattern: /^paypal \*/i, category: 'Online Shopping', confidence: 0.7 },
-  { pattern: /^apple\.com/i, category: 'Online Shopping', confidence: 0.8 },
-  { pattern: /^google \*/i, category: 'Online Shopping', confidence: 0.7 },
-  { pattern: /^uber\s/i, category: 'Transit', confidence: 0.9 },
-  { pattern: /^lyft\s/i, category: 'Transit', confidence: 0.9 },
-  { pattern: /^spotify/i, category: 'Streaming', confidence: 0.9 },
-  { pattern: /^netflix/i, category: 'Streaming', confidence: 0.9 },
-  { pattern: /^tst\*/i, category: 'Dining', confidence: 0.7 }, // Toast POS
-  { pattern: /\d+-dfo\/mpo/i, category: 'Utilities', confidence: 0.6 }, // Government payments
-  { pattern: /^pos\s/i, category: 'General Retail', confidence: 0.5 }, // Generic POS
-  { pattern: /^visa\s/i, category: 'Financial Services', confidence: 0.8 },
-  { pattern: /^mastercard\s/i, category: 'Financial Services', confidence: 0.8 },
-];
+// Enhanced fuzzy matching function
+function fuzzyMatch(keyword: string, text: string, threshold: number = 0.8): boolean {
+  if (text.includes(keyword)) return true;
+  
+  // Simple Levenshtein distance for close matches
+  const distance = levenshteinDistance(keyword, text);
+  const similarity = 1 - (distance / Math.max(keyword.length, text.length));
+  
+  return similarity >= threshold;
+}
+
+function levenshteinDistance(str1: string, str2: string): number {
+  const matrix = [];
+  
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i];
+  }
+  
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j;
+  }
+  
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  
+  return matrix[str2.length][str1.length];
+}
 
 function categorizeTransaction(transaction: ParsedTransaction): { category: string; subcategory?: string; confidence: number } {
   // If transaction already has a category from the bank, use it with high confidence
-  if (transaction.category && transaction.category.trim() !== '') {
+  if (transaction.category && transaction.category.trim() !== '' && transaction.category.toLowerCase() !== 'other') {
     return {
       category: transaction.category,
       confidence: 0.9
@@ -341,81 +461,69 @@ function categorizeTransaction(transaction: ParsedTransaction): { category: stri
     let matchScore = 0;
     let matchedKeywords = 0;
     let exactMatches = 0;
+    let strongMatches = 0;
 
     for (const keyword of category.keywords) {
       const keywordLower = keyword.toLowerCase();
       
-      // Check for exact word matches (higher score)
+      // Check for exact word matches (highest score)
       const exactWordRegex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
       if (exactWordRegex.test(searchText)) {
         exactMatches++;
-        matchScore += keyword.length * 3; // Triple score for exact matches
+        matchScore += keyword.length * 5; // 5x score for exact matches
         matchedKeywords++;
+        strongMatches++;
       }
-      // Check for partial matches (lower score)
+      // Check for partial matches within words
       else if (searchText.includes(keywordLower)) {
-        matchScore += keyword.length;
+        matchScore += keyword.length * 2; // 2x score for partial matches
         matchedKeywords++;
+        if (keyword.length >= 6) { // Longer keywords are more significant
+          strongMatches++;
+        }
       }
       // Check for fuzzy matches (brand names, common misspellings)
-      else if (fuzzyMatch(keywordLower, searchText)) {
-        matchScore += keyword.length * 0.5;
+      else if (keywordLower.length >= 4 && fuzzyMatch(keywordLower, searchText, 0.85)) {
+        matchScore += keyword.length * 1.5;
         matchedKeywords++;
       }
     }
 
     if (matchedKeywords > 0) {
       // Calculate confidence based on match quality
-      let confidence = Math.min(0.95, (matchScore / Math.max(searchText.length, 10)) + (exactMatches * 0.2) + (matchedKeywords * 0.05));
+      let confidence = Math.min(0.95, 
+        (matchScore / Math.max(searchText.length, 15)) + 
+        (exactMatches * 0.3) + 
+        (strongMatches * 0.2) + 
+        (matchedKeywords * 0.05)
+      );
       
-      // Boost confidence for exact matches
-      if (exactMatches > 0) {
-        confidence = Math.min(0.95, confidence + 0.3);
+      // Boost confidence for multiple strong matches
+      if (strongMatches >= 2) {
+        confidence = Math.min(0.95, confidence + 0.2);
+      }
+      
+      // Boost confidence for exact brand/merchant matches
+      if (exactMatches > 0 && category.keywords.some(k => k.length >= 8)) {
+        confidence = Math.min(0.95, confidence + 0.25);
       }
       
       if (confidence > bestMatch.confidence) {
         bestMatch = {
           category: category.name,
           confidence,
-          subcategory: category.subcategories?.[0] // Default to first subcategory
+          subcategory: category.subcategories?.[0]
         };
       }
     }
   }
 
   // If no good match found, categorize as 'Other'
-  if (bestMatch.confidence < 0.15) {
+  if (bestMatch.confidence < 0.2) {
     bestMatch = { category: 'Other', confidence: 0.5, subcategory: 'Miscellaneous' };
   }
 
   return bestMatch;
-}
-
-// Simple fuzzy matching for common variations and typos
-function fuzzyMatch(keyword: string, text: string): boolean {
-  // Remove common word variations
-  const normalizedKeyword = keyword.replace(/s$/, '').replace(/ing$/, '').replace(/ed$/, '');
-  const normalizedText = text.replace(/s\b/g, '').replace(/ing\b/g, '').replace(/ed\b/g, '');
-  
-  if (normalizedText.includes(normalizedKeyword)) {
-    return true;
-  }
-  
-  // Check for common abbreviations
-  const abbreviations: { [key: string]: string[] } = {
-    'restaurant': ['rest', 'rst'],
-    'grocery': ['groc'],
-    'pharmacy': ['pharm', 'rx'],
-    'gasoline': ['gas'],
-    'coffee': ['cof'],
-    'market': ['mkt', 'mart']
-  };
-  
-  if (abbreviations[keyword]) {
-    return abbreviations[keyword].some(abbr => text.includes(abbr));
-  }
-  
-  return false;
 }
 
 function calculateMonthlyTrends(transactions: TransactionWithCategory[]): MonthlySpending[] {
@@ -547,39 +655,29 @@ function generateInsights(analysis: SpendingAnalysis, transactions: TransactionW
     }
   }
 
-  // Subscriptions and recurring payments
-  const recurringTransactions = transactions.filter(t => 
-    t.type === 'debit' && 
-    (t.description.toLowerCase().includes('subscription') ||
-     t.description.toLowerCase().includes('monthly') ||
-     analysis.merchantAnalysis.some(m => m.merchant === t.merchant && m.frequency === 'monthly'))
-  );
-
-  if (recurringTransactions.length > 0) {
-    const recurringTotal = recurringTransactions.reduce((sum, t) => sum + t.amount, 0);
+  // High "Other" category spending
+  const otherCategory = analysis.categoryBreakdown.find(cat => cat.category === 'Other');
+  if (otherCategory && otherCategory.percentage > 20) {
     insights.push({
       type: 'info',
-      title: 'Recurring Payments Detected',
-      description: `You have approximately $${recurringTotal.toFixed(2)} in recurring monthly payments`,
-      impact: 'medium',
+      title: 'Many Transactions Uncategorized',
+      description: `${otherCategory.percentage.toFixed(1)}% of transactions are categorized as "Other"`,
+      impact: 'low',
       actionable: true,
-      recommendation: 'Review your subscriptions regularly to cancel unused services.'
+      recommendation: 'Review uncategorized transactions to improve spending insights and card recommendations.'
     });
   }
 
-  // High-value transactions
-  const highValueTransactions = transactions.filter(t => 
-    t.type === 'debit' && t.amount > analysis.averageTransactionAmount * 5
-  );
-
-  if (highValueTransactions.length > 0) {
+  // Dining spending insight
+  const diningCategory = analysis.categoryBreakdown.find(cat => cat.category === 'Dining');
+  if (diningCategory && diningCategory.percentage > 25) {
     insights.push({
       type: 'info',
-      title: 'Large Purchases Detected',
-      description: `You made ${highValueTransactions.length} transaction(s) significantly above your average`,
-      impact: 'low',
-      actionable: false,
-      recommendation: 'Consider if large purchases align with your budget and financial goals.'
+      title: 'High Dining Spending',
+      description: `You spend ${diningCategory.percentage.toFixed(1)}% of your budget on dining`,
+      impact: 'medium',
+      actionable: true,
+      recommendation: 'Consider a credit card with high dining rewards like Chase Sapphire Preferred or Amex Gold.'
     });
   }
 
