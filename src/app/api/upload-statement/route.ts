@@ -9,9 +9,16 @@ import { parseCSVStatements } from '@/lib/csvParser';
 import { analyzeTransactions } from '@/lib/transactionAnalyzer';
 import { generateCardRecommendations } from '@/lib/cardRecommendations';
 import { saveReport } from '@/lib/reportStorage';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createRouteHandlerClient({ cookies });
+    
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
@@ -24,10 +31,11 @@ export async function POST(request: NextRequest) {
     // Read file content
     const csvContent = await file.text();
     
-    // Parse CSV
+    // Parse CSV with statement period extraction
     const parseResult = parseCSVStatements(csvContent);
     
     console.log('Parse result metadata:', parseResult.metadata);
+    console.log('Statement period:', parseResult.statementPeriod);
     console.log('Parse errors:', parseResult.errors);
     console.log('Parse warnings:', parseResult.warnings);
 
@@ -56,12 +64,46 @@ export async function POST(request: NextRequest) {
     const cardRecommendations = await generateCardRecommendations(spendingAnalysis);
     console.log(`Generated ${cardRecommendations.recommendations.length} card recommendations`);
 
+    // Save statement information to database if user is authenticated
+    let statementId = null;
+    if (user) {
+      try {
+        const { data: statementData, error: statementError } = await supabase
+          .from('user_statements')
+          .insert({
+            user_id: user.id,
+            filename: file.name,
+            statement_period_start: parseResult.statementPeriod.startDate?.toISOString(),
+            statement_period_end: parseResult.statementPeriod.endDate?.toISOString(),
+            statement_date: parseResult.statementPeriod.statementDate?.toISOString(),
+            bank_name: parseResult.statementPeriod.bankName,
+            account_number: parseResult.statementPeriod.accountNumber,
+            transaction_count: parseResult.transactions.length,
+            total_amount: spendingAnalysis.totalSpent,
+            categories: spendingAnalysis.categoryBreakdown,
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (statementError) {
+          console.error('Error saving statement:', statementError);
+        } else {
+          statementId = statementData.id;
+          console.log(`Statement saved with ID: ${statementId}`);
+        }
+      } catch (saveError) {
+        console.error('Error saving statement info:', saveError);
+      }
+    }
+
     // Save report to database
     try {
       const savedReport = await saveReport(
         spendingAnalysis,
         cardRecommendations,
-        file.name
+        file.name,
+        statementId
       );
       
       if (savedReport) {
@@ -78,6 +120,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      statementId,
+      statementPeriod: parseResult.statementPeriod,
       analysis: spendingAnalysis,
       recommendations: cardRecommendations,
       metadata: parseResult.metadata,

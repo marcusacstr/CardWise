@@ -13,6 +13,7 @@ import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck } from 'react-icons/fa';
 import EnhancedRecommendations from '@/components/EnhancedRecommendations';
+import StatementManager from '@/components/StatementManager';
 
 interface AnalysisResult {
   transactions: any[];

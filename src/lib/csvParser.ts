@@ -18,10 +18,19 @@ export interface ParsedTransaction {
   original_data: RawTransaction;
 }
 
+export interface StatementPeriod {
+  startDate: Date | null;
+  endDate: Date | null;
+  statementDate: Date | null;
+  accountNumber?: string;
+  bankName?: string;
+}
+
 export interface CSVParseResult {
   transactions: ParsedTransaction[];
   errors: string[];
   warnings: string[];
+  statementPeriod: StatementPeriod;
   metadata: {
     totalRows: number;
     validRows: number;
@@ -554,11 +563,91 @@ function inferColumnStructureFromArray(data: string[][]): {
   };
 }
 
+function extractStatementPeriod(csvContent: string, transactions: ParsedTransaction[]): StatementPeriod {
+  const lines = csvContent.split('\n').slice(0, 20); // Check first 20 lines for metadata
+  
+  let startDate: Date | null = null;
+  let endDate: Date | null = null;
+  let statementDate: Date | null = null;
+  let accountNumber: string | undefined;
+  let bankName: string | undefined;
+
+  // Extract from header lines (common patterns)
+  for (const line of lines) {
+    const cleanLine = line.toLowerCase().trim();
+    
+    // Statement period patterns
+    const periodMatch = cleanLine.match(/statement period[:\s]+(\d{1,2}\/\d{1,2}\/\d{2,4})\s*[-–—to]+\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+    if (periodMatch) {
+      startDate = parseDate(periodMatch[1]);
+      endDate = parseDate(periodMatch[2]);
+    }
+
+    // Statement date patterns
+    const statementMatch = cleanLine.match(/statement date[:\s]+(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+    if (statementMatch) {
+      statementDate = parseDate(statementMatch[1]);
+    }
+
+    // Account number patterns
+    const accountMatch = cleanLine.match(/account[:\s#]*(\*{0,4}\d{4,}|\d{4,})/);
+    if (accountMatch && !accountNumber) {
+      accountNumber = accountMatch[1];
+    }
+
+    // Bank name patterns
+    if (cleanLine.includes('chase') || cleanLine.includes('jpmorgan')) {
+      bankName = 'Chase';
+    } else if (cleanLine.includes('citi') || cleanLine.includes('citibank')) {
+      bankName = 'Citi';
+    } else if (cleanLine.includes('american express') || cleanLine.includes('amex')) {
+      bankName = 'American Express';
+    } else if (cleanLine.includes('capital one')) {
+      bankName = 'Capital One';
+    } else if (cleanLine.includes('discover')) {
+      bankName = 'Discover';
+    } else if (cleanLine.includes('bank of america') || cleanLine.includes('bofa')) {
+      bankName = 'Bank of America';
+    } else if (cleanLine.includes('wells fargo')) {
+      bankName = 'Wells Fargo';
+    }
+  }
+
+  // Fallback: Use transaction date range if no explicit period found
+  if (!startDate || !endDate) {
+    if (transactions.length > 0) {
+      const dates = transactions.map(t => t.date).sort((a, b) => a.getTime() - b.getTime());
+      startDate = startDate || dates[0];
+      endDate = endDate || dates[dates.length - 1];
+    }
+  }
+
+  // Estimate statement date if not found (typically end of period + a few days)
+  if (!statementDate && endDate) {
+    const estimatedDate = new Date(endDate);
+    estimatedDate.setDate(estimatedDate.getDate() + 3); // Typical statement generation delay
+    statementDate = estimatedDate;
+  }
+
+  return {
+    startDate,
+    endDate,
+    statementDate,
+    accountNumber,
+    bankName
+  };
+}
+
 export function parseCSVStatements(csvContent: string): CSVParseResult {
   const result: CSVParseResult = {
     transactions: [],
     errors: [],
     warnings: [],
+    statementPeriod: {
+      startDate: null,
+      endDate: null,
+      statementDate: null
+    },
     metadata: {
       totalRows: 0,
       validRows: 0,
@@ -796,6 +885,16 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
     if (result.metadata.validRows === 0) {
       result.errors.push('No valid transactions found in the CSV file');
     }
+
+    // Extract statement period information
+    result.statementPeriod = extractStatementPeriod(csvContent, result.transactions);
+
+    console.log('Statement Period:', {
+      startDate: result.statementPeriod.startDate?.toISOString(),
+      endDate: result.statementPeriod.endDate?.toISOString(),
+      statementDate: result.statementPeriod.statementDate?.toISOString(),
+      bankName: result.statementPeriod.bankName
+    });
 
   } catch (error) {
     console.error('CSV parsing error:', error);
