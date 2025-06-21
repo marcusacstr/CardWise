@@ -339,7 +339,7 @@ export default function Dashboard() {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.type === 'application/csv' || selectedFile.type === 'text/plain' || selectedFile.name.toLowerCase().endsWith('.csv'))) {
       console.log(`File accepted: ${selectedFile.name}, type: ${selectedFile.type}, size: ${selectedFile.size} bytes`);
-      setFile(selectedFile);
+      console.log('Setting file state:', selectedFile); setFile(selectedFile);
       setError(null);
     } else {
       setError(`Please select a valid CSV file. Selected file: ${selectedFile.name}, type: ${selectedFile.type}`);
@@ -1730,6 +1730,38 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* File confirmation for additional uploads - Show when result exists and file is selected */}
+        {result && file && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <FaUpload className="text-green-600 text-lg" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Additional File Selected: {file.name}</p>
+                  <p className="text-sm text-gray-500">Ready to add to your analysis</p>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setFile(null)}
+                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpload}
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  {loading ? 'Processing...' : 'Add to Analysis'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Initial Upload Interface - Show when no analysis exists yet */}
         {!result && !file && (
           <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-sm border border-green-200 p-8 mb-8 text-center">
@@ -1782,7 +1814,7 @@ export default function Dashboard() {
         />
 
         {/* Show file selection confirmation when file is chosen */}
-        {!result && file && (
+        {!result && file && (console.log('Rendering file confirmation UI, file:', file) || true) && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
