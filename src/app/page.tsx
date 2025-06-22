@@ -223,7 +223,7 @@ export default function Home() {
           <p className="text-xl text-gray-700 mb-8">
             Launch your own branded portal where your audience can upload spending data and get AI-powered credit card suggestions — personalized to their habits, and profitable for you.
           </p>
-          <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/about" className="bg-green-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-green-700">
               About Us
             </Link>
@@ -339,14 +339,14 @@ export default function Home() {
           </div>
         </div>
       </section>
-        <div className="max-w-2xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-base md:text-lg font-bold mb-1">Ready to Transform Your Business?</h2>
-          <p className="text-xs md:text-sm mb-3 leading-relaxed max-w-md mx-auto">Join forward-thinking financial professionals who are already earning with CardWise</p>
-          <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
-            <Link href="/contact" className="bg-white text-green-600 px-4 py-1.5 rounded text-xs md:text-sm font-semibold hover:bg-gray-100 transition-colors shadow min-w-[120px]">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
+          <p className="text-lg mb-6 leading-relaxed max-w-2xl mx-auto">Join forward-thinking financial professionals who are already earning with CardWise</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link href="/contact" className="bg-white text-green-600 px-6 py-3 rounded-lg text-base font-semibold hover:bg-gray-100 transition-colors shadow-lg min-w-[140px]">
               Request a Demo
             </Link>
-            <Link href="/pricing" className="border border-white text-white px-4 py-1.5 rounded text-xs md:text-sm font-semibold hover:bg-white hover:text-green-600 transition-colors min-w-[120px]">
+            <Link href="/pricing" className="border-2 border-white text-white px-6 py-3 rounded-lg text-base font-semibold hover:bg-white hover:text-green-600 transition-colors min-w-[140px]">
               View Pricing
             </Link>
           </div>
