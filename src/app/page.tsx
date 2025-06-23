@@ -205,8 +205,8 @@ export default function Home() {
       {/* Hero Section with improved spacing and typography */}
       <section className="w-full pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-            <div className="lg:w-1/2 text-center lg:text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight mb-4 md:mb-6">
                 Your Brand.{' '}
                 <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
@@ -225,8 +225,8 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="lg:w-1/2 flex justify-center items-center w-full">
-              <div className="w-full max-w-md lg:max-w-lg">
+            <div className="flex justify-center items-center">
+              <div className="w-full max-w-sm md:max-w-md lg:max-w-lg">
                 <CardStackGraphic />
               </div>
             </div>
