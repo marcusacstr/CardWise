@@ -149,7 +149,7 @@ const PartnerPortalMockup = () => (
                 <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md border border-blue-200">
                   <img src="/scotiabank-gold.png" alt="Scotia Gold" className="w-8 h-5 md:w-10 md:h-6 rounded object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 truncate">Chase Sapphire Preferred</p>
+                    <p className="text-xs font-medium text-gray-900 truncate">Scotia Gold American Express</p>
                     <p className="text-xs text-gray-600">+$425/year potential</p>
                   </div>
                   <div className="text-xs text-blue-600 font-medium flex-shrink-0">96%</div>
@@ -157,7 +157,7 @@ const PartnerPortalMockup = () => (
                 <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-md border border-purple-200">
                   <img src="/rbc-cashback.png" alt="RBC Cashback" className="w-8 h-5 md:w-10 md:h-6 rounded object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 truncate">Capital One Venture X</p>
+                    <p className="text-xs font-medium text-gray-900 truncate">RBC Cashback Preferred</p>
                     <p className="text-xs text-gray-600">+$380/year potential</p>
                   </div>
                   <div className="text-xs text-purple-600 font-medium flex-shrink-0">94%</div>
@@ -165,7 +165,7 @@ const PartnerPortalMockup = () => (
                 <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md border border-green-200">
                   <img src="/amex-cobalt.png" alt="Amex Cobalt" className="w-8 h-5 md:w-10 md:h-6 rounded object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 truncate">Amex Gold Card</p>
+                    <p className="text-xs font-medium text-gray-900 truncate">American Express Cobalt</p>
                     <p className="text-xs text-gray-600">+$320/year potential</p>
                   </div>
                   <div className="text-xs text-green-600 font-medium flex-shrink-0">91%</div>

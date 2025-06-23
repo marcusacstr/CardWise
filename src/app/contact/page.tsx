@@ -498,10 +498,10 @@ export default function ContactPage() {
                     Learn About CardWise →
                   </Link>
                   <Link 
-                    href="/partner/auth" 
+                    href="/contact" 
                     className="block text-green-600 hover:text-green-700 font-medium"
                   >
-                    Partner Portal →
+                    Request Demo →
                   </Link>
                 </div>
               </div>
