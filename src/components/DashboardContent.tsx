@@ -164,8 +164,13 @@ export default function DashboardContent({ user }: { user: User | null }) {
       setAnalysis(null);
       setRecommendations([]);
       setCurrentCardRewards(0);
+      
+      // Also clear uploaded files list when no statements remain
+      if (data.uploadedFiles.length > 0) {
+        data.uploadedFiles.forEach(file => removeUploadedFile(file));
+      }
     }
-  }, [data.statements, data.manualSpending]);
+  }, [data.statements, data.manualSpending, data.uploadedFiles]);
 
   // Fetch partner branding
   const fetchPartnerBranding = async (partnerId: string) => {

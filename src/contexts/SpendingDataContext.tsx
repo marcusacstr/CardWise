@@ -88,10 +88,23 @@ export function SpendingDataProvider({ children, user }: { children: React.React
         return;
       }
       
+      const statements = responseData.statements || [];
+      
       setData(prev => ({
         ...prev,
-        statements: responseData.statements || []
+        statements
       }));
+      
+      // Clear analysis data if no statements remain
+      if (statements.length === 0) {
+        setData(prev => ({
+          ...prev,
+          analysis: null,
+          recommendations: [],
+          currentCardRewards: 0
+        }));
+      }
+      
       setError(null);
     } catch (err) {
       console.error('Error fetching statements:', err);
