@@ -205,7 +205,7 @@ export default function Home() {
       {/* Hero Section with improved spacing and typography */}
       <section className="w-full pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+          <div className="flex flex-col lg:flex-row-reverse items-center justify-between gap-8 lg:gap-12">
             <div className="lg:w-1/2 text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight mb-4 md:mb-6">
                 Your Brand.{' '}
@@ -241,8 +241,8 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-green-500/5 rounded-3xl blur-3xl"></div>
             <div className="relative bg-white/80 backdrop-blur-sm border border-white/20 rounded-3xl p-8 md:p-12 shadow-xl">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-green-500 rounded-2xl mb-6 shadow-lg">
-                  <span className="text-3xl font-bold text-white">54%</span>
+                <div className="mb-6">
+                  <span className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">54%</span>
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
                   of Americans have used ChatGPT to recommend a financial product
