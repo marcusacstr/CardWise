@@ -92,21 +92,80 @@ const PartnerPortalMockup = () => (
             {/* Current Card Section - Mobile Optimized */}
             <div className="bg-white rounded-lg shadow-sm p-3 md:p-4 border border-gray-200">
               <h2 className="text-sm md:text-base font-semibold text-gray-900 mb-3">Your Current Primary Card</h2>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-100">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
                 <div className="relative w-16 h-10 md:w-20 md:h-12 flex-shrink-0">
-                  <img src="/amex-cobalt.png" alt="American Express Cobalt" className="w-full h-full object-cover rounded" />
+                  <div className="w-full h-full bg-gradient-to-r from-gray-400 to-gray-500 rounded flex items-center justify-center text-white text-xs font-bold">
+                    BASIC
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-sm md:text-base">Premium Travel World Elite</h3>
-                  <p className="text-sm text-gray-600">Annual Fee: $149</p>
+                  <h3 className="font-semibold text-gray-900 text-sm md:text-base">Basic Cashback Card</h3>
+                  <p className="text-sm text-gray-600">Annual Fee: $0</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">3x Travel</span>
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">2x Dining</span>
+                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">1% All Purchases</span>
                   </div>
                 </div>
                 <div className="text-left sm:text-right flex-shrink-0">
                   <p className="text-sm text-gray-600">YTD Earnings</p>
-                  <p className="text-base md:text-lg font-bold text-green-900">$275.00</p>
+                  <p className="text-base md:text-lg font-bold text-gray-700">$127.00</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Rewards Comparison Bar Chart - Mobile Optimized */}
+            <div className="bg-white rounded-lg shadow-sm p-3 md:p-4 border border-gray-200">
+              <h2 className="text-sm md:text-base font-semibold text-gray-900 mb-3">Potential Annual Rewards Comparison</h2>
+              <div className="space-y-3">
+                {/* Current Card Bar */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-gray-600">Your Current Card</span>
+                    <span className="text-xs font-semibold text-gray-700">$127</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-gray-400 h-2 rounded-full" style={{width: '15%'}}></div>
+                  </div>
+                </div>
+                
+                {/* Top Recommended Card Bar */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-blue-600 font-medium">Scotia Gold Amex</span>
+                    <span className="text-xs font-semibold text-blue-600">$552</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '65%'}}></div>
+                  </div>
+                </div>
+                
+                {/* Second Recommended Card Bar */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-purple-600 font-medium">RBC Cashback</span>
+                    <span className="text-xs font-semibold text-purple-600">$507</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                  </div>
+                </div>
+                
+                {/* Third Recommended Card Bar */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-green-600 font-medium">Amex Cobalt</span>
+                    <span className="text-xs font-semibold text-green-600">$447</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-green-500 h-2 rounded-full" style={{width: '53%'}}></div>
+                  </div>
+                </div>
+                
+                {/* Potential Gain Highlight */}
+                <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-md border border-green-200">
+                  <p className="text-xs text-center">
+                    <span className="font-semibold text-green-700">+$425/year</span>
+                    <span className="text-gray-600"> potential gain with top recommendation</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -183,7 +242,7 @@ const PartnerPortalMockup = () => (
                 </div>
                 <div className="text-center p-2 bg-gray-50 rounded-md">
                   <p className="text-lg md:text-xl font-bold text-gray-900">$127</p>
-                  <p className="text-xs text-gray-600">Current Rewards</p>
+                  <p className="text-xs text-gray-600">YTD Rewards</p>
                 </div>
               </div>
             </div>
