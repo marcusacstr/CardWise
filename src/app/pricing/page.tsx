@@ -12,18 +12,18 @@ export default function PricingPage() {
       period: '/month',
       description: 'Perfect for individual advisors and small practices getting started.',
       features: [
-        'Up to 100 card recommendations per month',
+        'Up to 500 card recommendations per month',
         'White-Label Platform',
-        'Basic AI Recommendations',
-        'Standard Branding Customization',
+        'Smart AI Card Recommendations',
+        'Standard Branding & Customization',
         'Partners keep 100% of referral/affiliate payments',
-        'Basic Analytics Dashboard',
+        'Analytics Dashboard',
         'Email Support',
         'Client management tools'
       ],
       highlight: false,
       buttonText: 'Get Started',
-      buttonLink: '/contact',
+      buttonLink: '/partner/register',
       icon: FaRegUser,
       color: 'blue'
     },
@@ -33,10 +33,10 @@ export default function PricingPage() {
       period: '/month',
       description: 'For growing practices and established financial professionals.',
       features: [
-        'Up to 500 card recommendations per month',
+        'Up to 1,000 card recommendations per month',
         'White-Label Platform',
-        'Advanced AI Recommendations',
-        'Full Branding Customization',
+        'Smart AI Card Recommendations',
+        'Standard Branding & Customization',
         'Partners keep 100% of referral/affiliate payments',
         'Advanced Analytics & Reporting',
         'Priority Support',
@@ -44,8 +44,8 @@ export default function PricingPage() {
         'Custom integrations available'
       ],
       highlight: true,
-      buttonText: 'Start Free Trial',
-      buttonLink: '/contact',
+      buttonText: 'Get Started',
+      buttonLink: '/partner/register',
       icon: FaRocket,
       color: 'green'
     },
@@ -57,8 +57,8 @@ export default function PricingPage() {
       features: [
         'Unlimited card recommendations',
         'White-Label Platform',
-        'Premium AI Recommendations',
-        'Complete Custom Branding',
+        'Smart AI Card Recommendations',
+        'Advanced Branding & Full Customization',
         'Partners keep 100% of referral/affiliate payments',
         'Enterprise Analytics Suite',
         'Dedicated Account Manager',
@@ -67,7 +67,7 @@ export default function PricingPage() {
         'Custom onboarding & training'
       ],
       highlight: false,
-      buttonText: 'Get Started',
+      buttonText: 'Book a Demo',
       buttonLink: '/contact',
       icon: FaShieldAlt,
       color: 'purple'
