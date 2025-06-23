@@ -130,28 +130,42 @@ export default function DashboardContent({ user }: { user: User | null }) {
       if (sessionData) {
         console.log('📊 Loaded user session data:', sessionData);
         
-        // Update context with session data
-        if (sessionData.manualSpending) {
-          updateManualSpending(sessionData.manualSpending);
+        // Always load manual spending if it exists
+        if (sessionData.manualSpendingEntries) {
+          updateManualSpending(sessionData.manualSpendingEntries);
         }
-        if (sessionData.analysis) {
-          setAnalysis(sessionData.analysis);
-        }
-        if (sessionData.recommendations) {
-          setRecommendations(sessionData.recommendations);
-        }
+        
+        // Load current card
         if (sessionData.currentCard) {
           setCurrentCard(sessionData.currentCard);
-          setCurrentCardRewards(sessionData.currentCard.estimatedAnnualRewards);
+          setCurrentCardRewards(sessionData.currentCardRewards);
         }
+        
+        // Load uploaded files
         if (sessionData.uploadedFiles) {
           sessionData.uploadedFiles.forEach(file => addUploadedFile(file));
         }
+        
+        // Note: Analysis and recommendations will be loaded after statements are fetched
+        // to ensure we only show data when there are actual statements
       }
     } catch (err) {
       console.error('Error loading user session:', err);
     }
   };
+
+  // Effect to clear analysis data when there are no statements or manual spending
+  useEffect(() => {
+    const hasStatements = data.statements && data.statements.length > 0;
+    const hasManualSpending = data.manualSpending && data.manualSpending.length > 0;
+    
+    if (!hasStatements && !hasManualSpending) {
+      // Clear analysis data if no statements or manual spending
+      setAnalysis(null);
+      setRecommendations([]);
+      setCurrentCardRewards(0);
+    }
+  }, [data.statements, data.manualSpending]);
 
   // Fetch partner branding
   const fetchPartnerBranding = async (partnerId: string) => {
@@ -419,12 +433,17 @@ export default function DashboardContent({ user }: { user: User | null }) {
     if (!user) return;
     
     const sessionData: UserSessionData = {
-      manualSpending: data.manualSpending,
-      analysis: data.analysis,
-      recommendations: data.recommendations,
-      currentCard,
+      currentCard: {
+        ...currentCard,
+        isCustom: currentCard.isCustom || false
+      },
       uploadedFiles: data.uploadedFiles,
-      lastActivity: new Date().toISOString()
+      manualSpendingEntries: data.manualSpending,
+      analysisTimePeriod: analysisTimePeriod,
+      latestAnalysis: data.analysis,
+      latestRecommendations: data.recommendations,
+      currentCardRewards: data.currentCardRewards,
+      monthlyRewardsData: data.monthlyRewardsData
     };
     
     await saveUserSession(user.id, sessionData);
@@ -821,11 +840,25 @@ export default function DashboardContent({ user }: { user: User | null }) {
             {/* Enhanced Recommendations */}
             {data.recommendations.length > 0 && (
               <EnhancedRecommendations
-                recommendations={data.recommendations}
-                currentCard={currentCard}
-                analysis={data.analysis}
-                showAll={showAllRecommendations}
-                onShowAllToggle={() => setShowAllRecommendations(!showAllRecommendations)}
+                transactions={data.analysis?.transactions || []}
+                userProfile={{
+                  annual_income: 75000,
+                  credit_score: 'good',
+                  monthly_spending: {
+                    groceries: data.analysis?.categoryBreakdown?.find(c => c.category === 'Groceries')?.amount || 0,
+                    dining: data.analysis?.categoryBreakdown?.find(c => c.category === 'Dining')?.amount || 0,
+                    travel: data.analysis?.categoryBreakdown?.find(c => c.category === 'Travel')?.amount || 0,
+                    gas: data.analysis?.categoryBreakdown?.find(c => c.category === 'Gas')?.amount || 0,
+                    streaming: data.analysis?.categoryBreakdown?.find(c => c.category === 'Streaming')?.amount || 0,
+                    general: data.analysis?.totalSpent || 0
+                  },
+                  travel_frequency: 'occasionally',
+                  redemption_preference: 'flexible',
+                  current_cards: [],
+                  monthly_payment_behavior: 'full',
+                  signup_bonus_importance: 'medium'
+                }}
+                onRecommendationSelect={handleCardSelect}
               />
             )}
           </div>
