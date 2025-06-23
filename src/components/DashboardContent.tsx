@@ -121,40 +121,7 @@ export default function DashboardContent({ user }: { user: User | null }) {
     }
   }, [user]);
 
-  // Load user session data
-  const loadUserSessionData = async () => {
-    if (!user) return;
-    
-    try {
-      const sessionData = await loadUserSession(user.id);
-      if (sessionData) {
-        console.log('📊 Loaded user session data:', sessionData);
-        
-        // Always load manual spending if it exists
-        if (sessionData.manualSpendingEntries) {
-          updateManualSpending(sessionData.manualSpendingEntries);
-        }
-        
-        // Load current card
-        if (sessionData.currentCard) {
-          setCurrentCard(sessionData.currentCard);
-          setCurrentCardRewards(sessionData.currentCardRewards);
-        }
-        
-        // Load uploaded files
-        if (sessionData.uploadedFiles) {
-          sessionData.uploadedFiles.forEach(file => addUploadedFile(file));
-        }
-        
-        // Note: Analysis and recommendations will be loaded after statements are fetched
-        // to ensure we only show data when there are actual statements
-      }
-    } catch (err) {
-      console.error('Error loading user session:', err);
-    }
-  };
-
-  // Effect to clear analysis data when there are no statements or manual spending
+  // Effect to clear analysis and session if no statements or manual spending
   useEffect(() => {
     const hasStatements = data.statements && data.statements.length > 0;
     const hasManualSpending = data.manualSpending && data.manualSpending.length > 0;
@@ -164,13 +131,50 @@ export default function DashboardContent({ user }: { user: User | null }) {
       setAnalysis(null);
       setRecommendations([]);
       setCurrentCardRewards(0);
-      
       // Also clear uploaded files list when no statements remain
       if (data.uploadedFiles.length > 0) {
         data.uploadedFiles.forEach(file => removeUploadedFile(file));
       }
+      // Aggressively clear user session in the database
+      if (user) {
+        import('@/lib/userSession').then(({ clearUserSession }) => {
+          clearUserSession(user.id);
+        });
+      }
     }
-  }, [data.statements, data.manualSpending, data.uploadedFiles]);
+  }, [data.statements, data.manualSpending, data.uploadedFiles, user]);
+
+  // Load user session data
+  const loadUserSessionData = async () => {
+    if (!user) return;
+    
+    try {
+      const sessionData = await loadUserSession(user.id);
+      if (sessionData) {
+        // Only load analysis/recommendations if there are statements or manual spending
+        const hasStatements = data.statements && data.statements.length > 0;
+        const hasManualSpending = sessionData.manualSpendingEntries && sessionData.manualSpendingEntries.length > 0;
+        if (sessionData.manualSpendingEntries) {
+          updateManualSpending(sessionData.manualSpendingEntries);
+        }
+        if (sessionData.currentCard) {
+          setCurrentCard(sessionData.currentCard);
+          setCurrentCardRewards(sessionData.currentCardRewards);
+        }
+        if (sessionData.uploadedFiles) {
+          sessionData.uploadedFiles.forEach(file => addUploadedFile(file));
+        }
+        if ((hasStatements || hasManualSpending) && sessionData.latestAnalysis) {
+          setAnalysis(sessionData.latestAnalysis);
+        }
+        if ((hasStatements || hasManualSpending) && sessionData.latestRecommendations) {
+          setRecommendations(sessionData.latestRecommendations);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading user session:', err);
+    }
+  };
 
   // Fetch partner branding
   const fetchPartnerBranding = async (partnerId: string) => {
