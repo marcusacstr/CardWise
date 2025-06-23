@@ -242,17 +242,17 @@ export default function Home() {
             <div className="relative bg-white/80 backdrop-blur-sm border border-white/20 rounded-3xl p-8 md:p-12 shadow-xl">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-green-500 rounded-2xl mb-6 shadow-lg">
-                  <span className="text-3xl font-bold text-white">26%</span>
+                  <span className="text-3xl font-bold text-white">54%</span>
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                  of Americans Have Used ChatGPT for Credit Card Recommendations
+                  of Americans have used ChatGPT to recommend a financial product
                 </h3>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                  The AI revolution in financial advice is here. Give your audience the intelligent tools they're already seeking.
+                  In fact, 54% of Americans surveyed by Motley Fool Money have used ChatGPT to recommend a financial product, such as a credit or debit card.
                 </p>
                 <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Source: Consumer AI Usage Survey 2024</span>
+                  <span>Source: Motley Fool Money Survey 2024</span>
                 </div>
               </div>
             </div>
