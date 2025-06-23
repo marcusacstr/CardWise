@@ -39,6 +39,7 @@ interface SpendingDataContextType {
   removeUploadedFile: (filename: string) => void;
   refreshAll: () => Promise<void>;
   clearData: () => void;
+  forceRefresh: () => Promise<void>;
 }
 
 const defaultData: SpendingData = {
@@ -97,12 +98,23 @@ export function SpendingDataProvider({ children, user }: { children: React.React
       
       // Clear analysis data if no statements remain
       if (statements.length === 0) {
+        console.log('🗑️ No statements found, clearing all analysis data');
         setData(prev => ({
           ...prev,
           analysis: null,
           recommendations: [],
-          currentCardRewards: 0
+          currentCardRewards: 0,
+          uploadedFiles: []
         }));
+        
+        // Also clear session data from database
+        try {
+          const { clearUserSession } = await import('@/lib/userSession');
+          await clearUserSession(user.id);
+          console.log('🗑️ Cleared user session data');
+        } catch (sessionError) {
+          console.warn('Could not clear session data:', sessionError);
+        }
       }
       
       setError(null);
@@ -204,6 +216,29 @@ export function SpendingDataProvider({ children, user }: { children: React.React
     setError(null);
   }, []);
 
+  // Force refresh - completely reset all data
+  const forceRefresh = useCallback(async () => {
+    if (!user) return;
+    
+    console.log('🔄 Force refreshing all data');
+    
+    // Clear all local data
+    setData(defaultData);
+    setError(null);
+    
+    // Clear session data from database
+    try {
+      const { clearUserSession } = await import('@/lib/userSession');
+      await clearUserSession(user.id);
+      console.log('🗑️ Cleared user session data');
+    } catch (sessionError) {
+      console.warn('Could not clear session data:', sessionError);
+    }
+    
+    // Refresh all data
+    await refreshAll();
+  }, [user, refreshAll]);
+
   // Initial data load
   useEffect(() => {
     if (user) {
@@ -225,7 +260,8 @@ export function SpendingDataProvider({ children, user }: { children: React.React
     addUploadedFile,
     removeUploadedFile,
     refreshAll,
-    clearData
+    clearData,
+    forceRefresh
   };
 
   return (

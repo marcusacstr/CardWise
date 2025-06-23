@@ -11,7 +11,7 @@ import { testUserSessionsTable, getUserSessionCount } from '@/lib/testPersistenc
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck, FaFileAlt, FaToggleOn, FaToggleOff, FaInfoCircle, FaChevronDown, FaChevronUp, FaTrash } from 'react-icons/fa';
+import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck, FaFileAlt, FaToggleOn, FaToggleOff, FaInfoCircle, FaChevronDown, FaChevronUp, FaTrash, FaSync } from 'react-icons/fa';
 import EnhancedRecommendations from '@/components/EnhancedRecommendations';
 import StatementManager from '@/components/StatementManager';
 import { useSpendingData } from '@/contexts/SpendingDataContext';
@@ -508,6 +508,10 @@ export default function DashboardContent({ user }: { user: User | null }) {
   // Check if we have analysis data to show results
   const hasAnalysisData = data.analysis && (data.analysis.transactionCount > 0 || data.manualSpending.length > 0);
 
+  const forceRefresh = async () => {
+    await refreshAll();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -524,6 +528,15 @@ export default function DashboardContent({ user }: { user: User | null }) {
             </div>
             
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => forceRefresh()}
+                className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 text-sm"
+                title="Force refresh all data"
+              >
+                <FaSync className="text-gray-400" />
+                <span>Refresh Data</span>
+              </button>
+              
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}

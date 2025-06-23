@@ -25,7 +25,7 @@ interface StatementManagerProps {
 }
 
 export default function StatementManager({ onStatementDeleted, refreshTrigger, recentUploads = [] }: StatementManagerProps) {
-  const { data, loading, error, refreshStatements, refreshAll } = useSpendingData();
+  const { data, loading, error, refreshStatements, refreshAll, forceRefresh } = useSpendingData();
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const deleteStatement = async (statementId: string) => {
@@ -40,8 +40,8 @@ export default function StatementManager({ onStatementDeleted, refreshTrigger, r
       });
 
       if (response.ok) {
-        // Refresh all data to ensure analysis is cleared when no statements remain
-        await refreshAll();
+        // Force refresh all data to ensure everything is cleared
+        await forceRefresh();
         onStatementDeleted?.();
       } else {
         alert('Failed to delete statement');
