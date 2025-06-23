@@ -112,61 +112,91 @@ const PartnerPortalMockup = () => (
               </div>
             </div>
             
-            {/* Rewards Comparison Bar Chart - Mobile Optimized */}
+            {/* Monthly Rewards Comparison Bar Chart - Mobile Optimized */}
             <div className="bg-white rounded-lg shadow-sm p-3 md:p-4 border border-gray-200">
-              <h2 className="text-sm md:text-base font-semibold text-gray-900 mb-3">Potential Annual Rewards Comparison</h2>
-              <div className="space-y-3">
-                {/* Current Card Bar */}
+              <div className="flex items-center justify-between mb-3">
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-600">Your Current Card</span>
-                    <span className="text-xs font-semibold text-gray-700">$127</span>
+                  <h2 className="text-sm md:text-base font-semibold text-gray-900">Monthly Rewards Comparison</h2>
+                  <p className="text-xs text-gray-500">Your current card vs. our top recommendation</p>
+                </div>
+                <div className="text-right text-xs text-gray-500">
+                  Last 6 months
+                </div>
+              </div>
+              
+              <div className="relative">
+                {/* Y-axis labels and chart */}
+                <div className="flex">
+                  {/* Y-axis */}
+                  <div className="flex flex-col justify-between h-32 md:h-40 py-2 pr-2 text-xs text-gray-500">
+                    {[80, 60, 40, 20, 0].map(value => (
+                      <div key={value} className="flex items-center">
+                        <span className="w-6 text-right">${value}</span>
+                        <div className="w-1 h-px bg-gray-300 ml-1"></div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-gray-400 h-2 rounded-full" style={{width: '15%'}}></div>
+                  
+                  {/* Chart area */}
+                  <div className="flex-1 relative">
+                    {/* Grid lines */}
+                    <div className="absolute inset-0">
+                      {[0, 25, 50, 75, 100].map(percent => (
+                        <div 
+                          key={percent}
+                          className="absolute w-full border-t border-gray-200"
+                          style={{ bottom: `${percent}%` }}
+                        ></div>
+                      ))}
+                    </div>
+                    
+                    {/* Bars */}
+                    <div className="h-32 md:h-40 flex items-end space-x-2 relative z-10">
+                      {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((month, index) => {
+                        const currentReward = [10, 11, 8, 12, 9, 10][index]; // $10-12 range for basic card
+                        const recommendedReward = [42, 45, 38, 48, 41, 46][index]; // $40-48 range for recommended
+                        const maxValue = 80; // Scale to $80 max
+                        
+                        return (
+                          <div key={month} className="flex-1 flex flex-col items-center">
+                            <div className="w-full flex justify-center items-end space-x-0.5 h-28 md:h-36">
+                              <div 
+                                className="bg-green-400 rounded-t flex-1 min-h-[2px]" 
+                                style={{ height: `${Math.min((currentReward / maxValue) * 100, 100)}%` }}
+                                title={`Current: $${currentReward}/month`}
+                              ></div>
+                              <div 
+                                className="bg-green-500 rounded-t flex-1 min-h-[2px]" 
+                                style={{ height: `${Math.min((recommendedReward / maxValue) * 100, 100)}%` }}
+                                title={`Recommended: $${recommendedReward}/month`}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-500 mt-1">{month}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-                
-                {/* Top Recommended Card Bar */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-blue-600 font-medium">Scotia Gold Amex</span>
-                    <span className="text-xs font-semibold text-blue-600">$552</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '65%'}}></div>
-                  </div>
+              </div>
+              
+              <div className="flex items-center justify-center space-x-4 mt-3">
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span className="text-xs text-gray-600">Recommended Card</span>
                 </div>
-                
-                {/* Second Recommended Card Bar */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-purple-600 font-medium">RBC Cashback</span>
-                    <span className="text-xs font-semibold text-purple-600">$507</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{width: '60%'}}></div>
-                  </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-green-400 rounded"></div>
+                  <span className="text-xs text-gray-600">Current Card</span>
                 </div>
-                
-                {/* Third Recommended Card Bar */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-green-600 font-medium">Amex Cobalt</span>
-                    <span className="text-xs font-semibold text-green-600">$447</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{width: '53%'}}></div>
-                  </div>
-                </div>
-                
-                {/* Potential Gain Highlight */}
-                <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-md border border-green-200">
-                  <p className="text-xs text-center">
-                    <span className="font-semibold text-green-700">+$425/year</span>
-                    <span className="text-gray-600"> potential gain with top recommendation</span>
-                  </p>
-                </div>
+              </div>
+              
+              {/* Summary at bottom */}
+              <div className="mt-3 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-md border border-green-200">
+                <p className="text-xs text-center">
+                  <span className="font-semibold text-green-700">+$425/year</span>
+                  <span className="text-gray-600"> potential gain with top recommendation</span>
+                </p>
               </div>
             </div>
             
