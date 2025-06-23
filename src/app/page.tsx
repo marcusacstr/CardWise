@@ -205,7 +205,7 @@ export default function Home() {
       {/* Hero Section with improved spacing and typography */}
       <section className="w-full pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row-reverse items-center justify-between gap-8 lg:gap-12">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
             <div className="lg:w-1/2 text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight mb-4 md:mb-6">
                 Your Brand.{' '}
@@ -225,8 +225,8 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="lg:w-1/2 flex justify-center w-full">
-              <div className="w-full max-w-md lg:max-w-none">
+            <div className="lg:w-1/2 flex justify-center lg:justify-end w-full">
+              <div className="w-full max-w-md lg:max-w-lg xl:max-w-xl">
                 <CardStackGraphic />
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function Home() {
                   of Americans have used ChatGPT to recommend a financial product
                 </h3>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                  In fact, 54% of Americans surveyed by Motley Fool Money have used ChatGPT to recommend a financial product, such as a credit or debit card.
+                  The AI revolution in financial advice is here. Give your audience the intelligent tools they're already seeking.
                 </p>
                 <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
