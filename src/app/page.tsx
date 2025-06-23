@@ -94,7 +94,7 @@ const PartnerPortalMockup = () => (
               <h2 className="text-sm md:text-base font-semibold text-gray-900 mb-3">Your Current Primary Card</h2>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-100">
                 <div className="relative w-16 h-10 md:w-20 md:h-12 flex-shrink-0">
-                  <div className="w-full h-full bg-gradient-to-r from-green-600 to-green-700 rounded flex items-center justify-center text-white text-xs font-bold">CARD</div>
+                  <img src="/amex-cobalt.png" alt="American Express Cobalt" className="w-full h-full object-cover rounded" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 text-sm md:text-base">Premium Travel World Elite</h3>
@@ -147,7 +147,7 @@ const PartnerPortalMockup = () => (
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-                  <div className="w-8 h-5 md:w-10 md:h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0">CARD</div>
+                  <img src="/scotiabank-gold.png" alt="Scotia Gold" className="w-8 h-5 md:w-10 md:h-6 rounded object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-gray-900 truncate">Chase Sapphire Preferred</p>
                     <p className="text-xs text-gray-600">+$425/year potential</p>
@@ -155,7 +155,7 @@ const PartnerPortalMockup = () => (
                   <div className="text-xs text-blue-600 font-medium flex-shrink-0">96%</div>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-md border border-purple-200">
-                  <div className="w-8 h-5 md:w-10 md:h-6 bg-purple-600 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0">CARD</div>
+                  <img src="/rbc-cashback.png" alt="RBC Cashback" className="w-8 h-5 md:w-10 md:h-6 rounded object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-gray-900 truncate">Capital One Venture X</p>
                     <p className="text-xs text-gray-600">+$380/year potential</p>
@@ -163,7 +163,7 @@ const PartnerPortalMockup = () => (
                   <div className="text-xs text-purple-600 font-medium flex-shrink-0">94%</div>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md border border-green-200">
-                  <div className="w-8 h-5 md:w-10 md:h-6 bg-green-600 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0">CARD</div>
+                  <img src="/amex-cobalt.png" alt="Amex Cobalt" className="w-8 h-5 md:w-10 md:h-6 rounded object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-gray-900 truncate">Amex Gold Card</p>
                     <p className="text-xs text-gray-600">+$320/year potential</p>
@@ -225,8 +225,8 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="lg:w-1/2 flex justify-center lg:justify-end w-full">
-              <div className="w-full max-w-md lg:max-w-lg xl:max-w-xl">
+            <div className="lg:w-1/2 flex justify-center w-full">
+              <div className="w-full max-w-lg lg:max-w-xl xl:max-w-2xl">
                 <CardStackGraphic />
               </div>
             </div>
