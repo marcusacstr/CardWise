@@ -9,14 +9,36 @@ export default function ContactPage() {
     name: '',
     email: '',
     company: '',
+    phone: '',
+    businessType: '',
+    businessSize: '',
+    currentRevenue: '',
+    clientBase: '',
+    currentTools: '',
+    timeframe: '',
+    budget: '',
     message: '',
-    inquiryType: 'general'
+    inquiryType: 'demo'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData({
+        name: '',
+        email: '',
+        company: '',
+        phone: '',
+        businessType: '',
+        businessSize: '',
+        currentRevenue: '',
+        clientBase: '',
+        currentTools: '',
+        timeframe: '',
+        budget: '',
+        message: '',
+        inquiryType: 'demo'
+      });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,8 +59,16 @@ export default function ContactPage() {
         name: '',
         email: '',
         company: '',
+        phone: '',
+        businessType: '',
+        businessSize: '',
+        currentRevenue: '',
+        clientBase: '',
+        currentTools: '',
+        timeframe: '',
+        budget: '',
         message: '',
-        inquiryType: 'general'
+        inquiryType: 'demo'
       });
     }, 3000);
   };
@@ -82,11 +112,11 @@ export default function ContactPage() {
             </Link>
             
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Let's Start a Conversation
+              Request Your Demo
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Ready to transform your business with CardWise? Whether you're interested in becoming a partner 
-              or have questions about our platform, we're here to help.
+              See how CardWise can transform your business with personalized credit card recommendations. 
+              Complete the form below to schedule your demo and get custom pricing for your needs.
             </p>
           </div>
         </div>
@@ -100,12 +130,12 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="order-2 lg:order-1">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 lg:p-10">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Send us a message</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Get Your Custom Demo</h2>
                 <p className="text-gray-600 mb-8">
-                  Fill out the form below and we'll respond within 24 hours.
+                  Complete this form and we'll contact you within 24 hours to schedule your personalized demo.
                 </p>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                                <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Inquiry Type */}
                   <div>
                     <label htmlFor="inquiryType" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -118,74 +148,242 @@ export default function ContactPage() {
                       className="input"
                       required
                     >
-                      <option value="general">General Inquiry</option>
-                      <option value="partnership">Partnership Opportunity</option>
                       <option value="demo">Request a Demo</option>
-                      <option value="support">Technical Support</option>
+                      <option value="partnership">Partnership Opportunity</option>
                       <option value="pricing">Pricing Information</option>
+                      <option value="general">General Inquiry</option>
+                      <option value="support">Technical Support</option>
                     </select>
                   </div>
 
-                  {/* Name */}
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="input"
-                      placeholder="Enter your full name"
-                      required
-                    />
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
                   </div>
 
-                  {/* Email */}
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="input"
-                      placeholder="Enter your email address"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Company / Organization *
+                      </label>
+                      <input
+                        type="text"
+                        id="company"
+                        value={formData.company}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="Enter your company name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
                   </div>
 
-                  {/* Company */}
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Company / Organization
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      className="input"
-                      placeholder="Enter your company name (optional)"
-                    />
+                  {/* Business Qualifying Questions */}
+                  <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Tell us about your business</h3>
+                    
+                    <div>
+                      <label htmlFor="businessType" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Which of the following best describes your business? *
+                      </label>
+                      <select
+                        id="businessType"
+                        value={formData.businessType}
+                        onChange={handleChange}
+                        className="input"
+                        required
+                      >
+                        <option value="">Select your business type</option>
+                        <option value="financial-advisor">Financial Advisor</option>
+                        <option value="influencer">Influencer/Content Creator</option>
+                        <option value="travel-agent">Travel Agent/Agency</option>
+                        <option value="blogger">Blogger/Website Owner</option>
+                        <option value="affiliate-marketer">Affiliate Marketer</option>
+                        <option value="fintech">Fintech Company</option>
+                        <option value="media-company">Media Company</option>
+                        <option value="consulting">Business Consultant</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="businessSize" className="block text-sm font-semibold text-gray-700 mb-2">
+                        What's the size of your business? *
+                      </label>
+                      <select
+                        id="businessSize"
+                        value={formData.businessSize}
+                        onChange={handleChange}
+                        className="input"
+                        required
+                      >
+                        <option value="">Select business size</option>
+                        <option value="solo">Solo entrepreneur</option>
+                        <option value="small">Small team (2-10 people)</option>
+                        <option value="medium">Medium business (11-50 people)</option>
+                        <option value="large">Large business (50+ people)</option>
+                        <option value="enterprise">Enterprise (500+ people)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="clientBase" className="block text-sm font-semibold text-gray-700 mb-2">
+                        How many clients/customers do you currently serve? *
+                      </label>
+                      <select
+                        id="clientBase"
+                        value={formData.clientBase}
+                        onChange={handleChange}
+                        className="input"
+                        required
+                      >
+                        <option value="">Select client base size</option>
+                        <option value="0-100">0-100 clients</option>
+                        <option value="100-500">100-500 clients</option>
+                        <option value="500-1000">500-1,000 clients</option>
+                        <option value="1000-5000">1,000-5,000 clients</option>
+                        <option value="5000+">5,000+ clients</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="currentRevenue" className="block text-sm font-semibold text-gray-700 mb-2">
+                        What's your approximate annual revenue? *
+                      </label>
+                      <select
+                        id="currentRevenue"
+                        value={formData.currentRevenue}
+                        onChange={handleChange}
+                        className="input"
+                        required
+                      >
+                        <option value="">Select revenue range</option>
+                        <option value="0-50k">/bin/zsh - ,000</option>
+                        <option value="50k-100k">,000 - ,000</option>
+                        <option value="100k-500k">,000 - ,000</option>
+                        <option value="500k-1m">,000 - M</option>
+                        <option value="1m-5m">M - M</option>
+                        <option value="5m+">M+</option>
+                        <option value="prefer-not-to-say">Prefer not to say</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Implementation Questions */}
+                  <div className="bg-blue-50 rounded-lg p-6 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Implementation details</h3>
+                    
+                    <div>
+                      <label htmlFor="timeframe" className="block text-sm font-semibold text-gray-700 mb-2">
+                        When would you like to get started? *
+                      </label>
+                      <select
+                        id="timeframe"
+                        value={formData.timeframe}
+                        onChange={handleChange}
+                        className="input"
+                        required
+                      >
+                        <option value="">Select timeframe</option>
+                        <option value="immediately">Immediately</option>
+                        <option value="1-2-weeks">Within 1-2 weeks</option>
+                        <option value="1-month">Within 1 month</option>
+                        <option value="3-months">Within 3 months</option>
+                        <option value="6-months">Within 6 months</option>
+                        <option value="just-exploring">Just exploring options</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="budget" className="block text-sm font-semibold text-gray-700 mb-2">
+                        What's your monthly budget for this type of solution? *
+                      </label>
+                      <select
+                        id="budget"
+                        value={formData.budget}
+                        onChange={handleChange}
+                        className="input"
+                        required
+                      >
+                        <option value="">Select budget range</option>
+                        <option value="under-100">Under /month</option>
+                        <option value="100-300">-300/month</option>
+                        <option value="300-500">-500/month</option>
+                        <option value="500-1000">-1,000/month</option>
+                        <option value="1000+">,000+/month</option>
+                        <option value="need-roi-info">Need ROI information first</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="currentTools" className="block text-sm font-semibold text-gray-700 mb-2">
+                        What tools do you currently use for client recommendations?
+                      </label>
+                      <input
+                        type="text"
+                        id="currentTools"
+                        value={formData.currentTools}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="e.g., spreadsheets, other software, manual process"
+                      />
+                    </div>
                   </div>
 
                   {/* Message */}
                   <div>
                     <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Message *
+                      Additional comments or questions
                     </label>
                     <textarea
                       id="message"
                       value={formData.message}
                       onChange={handleChange}
-                      rows={5}
+                      rows={4}
                       className="input resize-none"
-                      placeholder="Tell us about your needs, questions, or how we can help..."
-                      required
+                      placeholder="Tell us about your specific needs or any questions you have..."
                     ></textarea>
                   </div>
 
@@ -203,7 +401,7 @@ export default function ContactPage() {
                     ) : (
                       <div className="flex items-center justify-center">
                         <FaPaperPlane className="mr-2 h-4 w-4" />
-                        Send Message
+                        Request Demo & Get Pricing
                       </div>
                     )}
                   </button>

@@ -64,7 +64,7 @@ export default function Navigation() {
                 <a href="/auth" className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
                   Partner Sign In
                 </a>
-                <a href="/request-demo" className="ml-4 px-4 py-2 border border-green-600 text-sm font-medium rounded-md text-green-600 bg-transparent hover:bg-green-50">
+                <a href="/contact" className="ml-4 px-4 py-2 border border-green-600 text-sm font-medium rounded-md text-green-600 bg-transparent hover:bg-green-50">
                   Request Demo
                 </a>
               </>
