@@ -3,7 +3,7 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { FaGoogle, FaExclamationTriangle, FaUser, FaBuilding, FaArrowLeft, FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaGoogle, FaExclamationTriangle, FaUser, FaBuilding, FaArrowLeft, FaEye, FaEyeSlash } from 'react-icons/fa';
 import Link from 'next/link';
 import { validatePassword } from '@/utils/validation';
 
@@ -264,19 +264,17 @@ export default function UserAuth() {
                   Email address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaEnvelope className="h-5 w-5 text-gray-400" />
-                  </div>
                   <input
                     id="email-address"
                     name="email"
                     type="email"
                     autoComplete="email"
                     required
-                    className="input pl-10"
+                    className="input"
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    style={{ fontSize: '16px' }}
                   />
                 </div>
               </div>
@@ -287,23 +285,21 @@ export default function UserAuth() {
                   Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaLock className="h-5 w-5 text-gray-400" />
-                  </div>
                   <input
                     id="password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete={isSignUp ? 'new-password' : 'current-password'}
                     required
-                    className="input pl-10 pr-10"
+                    className="input pr-12"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    style={{ fontSize: '16px' }}
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center z-10"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -334,23 +330,21 @@ export default function UserAuth() {
                     Confirm Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-5 w-5 text-gray-400" />
-                    </div>
                     <input
                       id="confirm-password"
                       name="confirm-password"
                       type={showConfirmPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       required
-                      className="input pl-10 pr-10"
+                      className="input pr-12"
                       placeholder="Confirm your password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      style={{ fontSize: '16px' }}
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center z-10"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? (

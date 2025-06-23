@@ -40,6 +40,7 @@ export interface CategorySpending {
 
 export interface MonthlySpending {
   month: string;
+  year: number;
   amount: number;
   transactionCount: number;
   topCategory: string;
@@ -213,7 +214,7 @@ function categorizeByDescription(description: string): { category: string; confi
   };
 }
 
-export function analyzeTransactions(transactions: ParsedTransaction[]): SpendingAnalysis {
+export function analyzeTransactions(transactions: ParsedTransaction[], statementPeriod?: { startDate: Date | null; endDate: Date | null; statementDate: Date | null }): SpendingAnalysis {
   const categorizedTransactions: TransactionWithCategory[] = transactions.map(transaction => {
     const categoryResult = categorizeTransactionWithMCC(
       transaction.description,
@@ -260,6 +261,76 @@ export function analyzeTransactions(transactions: ParsedTransaction[]): Spending
       trend: 'stable' as const // Would need historical data for real trend analysis
     }))
     .sort((a, b) => b.amount - a.amount);
+
+  // Generate monthly trends using actual transaction dates and statement period
+  const monthlyTrends: MonthlySpending[] = [];
+  
+  if (transactions.length > 0) {
+    // Group transactions by month
+    const monthlyData = new Map<string, { amount: number; count: number; categoryMap: Map<string, number> }>();
+    
+    categorizedTransactions
+      .filter(t => t.type === 'debit')
+      .forEach(transaction => {
+        const monthKey = transaction.date.toISOString().slice(0, 7); // YYYY-MM format
+        const current = monthlyData.get(monthKey) || { 
+          amount: 0, 
+          count: 0, 
+          categoryMap: new Map<string, number>() 
+        };
+        
+        current.amount += transaction.amount;
+        current.count += 1;
+        current.categoryMap.set(
+          transaction.category, 
+          (current.categoryMap.get(transaction.category) || 0) + transaction.amount
+        );
+        
+        monthlyData.set(monthKey, current);
+      });
+
+    // Convert to monthly trends array
+    Array.from(monthlyData.entries())
+      .sort((a, b) => a[0].localeCompare(b[0])) // Sort by month
+      .forEach(([monthKey, data]) => {
+        const [year, month] = monthKey.split('-');
+        const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long' });
+        
+        // Find the top category for this month
+        let topCategory = 'Other';
+        let topAmount = 0;
+        data.categoryMap.forEach((amount, category) => {
+          if (amount > topAmount) {
+            topAmount = amount;
+            topCategory = category;
+          }
+        });
+
+        monthlyTrends.push({
+          month: monthName,
+          year: parseInt(year),
+          amount: data.amount,
+          transactionCount: data.count,
+          topCategory
+        });
+      });
+  }
+
+  // If we have statement period information but no monthly trends generated,
+  // create a single month entry for the statement period
+  if (monthlyTrends.length === 0 && statementPeriod?.startDate && totalSpent > 0) {
+    const statementDate = statementPeriod.startDate;
+    const monthName = statementDate.toLocaleDateString('en-US', { month: 'long' });
+    const year = statementDate.getFullYear();
+    
+    monthlyTrends.push({
+      month: monthName,
+      year,
+      amount: totalSpent,
+      transactionCount: categorizedTransactions.filter(t => t.type === 'debit').length,
+      topCategory: categoryBreakdown[0]?.category || 'Other'
+    });
+  }
 
   // Merchant analysis
   const merchantMap = new Map<string, { amount: number; count: number; category: string }>();
@@ -323,7 +394,7 @@ export function analyzeTransactions(transactions: ParsedTransaction[]): Spending
     transactionCount: categorizedTransactions.length,
     averageTransactionAmount: totalSpent / categorizedTransactions.filter(t => t.type === 'debit').length,
     categoryBreakdown,
-    monthlyTrends: [], // Would need date-based grouping
+    monthlyTrends,
     merchantAnalysis,
     spendingInsights: insights,
     topCategories: topCategories.map(cat => ({

@@ -137,15 +137,16 @@ export default function CreateSuperAdminAccount() {
                 Admin Email
               </label>
               <div className="mt-1 relative">
-                <FaEnvelope className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                 <input
                   id="email"
                   name="email"
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                  className="appearance-none block w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
                   placeholder="Enter admin email"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             </div>
@@ -155,15 +156,16 @@ export default function CreateSuperAdminAccount() {
                 Password
               </label>
               <div className="mt-1 relative">
-                <FaLock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                 <input
                   id="password"
                   name="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                  className="appearance-none block w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
                   placeholder="Create a strong password"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
               <p className="mt-1 text-sm text-gray-500">

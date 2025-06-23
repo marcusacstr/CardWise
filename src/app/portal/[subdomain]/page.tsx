@@ -458,20 +458,46 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
         {/* Welcome Section */}
         {currentStep === 1 && (
-          <div className="text-center mb-8 md:mb-12 px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
-              {partner.welcome_message || `Find Your Perfect Credit Card`}
-            </h2>
-            <p className="text-base md:text-xl text-gray-600 mb-6 md:mb-8">
-              Answer a few quick questions to get personalized credit card recommendations
-            </p>
+          <div className="text-center mb-8 md:mb-12 px-4 max-w-3xl mx-auto">
+            <div className="mb-6">
+              <div className="text-6xl mb-4">💳</div>
+              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+                {partner.welcome_message || `Find Your Perfect Credit Card`}
+              </h2>
+              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+                Answer 3 quick questions to get personalized recommendations tailored just for you
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl mb-2">⚡</div>
+                  <div className="text-sm font-semibold text-gray-700">Quick</div>
+                  <div className="text-xs text-gray-500">2 minutes</div>
+                </div>
+                <div>
+                  <div className="text-2xl mb-2">🎯</div>
+                  <div className="text-sm font-semibold text-gray-700">Personal</div>
+                  <div className="text-xs text-gray-500">Just for you</div>
+                </div>
+                <div>
+                  <div className="text-2xl mb-2">💰</div>
+                  <div className="text-sm font-semibold text-gray-700">Free</div>
+                  <div className="text-xs text-gray-500">No cost</div>
+                </div>
+              </div>
+            </div>
+            
             <button
               onClick={() => setCurrentStep(2)}
-              className="w-full md:w-auto inline-flex items-center justify-center px-8 py-4 text-base md:text-lg font-medium rounded-lg text-white shadow-lg hover:shadow-xl transition-all"
+              className="w-full py-5 px-8 text-xl font-bold rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 active:scale-95"
               style={{ backgroundColor: customColors.primary }}
             >
-              Get Started
-              <FaArrowRight className="ml-2" />
+              <div className="flex items-center justify-center space-x-3">
+                <span>Get Started</span>
+                <FaArrowRight className="text-lg" />
+              </div>
             </button>
           </div>
         )}
@@ -517,56 +543,57 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
         <div className="max-w-4xl mx-auto">
           {/* Step 1: Profile */}
           {currentStep === 2 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-6">Tell us about yourself</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 md:p-8">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">👋 Tell us about yourself</h3>
+              <p className="text-base text-gray-600 mb-6 md:mb-8 text-center md:text-left">This helps us find your perfect card match</p>
+              
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <label className="block text-base font-semibold text-gray-800 mb-3">Your Name</label>
                   <input
                     type="text"
                     value={userProfile.name}
                     onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
-                    style={{ fontSize: '16px' }}
-                    placeholder="John Doe"
+                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-4 text-lg focus:ring-2 focus:border-blue-500 transition-colors"
+                    placeholder="Enter your full name"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                  <label className="block text-base font-semibold text-gray-800 mb-3">Email Address</label>
                   <input
                     type="email"
                     value={userProfile.email}
                     onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
-                    style={{ fontSize: '16px' }}
-                    placeholder="john@example.com"
+                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-4 text-lg focus:ring-2 focus:border-blue-500 transition-colors"
+                    placeholder="your@email.com"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Credit Score Range</label>
+                  <label className="block text-base font-semibold text-gray-800 mb-3">💳 Credit Score Range</label>
                   <select
                     value={userProfile.creditScore}
                     onChange={(e) => setUserProfile({ ...userProfile, creditScore: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
-                    style={{ fontSize: '16px' }}
+                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-4 text-lg focus:ring-2 focus:border-blue-500 transition-colors appearance-none bg-white"
                   >
-                    <option value="">Select range</option>
-                    <option value="excellent">Excellent (750+)</option>
-                    <option value="good">Good (700-749)</option>
-                    <option value="fair">Fair (650-699)</option>
-                    <option value="poor">Poor (Below 650)</option>
-                    <option value="unknown">I don't know</option>
+                    <option value="">How's your credit?</option>
+                    <option value="excellent">🌟 Excellent (750+)</option>
+                    <option value="good">✅ Good (700-749)</option>
+                    <option value="fair">📈 Fair (650-699)</option>
+                    <option value="poor">🔧 Needs Work (Below 650)</option>
+                    <option value="unknown">🤷 I'm not sure</option>
                   </select>
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Annual Income</label>
+                  <label className="block text-base font-semibold text-gray-800 mb-3">💰 Annual Income</label>
                   <select
                     value={userProfile.annualIncome}
                     onChange={(e) => setUserProfile({ ...userProfile, annualIncome: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:border-transparent"
-                    
+                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-4 text-lg focus:ring-2 focus:border-blue-500 transition-colors appearance-none bg-white"
                   >
-                    <option value="">Select range</option>
+                    <option value="">Select income range</option>
                     <option value="under-30k">Under $30,000</option>
                     <option value="30k-50k">$30,000 - $50,000</option>
                     <option value="50k-75k">$50,000 - $75,000</option>
@@ -574,48 +601,56 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                     <option value="over-100k">Over $100,000</option>
                   </select>
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Primary Goal</label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                
+                <div>
+                  <label className="block text-base font-semibold text-gray-800 mb-4">🎯 What's your main goal?</label>
+                  <div className="space-y-3">
                     {[
-                      { value: 'travel', label: 'Travel Rewards', icon: <FaPlane /> },
-                      { value: 'cashback', label: 'Cash Back', icon: <FaDollarSign /> },
-                      { value: 'building-credit', label: 'Building Credit', icon: <FaGraduationCap /> }
+                      { value: 'travel', label: 'Travel Rewards', icon: <FaPlane />, desc: 'Earn points and miles for trips' },
+                      { value: 'cashback', label: 'Cash Back', icon: <FaDollarSign />, desc: 'Get money back on purchases' },
+                      { value: 'building-credit', label: 'Building Credit', icon: <FaGraduationCap />, desc: 'Improve my credit score' }
                     ].map((goal) => (
                       <button
                         key={goal.value}
                         onClick={() => setUserProfile({ ...userProfile, primaryGoal: goal.value })}
-                        className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        className={`w-full p-4 border-2 rounded-xl text-left transition-all ${
                           userProfile.primaryGoal === goal.value
-                            ? 'border-current text-white'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                            ? 'border-current text-white shadow-lg'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:shadow-md'
                         }`}
                         style={{
                           backgroundColor: userProfile.primaryGoal === goal.value ? customColors.primary : undefined,
                           borderColor: userProfile.primaryGoal === goal.value ? customColors.primary : undefined
                         }}
                       >
-                        <div className="text-2xl mb-2">{goal.icon}</div>
-                        <div className="font-medium">{goal.label}</div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-2xl">{goal.icon}</div>
+                          <div>
+                            <div className="font-bold text-lg">{goal.label}</div>
+                            <div className={`text-sm ${userProfile.primaryGoal === goal.value ? 'text-white opacity-90' : 'text-gray-500'}`}>
+                              {goal.desc}
+                            </div>
+                          </div>
+                        </div>
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
-              <div className="mt-8 flex justify-between">
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Back
-                </button>
+              <div className="mt-10 space-y-3">
                 <button
                   onClick={() => setCurrentStep(3)}
                   disabled={!userProfile.name || !userProfile.email || !userProfile.creditScore || !userProfile.primaryGoal}
-                  className="px-6 py-2 rounded-md text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 px-6 text-lg font-bold text-white rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95"
                   style={{ backgroundColor: customColors.primary }}
                 >
-                  Continue
+                  Continue to Spending →
+                </button>
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="w-full py-3 px-6 text-base font-medium border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  ← Back
                 </button>
               </div>
             </div>
@@ -623,69 +658,116 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
 
           {/* Step 2: Spending */}
           {currentStep === 3 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-6">Monthly Spending</h3>
-              <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
-                Help us understand your spending patterns to recommend the best rewards cards.
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 md:p-8">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">💳 Monthly Spending</h3>
+              <p className="text-base text-gray-600 mb-6 md:mb-8 text-center md:text-left">
+                Tell us where you spend to find cards with the best rewards for you.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {spendingCategories.map((category, index) => (
-                  <div key={category.name} className="flex items-center space-x-3 md:space-x-4">
-                    <div 
-                      className="p-2 md:p-3 rounded-lg text-white flex-shrink-0"
-                      style={{ backgroundColor: customColors.secondary }}
-                    >
-                      <div className="text-sm md:text-base">
-                        {category.icon}
+              
+              {/* Mobile: Ultra-Compact List Layout */}
+              <div className="block md:hidden">
+                <div className="space-y-3">
+                  {spendingCategories.map((category, index) => (
+                    <div key={category.name} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <div className="flex items-center p-3">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white mr-3 flex-shrink-0"
+                          style={{ backgroundColor: customColors.secondary }}
+                        >
+                          <div className="text-lg">
+                            {category.icon}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900 text-sm mb-1">{category.name}</div>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                            <input
+                              type="number"
+                              value={category.amount || ''}
+                              onChange={(e) => {
+                                const newCategories = [...spendingCategories]
+                                newCategories[index].amount = parseInt(e.target.value) || 0
+                                setSpendingCategories(newCategories)
+                              }}
+                              className="w-full pl-8 pr-12 py-2.5 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="0"
+                              style={{ fontSize: '16px' }}
+                            />
+                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">/mo</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {category.name}
-                      </label>
-                      <div className="flex items-center">
-                        <span className="text-gray-500 mr-2 text-lg">$</span>
-                        <input
-                          type="number"
-                          value={category.amount || ''}
-                          onChange={(e) => {
-                            const newCategories = [...spendingCategories]
-                            newCategories[index].amount = parseInt(e.target.value) || 0
-                            setSpendingCategories(newCategories)
-                          }}
-                          className="flex-1 border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
-                          style={{ fontSize: '16px' }}
-                          placeholder="0"
-                        />
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop: Original Layout */}
+              <div className="hidden md:block space-y-6">
+                {spendingCategories.map((category, index) => (
+                  <div key={category.name} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <div className="flex items-center space-x-4">
+                      <div 
+                        className="p-3 rounded-full text-white flex-shrink-0"
+                        style={{ backgroundColor: customColors.secondary }}
+                      >
+                        <div className="text-xl">
+                          {category.icon}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <label className="block text-lg font-semibold text-gray-800 mb-2">
+                          {category.name}
+                        </label>
+                        <div className="flex items-center bg-white rounded-lg border-2 border-gray-300 focus-within:border-blue-500 transition-colors">
+                          <span className="text-gray-500 pl-4 text-xl font-bold">$</span>
+                          <input
+                            type="number"
+                            value={category.amount || ''}
+                            onChange={(e) => {
+                              const newCategories = [...spendingCategories]
+                              newCategories[index].amount = parseInt(e.target.value) || 0
+                              setSpendingCategories(newCategories)
+                            }}
+                            className="flex-1 px-2 py-4 text-lg bg-transparent border-0 focus:ring-0 focus:outline-none"
+                            placeholder="0"
+                          />
+                          <span className="text-gray-400 pr-4 text-sm">/month</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900">Total Monthly Spending:</span>
+                  <div>
+                    <span className="text-lg font-semibold text-gray-900">Total Monthly Spending</span>
+                    <div className="text-sm text-gray-600">This helps us calculate your rewards potential</div>
+                  </div>
                   <span 
-                    className="text-xl font-bold"
+                    className="text-3xl font-bold"
                     style={{ color: customColors.primary }}
                   >
                     ${spendingCategories.reduce((sum, cat) => sum + cat.amount, 0).toLocaleString()}
                   </span>
                 </div>
               </div>
-              <div className="mt-6 md:mt-8 flex flex-col md:flex-row justify-between space-y-3 md:space-y-0 md:space-x-4">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="w-full md:w-auto px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
-                >
-                  Back
-                </button>
+              <div className="mt-10 space-y-3">
                 <button
                   onClick={generateRecommendations}
-                  className="w-full md:w-auto px-6 py-3 rounded-md text-white font-medium"
+                  className="w-full py-4 px-6 text-lg font-bold text-white rounded-xl shadow-lg transition-all transform active:scale-95"
                   style={{ backgroundColor: customColors.primary }}
                 >
-                  Get My Recommendations
+                  🎯 Get My Recommendations
+                </button>
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="w-full py-3 px-6 text-base font-medium border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  ← Back
                 </button>
               </div>
             </div>
@@ -693,124 +775,203 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
 
           {/* Step 3: Recommendations */}
           {currentStep === 4 && (
-            <div>
-              <div className="text-center mb-6 md:mb-8 px-4">
-                <h3 className="text-xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
-                  Your Personalized Recommendations
+            <div className="px-3 md:px-0">
+              <div className="text-center mb-6 md:mb-8">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
+                  🎯 Your Top Card Matches
                 </h3>
-                <p className="text-sm md:text-base text-gray-600">
-                  Based on your profile and spending habits, here are the best credit cards for you:
+                <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+                  Based on your spending, here are your best options:
                 </p>
               </div>
 
               <div className="space-y-4 md:space-y-6">
                 {recommendations.map((card, index) => (
-                  <div key={card.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                  <div key={card.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                    {/* Mobile-First Card Design */}
                     <div className="p-4 md:p-6">
-                      {/* Mobile-optimized card header */}
-                      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 space-y-3 md:space-y-0">
-                        <div className="flex flex-col space-y-3">
-                          {index === 0 && (
-                            <div 
-                              className="self-start px-3 py-1 rounded-full text-xs font-medium text-white"
-                              style={{ backgroundColor: customColors.accent }}
-                            >
-                              <FaStar className="inline mr-1" />
-                              Best Match
-                            </div>
-                          )}
-                          <div className="flex items-center space-x-3 md:space-x-4">
+                      {/* Best Match Badge - Mobile Prominent */}
+                      {index === 0 && (
+                        <div className="mb-4 flex justify-center md:justify-start">
+                          <div 
+                            className="px-4 py-2 rounded-full text-sm font-bold text-white shadow-md flex items-center"
+                            style={{ backgroundColor: customColors.accent }}
+                          >
+                            <FaStar className="mr-2" />
+                            BEST MATCH FOR YOU
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Card Header */}
+                      <div className="text-center md:text-left mb-4 md:mb-6">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                          <div className="flex flex-col items-center md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
                             <img
                               src={card.card_image_url}
                               alt={card.card_name}
-                              className="w-12 h-8 md:w-16 md:h-10 object-contain flex-shrink-0"
+                              className="w-16 h-10 md:w-24 md:h-14 object-contain"
                             />
-                            <div className="min-w-0">
-                              <h4 className="text-lg md:text-xl font-semibold text-gray-900 truncate">{card.card_name}</h4>
+                            <div>
+                              <h4 className="text-lg md:text-2xl font-bold text-gray-900 mb-1 leading-tight">{card.card_name}</h4>
                               <p className="text-sm md:text-base text-gray-600">{card.issuer}</p>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-left md:text-right self-start md:self-auto">
-                          <div className="text-sm text-gray-500">Annual Fee</div>
-                          <div className="font-semibold text-lg">
-                            {card.annual_fee === 0 ? 'No Fee' : `$${card.annual_fee}`}
+                          <div className="mt-3 md:mt-0 text-center md:text-right">
+                            <div className="text-xs md:text-sm text-gray-500">Annual Fee</div>
+                            <div className="text-lg md:text-2xl font-bold" style={{ color: card.annual_fee === 0 ? customColors.accent : customColors.primary }}>
+                              {card.annual_fee === 0 ? 'FREE' : `$${card.annual_fee}`}
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
+                      {/* Mobile: Compact Key Metrics */}
+                      <div className="block md:hidden mb-4">
+                        <div className="space-y-2">
+                          {card.intro_bonus && (
+                            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <span className="text-lg mr-2">🎁</span>
+                                  <span className="font-medium text-gray-800 text-sm">Welcome Bonus</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-orange-700 text-sm">{card.intro_bonus}</div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <span className="text-lg mr-2">💰</span>
+                                <span className="font-medium text-gray-800 text-sm">Rewards</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-green-700 text-sm">{card.rewards_rate}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="p-2 bg-blue-50 rounded border border-blue-200 text-center">
+                              <div className="text-blue-600 text-base mb-1">📊</div>
+                              <div className="font-medium text-gray-800 text-xs">APR</div>
+                              <div className="font-bold text-blue-700 text-xs">{card.intro_apr || card.regular_apr}</div>
+                            </div>
+
+                            <div className="p-2 bg-purple-50 rounded border border-purple-200 text-center">
+                              <div className="text-purple-600 text-base mb-1">✨</div>
+                              <div className="font-medium text-gray-800 text-xs">Best For</div>
+                              <div className="font-bold text-purple-700 text-xs truncate">{card.best_for}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Desktop: Original Key Highlights */}
+                      <div className="hidden md:block space-y-3 mb-6">
                         {card.intro_bonus && (
-                          <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg">
-                            <FaGift 
-                              className="mx-auto mb-2 text-lg md:text-2xl"
-                              style={{ color: customColors.accent }}
-                            />
-                            <div className="text-xs md:text-sm text-gray-600">Welcome Bonus</div>
-                            <div className="font-semibold text-sm md:text-base">{card.intro_bonus}</div>
-                            {card.bonus_requirement && (
-                              <div className="text-xs text-gray-500 mt-1 hidden md:block">{card.bonus_requirement}</div>
-                            )}
+                          <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
+                            <div className="flex items-center space-x-3">
+                              <div 
+                                className="p-2 rounded-full text-white"
+                                style={{ backgroundColor: customColors.accent }}
+                              >
+                                <FaGift className="text-lg" />
+                              </div>
+                              <div>
+                                <div className="font-semibold text-gray-900 text-base">Welcome Bonus</div>
+                                <div className="text-lg font-bold" style={{ color: customColors.accent }}>{card.intro_bonus}</div>
+                              </div>
+                            </div>
                           </div>
                         )}
                         
-                        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg">
-                          <FaPercent 
-                            className="mx-auto mb-2 text-lg md:text-2xl"
-                            style={{ color: customColors.secondary }}
-                          />
-                          <div className="text-xs md:text-sm text-gray-600">Rewards Rate</div>
-                          <div className="font-semibold text-sm md:text-base">{card.rewards_rate}</div>
-                          <div className="text-xs text-gray-500 mt-1">{card.rewards_type}</div>
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                          <div className="flex items-center space-x-3">
+                            <div 
+                              className="p-2 rounded-full text-white"
+                              style={{ backgroundColor: customColors.secondary }}
+                            >
+                              <FaPercent className="text-lg" />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-gray-900 text-base">Rewards Rate</div>
+                              <div className="text-lg font-bold" style={{ color: customColors.secondary }}>{card.rewards_rate}</div>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg">
-                          <FaCreditCard 
-                            className="mx-auto mb-2 text-lg md:text-2xl"
-                            style={{ color: customColors.primary }}
-                          />
-                          <div className="text-xs md:text-sm text-gray-600">APR</div>
-                          <div className="font-semibold text-sm md:text-base">{card.intro_apr || card.regular_apr}</div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {card.intro_apr ? 'Intro Rate' : 'Regular Rate'}
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                          <div className="flex items-center space-x-3">
+                            <div 
+                              className="p-2 rounded-full text-white"
+                              style={{ backgroundColor: customColors.primary }}
+                            >
+                              <FaCreditCard className="text-lg" />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-gray-900 text-base">Interest Rate</div>
+                              <div className="text-lg font-bold" style={{ color: customColors.primary }}>{card.intro_apr || card.regular_apr}</div>
+                            </div>
                           </div>
                         </div>
                       </div>
 
+                      {/* Top Benefits - Mobile Friendly */}
                       {card.key_benefits && card.key_benefits.length > 0 && (
-                        <div className="mb-6">
-                          <h5 className="font-medium text-gray-900 mb-2">Key Benefits:</h5>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {card.key_benefits.slice(0, 3).map((benefit, idx) => (
-                              <li key={idx} className="flex items-center">
+                        <div className="mb-4 md:mb-6">
+                          <h5 className="font-bold text-gray-900 mb-2 text-sm md:text-lg">✨ Key Benefits</h5>
+                          <div className="space-y-1 md:space-y-2">
+                            {card.key_benefits.slice(0, 2).map((benefit, idx) => (
+                              <div key={idx} className="flex items-start space-x-2 p-2 rounded bg-gray-50">
                                 <FaCheck 
-                                  className="mr-2 text-xs"
+                                  className="mt-0.5 text-sm flex-shrink-0"
                                   style={{ color: customColors.accent }}
                                 />
-                                {benefit}
-                              </li>
+                                <span className="text-xs md:text-base text-gray-700 leading-relaxed">{benefit}</span>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         </div>
                       )}
 
+                      {/* Custom Description */}
                       {card.custom_description && (
-                        <div className="mb-6 p-4 bg-green-50 rounded-lg">
-                          <p className="text-sm text-green-800">{card.custom_description}</p>
+                        <div className="mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
+                          <p className="text-base text-green-800 leading-relaxed">{card.custom_description}</p>
                         </div>
                       )}
 
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
-                        <div className="text-sm text-gray-600">
-                          Best for: <span className="font-medium">{card.best_for}</span>
+                      {/* Best For - Desktop Only (mobile shows in grid above) */}
+                      <div className="hidden md:block mb-6 p-3 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                          <span className="text-sm text-gray-600">Perfect for: </span>
+                          <span className="font-semibold text-gray-900 text-base">{card.best_for}</span>
                         </div>
+                      </div>
+
+                      {/* Apply Button - Mobile Prominent */}
+                      <div className="mt-6">
                         <button
                           onClick={() => handleApplyClick(card)}
-                          className="w-full md:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-white font-medium hover:shadow-lg transition-all"
-                          style={{ backgroundColor: customColors.primary }}
+                          className="w-full py-4 px-4 font-bold text-white rounded-xl shadow-lg transition-all transform active:scale-95"
+                          style={{ 
+                            backgroundColor: customColors.primary,
+                          }}
                         >
-                          Apply Now
-                          <FaExternalLinkAlt className="ml-2 text-sm" />
+                          <div className="flex items-center justify-center space-x-2">
+                            <span className="text-base">Apply Now</span>
+                            <FaExternalLinkAlt className="text-sm" />
+                          </div>
+                          {index === 0 && (
+                            <div className="text-xs opacity-90 mt-1">
+                              🏆 #1 Pick
+                            </div>
+                          )}
                         </button>
                       </div>
                     </div>

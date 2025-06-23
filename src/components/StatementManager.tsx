@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { FaTrash, FaCalendar, FaFileAlt, FaUniversity, FaDollarSign } from 'react-icons/fa';
+import { useSpendingData } from '@/contexts/SpendingDataContext';
 
 interface Statement {
   id: string;
@@ -24,56 +25,8 @@ interface StatementManagerProps {
 }
 
 export default function StatementManager({ onStatementDeleted, refreshTrigger, recentUploads = [] }: StatementManagerProps) {
-  const [statements, setStatements] = useState<Statement[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, loading, error, refreshStatements } = useSpendingData();
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchStatements = async () => {
-    try {
-      setLoading(true);
-      console.log('StatementManager: Fetching statements...');
-      
-      const response = await fetch('/api/delete-statement');
-      console.log('StatementManager: Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('StatementManager: Error response:', errorText);
-        
-        if (response.status === 500 && errorText.includes('42P01')) {
-          setError('Database table not set up yet. Please contact support.');
-          return;
-        }
-        
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('StatementManager: Received data:', data);
-      
-      if (data.error) {
-        console.error('StatementManager: API error:', data.error);
-        setError(data.error);
-        return;
-      }
-      
-      setStatements(data.statements || []);
-      setError(null);
-      
-    } catch (err) {
-      console.error('StatementManager: Fetch error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch statements';
-      
-      if (errorMessage.includes('42P01')) {
-        setError('Database not set up yet. Please visit /api/setup-db to initialize.');
-      } else {
-        setError(errorMessage);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const deleteStatement = async (statementId: string) => {
     if (!confirm('Are you sure you want to delete this statement? This action cannot be undone.')) {
@@ -87,7 +40,8 @@ export default function StatementManager({ onStatementDeleted, refreshTrigger, r
       });
 
       if (response.ok) {
-        setStatements(statements.filter(s => s.id !== statementId));
+        // Refresh statements from context
+        await refreshStatements();
         onStatementDeleted?.();
       } else {
         alert('Failed to delete statement');
@@ -116,12 +70,8 @@ export default function StatementManager({ onStatementDeleted, refreshTrigger, r
     }).format(amount);
   };
 
-  useEffect(() => {
-    fetchStatements();
-  }, [refreshTrigger]);
-
   const handleRefresh = () => {
-    fetchStatements();
+    refreshStatements();
   };
 
   if (loading) {
@@ -171,6 +121,8 @@ export default function StatementManager({ onStatementDeleted, refreshTrigger, r
       </div>
     );
   }
+
+  const statements = data.statements || [];
 
   if (statements.length === 0) {
     return (

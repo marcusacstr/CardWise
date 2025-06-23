@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
-import { FaEnvelope, FaLock, FaCreditCard, FaEye, FaEyeSlash, FaSpinner, FaUser, FaCheck } from 'react-icons/fa'
+import { FaCreditCard, FaEye, FaEyeSlash, FaSpinner, FaUser, FaCheck } from 'react-icons/fa'
 
 function SignUpContent() {
   const router = useRouter()
@@ -297,7 +297,6 @@ function SignUpContent() {
                 Email address
               </label>
               <div className="mt-1 relative">
-                <FaEnvelope className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   id="email"
                   name="email"
@@ -311,10 +310,11 @@ function SignUpContent() {
                       setErrors({...errors, email: ''})
                     }
                   }}
-                  className={`appearance-none block w-full pl-10 pr-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Enter your email"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
               {errors.email && (
@@ -327,7 +327,6 @@ function SignUpContent() {
                 Password
               </label>
               <div className="mt-1 relative">
-                <FaLock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   id="password"
                   name="password"
@@ -345,14 +344,15 @@ function SignUpContent() {
                       setErrors({...errors, confirmPassword: ''})
                     }
                   }}
-                  className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
+                  className={`appearance-none block w-full pr-12 px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Create a password"
+                  style={{ fontSize: '16px' }}
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
@@ -368,7 +368,6 @@ function SignUpContent() {
                 Confirm password
               </label>
               <div className="mt-1 relative">
-                <FaLock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -382,14 +381,15 @@ function SignUpContent() {
                       setErrors({...errors, confirmPassword: ''})
                     }
                   }}
-                  className={`appearance-none block w-full pl-10 pr-10 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
+                  className={`appearance-none block w-full pr-12 px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                     errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Confirm your password"
+                  style={{ fontSize: '16px' }}
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}

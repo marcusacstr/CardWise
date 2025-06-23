@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`Successfully parsed ${parseResult.transactions.length} transactions`);
 
-    // Analyze transactions
-    const spendingAnalysis = analyzeTransactions(parseResult.transactions);
+    // Analyze transactions with statement period information
+    const spendingAnalysis = analyzeTransactions(parseResult.transactions, parseResult.statementPeriod);
     console.log('Spending analysis completed');
 
     // Generate card recommendations

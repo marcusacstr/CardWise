@@ -61,19 +61,22 @@ export function extractReportPeriod(analysis: SpendingAnalysis): { month: number
 
 // Extract date range from spending analysis
 export function extractDateRange(analysis: SpendingAnalysis): { start: Date; end: Date } {
-  const now = new Date();
-  let start = new Date(now.getFullYear(), now.getMonth(), 1);
-  let end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  
   // Try to extract from monthly trends if available
   if (analysis.monthlyTrends && analysis.monthlyTrends.length > 0) {
     const trends = analysis.monthlyTrends;
     const earliestTrend = trends[0];
     const latestTrend = trends[trends.length - 1];
     
-    start = new Date(earliestTrend.year, new Date(`${earliestTrend.month} 1, 2000`).getMonth(), 1);
-    end = new Date(latestTrend.year, new Date(`${latestTrend.month} 1, 2000`).getMonth() + 1, 0);
+    const start = new Date(earliestTrend.year, new Date(`${earliestTrend.month} 1, 2000`).getMonth(), 1);
+    const end = new Date(latestTrend.year, new Date(`${latestTrend.month} 1, 2000`).getMonth() + 1, 0);
+    
+    return { start, end };
   }
+  
+  // Fallback to current date if no monthly trends
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   
   return { start, end };
 }
@@ -251,6 +254,50 @@ export async function getReportsForChart(userId?: string): Promise<{ month: stri
     }));
   } catch (error) {
     console.error('Error in getReportsForChart:', error);
+    return [];
+  }
+}
+
+// Get statements for chart data based on statement periods (last 12 months)
+export async function getStatementsForChart(userId?: string): Promise<{ month: string; year: number; totalSpent: number; statementPeriod: string }[]> {
+  const supabase = createClientComponentClient();
+  
+  try {
+    const now = new Date();
+    const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+    
+    let query = supabase
+      .from('user_statements')
+      .select('statement_period_start, statement_period_end, total_amount, bank_name')
+      .gte('statement_period_start', twelveMonthsAgo.toISOString())
+      .order('statement_period_start', { ascending: true });
+    
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching statement chart data:', error);
+      return [];
+    }
+    
+    return (data || [])
+      .filter(statement => statement.statement_period_start && statement.total_amount)
+      .map(statement => {
+        const statementDate = new Date(statement.statement_period_start);
+        return {
+          month: statementDate.toLocaleDateString('en-US', { month: 'short' }),
+          year: statementDate.getFullYear(),
+          totalSpent: statement.total_amount,
+          statementPeriod: statement.statement_period_start && statement.statement_period_end 
+            ? `${new Date(statement.statement_period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(statement.statement_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+            : 'N/A'
+        };
+      });
+  } catch (error) {
+    console.error('Error in getStatementsForChart:', error);
     return [];
   }
 } 
