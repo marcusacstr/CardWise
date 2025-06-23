@@ -27,9 +27,9 @@ const faqs: FAQItem[] = [
     category: "Platform"
   },
   {
-    question: "Is my clients' data secure and private?",
-    answer: "Yes, client data security and privacy are our highest priorities. We use advanced encryption and comply with industry-standard data protection regulations. Client data is processed securely and not stored longer than necessary for the analysis, nor is it shared with third parties without explicit consent.",
-    category: "Security & Data"
+    question: "What data does CardWise collect and store?",
+    answer: "CardWise only analyzes transaction amounts and categories from uploaded statements to provide recommendations. We do not save, store, or sell any personal information, account numbers, or sensitive financial data. All analysis is done in real-time and no personal data is retained after processing.",
+    category: "Privacy & Data"
   },
   {
     question: "What level of branding customization is available?",
@@ -68,7 +68,7 @@ const categories = Array.from(new Set(faqs.map(faq => faq.category)));
 const getCategoryIcon = (category: string) => {
   switch (category) {
     case 'Platform': return FaQuestionCircle;
-    case 'Security & Data': return FaShieldAlt;
+    case 'Privacy & Data': return FaShieldAlt;
     case 'Integration': case 'Support': return FaCogs;
     case 'Partnership': case 'Branding': case 'Getting Started': return FaHandshake;
     default: return FaQuestionCircle;
@@ -78,7 +78,7 @@ const getCategoryIcon = (category: string) => {
 const getCategoryColor = (category: string) => {
   switch (category) {
     case 'Platform': return 'bg-blue-100 text-blue-700 border-blue-200';
-    case 'Security & Data': return 'bg-red-100 text-red-700 border-red-200';
+    case 'Privacy & Data': return 'bg-blue-100 text-blue-700 border-blue-200';
     case 'Integration': case 'Support': return 'bg-purple-100 text-purple-700 border-purple-200';
     case 'Partnership': case 'Branding': case 'Getting Started': return 'bg-green-100 text-green-700 border-green-200';
     default: return 'bg-gray-100 text-gray-700 border-gray-200';

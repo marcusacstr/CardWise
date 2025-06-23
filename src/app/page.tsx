@@ -439,8 +439,8 @@ export default function Home() {
             />
             
             <FAQItem 
-              question="Is client data secure?"
-              answer="Absolutely. We don't store or share any personal information - only credit card usage patterns for analysis. No account numbers, personal details, or sensitive data is retained. Your clients' privacy is fully protected."
+              question="What data does CardWise collect?"
+              answer="CardWise only analyzes transaction amounts and spending categories to provide recommendations. We never save, store, or sell personal information, account numbers, or sensitive financial data. All analysis happens in real-time with complete privacy protection."
             />
             
             <FAQItem 

@@ -67,7 +67,7 @@ export default function PricingPage() {
         'Custom onboarding & training'
       ],
       highlight: false,
-      buttonText: 'Contact Sales',
+      buttonText: 'Get Started',
       buttonLink: '/contact',
       icon: FaShieldAlt,
       color: 'purple'

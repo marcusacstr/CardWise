@@ -61,8 +61,8 @@ export default function AboutPage() {
                   <FaRocket className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Growing Fast</h3>
-                  <p className="text-gray-600 text-sm">Over 500+ partners trust CardWise to power their recommendations</p>
+                  <h3 className="font-semibold text-gray-900 mb-1">Innovation Leader</h3>
+                  <p className="text-gray-600 text-sm">Advanced AI technology transforming credit card recommendations</p>
                 </div>
               </div>
             </div>
@@ -96,8 +96,8 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <FaShieldAlt className="text-orange-600 text-2xl" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Security</h3>
-                <p className="text-gray-600 text-sm">Bank-level security for all data and transactions</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Privacy First</h3>
+                <p className="text-gray-600 text-sm">We only analyze transaction amounts - no personal or financial data saved or sold</p>
               </div>
             </div>
           </div>
@@ -121,10 +121,10 @@ export default function AboutPage() {
               <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <FaShieldAlt className="text-green-600 text-2xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Data Security</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Privacy & Data Protection</h3>
               <p className="text-gray-600 leading-relaxed">
-                We prioritize the security and privacy of all data, using robust encryption 
-                and compliance measures that exceed industry standards.
+                CardWise analyzes only transaction amounts and categories to provide recommendations. 
+                We never save, store, or sell your personal or financial information.
               </p>
             </div>
 
@@ -276,29 +276,25 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto container-padding">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Trusted by Industry Leaders
+              Leading Innovation in Credit Card Recommendations
             </h2>
             <p className="text-xl text-green-100 max-w-2xl mx-auto">
-              Join hundreds of partners already earning with CardWise
+              Empowering financial professionals with AI-powered insights
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold mb-2">500+</div>
-              <div className="text-green-100">Active Partners</div>
+              <div className="text-4xl md:text-5xl font-bold mb-2">AI-Powered</div>
+              <div className="text-green-100">Advanced machine learning algorithms</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold mb-2">50K+</div>
-              <div className="text-green-100">Recommendations</div>
+              <div className="text-4xl md:text-5xl font-bold mb-2">Privacy First</div>
+              <div className="text-green-100">No personal data stored or sold</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold mb-2">$2M+</div>
-              <div className="text-green-100">Partner Revenue</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold mb-2">98%</div>
-              <div className="text-green-100">Satisfaction Rate</div>
+              <div className="text-4xl md:text-5xl font-bold mb-2">100%</div>
+              <div className="text-green-100">Your affiliate earnings kept</div>
             </div>
           </div>
         </div>
