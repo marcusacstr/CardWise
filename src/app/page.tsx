@@ -359,32 +359,32 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mobile-feature-stack md:mobile-grid-auto tablet-grid-3">
+            <div className="text-center mobile-feature-item">
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-white">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Brand Your Portal</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3 mobile-heading-sm">Brand Your Portal</h3>
               <p className="text-gray-600">
                 Customize your white-label credit card tool in minutes — no code needed.
               </p>
             </div>
             
-            <div className="text-center">
+            <div className="text-center mobile-feature-item">
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaUpload className="text-xl text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Let Users Upload Their Spending</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3 mobile-heading-sm">Let Users Upload Their Spending</h3>
               <p className="text-gray-600">
                 They can securely upload statements or enter spending habits manually.
               </p>
             </div>
             
-            <div className="text-center">
+            <div className="text-center mobile-feature-item">
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FaDollarSign className="text-xl text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Recommend Cards — and Earn</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3 mobile-heading-sm">Recommend Cards — and Earn</h3>
               <p className="text-gray-600">
                 Our AI analyzes their spend and recommends the best cards. You earn affiliate revenue from every signup.
               </p>

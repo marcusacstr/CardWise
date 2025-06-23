@@ -114,7 +114,7 @@ export default function PricingPage() {
       {/* Pricing Cards Section */}
       <section className="section-padding">
         <div className="max-w-7xl mx-auto container-padding">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mobile-pricing-stack tablet-pricing-grid">
             {pricingTiers.map((tier, index) => {
               const IconComponent = tier.icon;
               return (

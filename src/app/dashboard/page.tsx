@@ -1078,7 +1078,7 @@ export default function Dashboard() {
 
         {/* Upload Section - Only show if no result */}
         {!result && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 mobile-dashboard-grid tablet-dashboard-grid">
             <button
               onClick={() => { console.log('Upload button clicked, triggering file input'); const fileInput = document.getElementById('file-upload'); console.log('File input element:', fileInput); fileInput?.click(); }}
               className="bg-green-600 hover:bg-green-700 text-white rounded-lg p-4 md:p-6 flex flex-col items-center space-y-2 transition-colors mobile-button touch-button min-h-[120px]"
@@ -1630,7 +1630,7 @@ export default function Dashboard() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mobile-dashboard-grid tablet-dashboard-grid">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -1848,7 +1848,7 @@ export default function Dashboard() {
                 {/* Add new entry */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium text-gray-900 mb-3">Add Spending Category</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mobile-card-grid tablet-card-grid">
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}

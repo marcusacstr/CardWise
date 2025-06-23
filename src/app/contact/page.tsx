@@ -157,7 +157,7 @@ export default function ContactPage() {
                   </div>
 
                   {/* Basic Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-form-layout tablet-form-grid">
                     <div>
                       <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
                         Full Name *
@@ -189,7 +189,7 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-form-layout tablet-form-grid">
                     <div>
                       <label htmlFor="company" className="block text-sm font-semibold text-gray-700 mb-2">
                         Company / Organization *

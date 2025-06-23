@@ -424,30 +424,30 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
     >
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-3 md:space-x-4">
               {partner.logo_url && (
                 <img
                   src={partner.logo_url}
                   alt={partner.company_name}
-                  className="h-10 w-auto"
+                  className="h-8 md:h-10 w-auto flex-shrink-0"
                 />
               )}
-              <div>
+              <div className="min-w-0">
                 <h1 
-                  className="text-2xl font-bold"
+                  className="text-lg md:text-2xl font-bold truncate"
                   style={{ color: customColors.primary }}
                 >
                   {partner.custom_app_name}
                 </h1>
-                <p className="text-sm text-gray-600">{partner.custom_tagline}</p>
+                <p className="text-xs md:text-sm text-gray-600 truncate">{partner.custom_tagline}</p>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500">Powered by</div>
+            <div className="text-right self-end md:self-auto">
+              <div className="text-xs md:text-sm text-gray-500">Powered by</div>
               {!partner.hide_cardwise_branding && (
-                <div className="text-sm font-medium text-gray-700">CardWise</div>
+                <div className="text-xs md:text-sm font-medium text-gray-700">CardWise</div>
               )}
             </div>
           </div>
@@ -455,19 +455,19 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
         {/* Welcome Section */}
         {currentStep === 1 && (
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-12 px-4">
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               {partner.welcome_message || `Find Your Perfect Credit Card`}
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-base md:text-xl text-gray-600 mb-6 md:mb-8">
               Answer a few quick questions to get personalized credit card recommendations
             </p>
             <button
               onClick={() => setCurrentStep(2)}
-              className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-lg text-white shadow-lg hover:shadow-xl transition-all"
+              className="w-full md:w-auto inline-flex items-center justify-center px-8 py-4 text-base md:text-lg font-medium rounded-lg text-white shadow-lg hover:shadow-xl transition-all"
               style={{ backgroundColor: customColors.primary }}
             >
               Get Started
@@ -478,12 +478,12 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
 
         {/* Progress Bar */}
         {currentStep > 1 && currentStep < 4 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-center space-x-4">
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center justify-center space-x-2 md:space-x-4 px-4">
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium ${
                       currentStep >= step + 1
                         ? 'text-white'
                         : currentStep === step + 1
@@ -495,11 +495,11 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                                      currentStep === step + 1 ? customColors.primary : undefined
                     }}
                   >
-                    {currentStep > step + 1 ? <FaCheck /> : step}
+                    {currentStep > step + 1 ? <FaCheck className="text-xs" /> : step}
                   </div>
                   {step < 3 && (
                     <div 
-                      className={`w-16 h-1 mx-2 ${
+                      className={`w-8 md:w-16 h-1 mx-1 md:mx-2 ${
                         currentStep > step + 1 ? '' : 'bg-gray-200'
                       }`}
                       style={{
@@ -517,17 +517,17 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
         <div className="max-w-4xl mx-auto">
           {/* Step 1: Profile */}
           {currentStep === 2 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Tell us about yourself</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-6">Tell us about yourself</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                   <input
                     type="text"
                     value={userProfile.name}
                     onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:border-transparent"
-                    
+                    className="w-full border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
+                    style={{ fontSize: '16px' }}
                     placeholder="John Doe"
                   />
                 </div>
@@ -537,8 +537,8 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                     type="email"
                     value={userProfile.email}
                     onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:border-transparent"
-                    
+                    className="w-full border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
+                    style={{ fontSize: '16px' }}
                     placeholder="john@example.com"
                   />
                 </div>
@@ -547,8 +547,8 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                   <select
                     value={userProfile.creditScore}
                     onChange={(e) => setUserProfile({ ...userProfile, creditScore: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:border-transparent"
-                    
+                    className="w-full border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
+                    style={{ fontSize: '16px' }}
                   >
                     <option value="">Select range</option>
                     <option value="excellent">Excellent (750+)</option>
@@ -623,26 +623,28 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
 
           {/* Step 2: Spending */}
           {currentStep === 3 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Monthly Spending</h3>
-              <p className="text-gray-600 mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-6">Monthly Spending</h3>
+              <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">
                 Help us understand your spending patterns to recommend the best rewards cards.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {spendingCategories.map((category, index) => (
-                  <div key={category.name} className="flex items-center space-x-4">
+                  <div key={category.name} className="flex items-center space-x-3 md:space-x-4">
                     <div 
-                      className="p-3 rounded-lg text-white"
+                      className="p-2 md:p-3 rounded-lg text-white flex-shrink-0"
                       style={{ backgroundColor: customColors.secondary }}
                     >
-                      {category.icon}
+                      <div className="text-sm md:text-base">
+                        {category.icon}
+                      </div>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {category.name}
                       </label>
                       <div className="flex items-center">
-                        <span className="text-gray-500 mr-2">$</span>
+                        <span className="text-gray-500 mr-2 text-lg">$</span>
                         <input
                           type="number"
                           value={category.amount || ''}
@@ -651,8 +653,8 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                             newCategories[index].amount = parseInt(e.target.value) || 0
                             setSpendingCategories(newCategories)
                           }}
-                          className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:border-transparent"
-                          
+                          className="flex-1 border border-gray-300 rounded-md px-3 py-3 md:py-2 text-base md:text-sm focus:ring-2 focus:border-transparent"
+                          style={{ fontSize: '16px' }}
                           placeholder="0"
                         />
                       </div>
@@ -671,16 +673,16 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                   </span>
                 </div>
               </div>
-              <div className="mt-8 flex justify-between">
+              <div className="mt-6 md:mt-8 flex flex-col md:flex-row justify-between space-y-3 md:space-y-0 md:space-x-4">
                 <button
                   onClick={() => setCurrentStep(2)}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="w-full md:w-auto px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
                 >
                   Back
                 </button>
                 <button
                   onClick={generateRecommendations}
-                  className="px-6 py-2 rounded-md text-white"
+                  className="w-full md:w-auto px-6 py-3 rounded-md text-white font-medium"
                   style={{ backgroundColor: customColors.primary }}
                 >
                   Get My Recommendations
@@ -692,80 +694,83 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
           {/* Step 3: Recommendations */}
           {currentStep === 4 && (
             <div>
-              <div className="text-center mb-8">
-                <h3 className="text-3xl font-bold text-gray-900 mb-4">
+              <div className="text-center mb-6 md:mb-8 px-4">
+                <h3 className="text-xl md:text-3xl font-bold text-gray-900 mb-3 md:mb-4">
                   Your Personalized Recommendations
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm md:text-base text-gray-600">
                   Based on your profile and spending habits, here are the best credit cards for you:
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {recommendations.map((card, index) => (
                   <div key={card.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center space-x-4">
+                    <div className="p-4 md:p-6">
+                      {/* Mobile-optimized card header */}
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 space-y-3 md:space-y-0">
+                        <div className="flex flex-col space-y-3">
                           {index === 0 && (
                             <div 
-                              className="px-3 py-1 rounded-full text-xs font-medium text-white"
+                              className="self-start px-3 py-1 rounded-full text-xs font-medium text-white"
                               style={{ backgroundColor: customColors.accent }}
                             >
                               <FaStar className="inline mr-1" />
                               Best Match
                             </div>
                           )}
-                          <img
-                            src={card.card_image_url}
-                            alt={card.card_name}
-                            className="w-16 h-10 object-contain"
-                          />
-                          <div>
-                            <h4 className="text-xl font-semibold text-gray-900">{card.card_name}</h4>
-                            <p className="text-gray-600">{card.issuer}</p>
+                          <div className="flex items-center space-x-3 md:space-x-4">
+                            <img
+                              src={card.card_image_url}
+                              alt={card.card_name}
+                              className="w-12 h-8 md:w-16 md:h-10 object-contain flex-shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <h4 className="text-lg md:text-xl font-semibold text-gray-900 truncate">{card.card_name}</h4>
+                              <p className="text-sm md:text-base text-gray-600">{card.issuer}</p>
+                            </div>
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left md:text-right self-start md:self-auto">
                           <div className="text-sm text-gray-500">Annual Fee</div>
-                          <div className="font-semibold">
+                          <div className="font-semibold text-lg">
                             {card.annual_fee === 0 ? 'No Fee' : `$${card.annual_fee}`}
                           </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
                         {card.intro_bonus && (
-                          <div className="text-center p-4 bg-gray-50 rounded-lg">
+                          <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg">
                             <FaGift 
-                              className="mx-auto mb-2 text-2xl"
+                              className="mx-auto mb-2 text-lg md:text-2xl"
                               style={{ color: customColors.accent }}
                             />
-                            <div className="text-sm text-gray-600">Welcome Bonus</div>
-                            <div className="font-semibold">{card.intro_bonus}</div>
+                            <div className="text-xs md:text-sm text-gray-600">Welcome Bonus</div>
+                            <div className="font-semibold text-sm md:text-base">{card.intro_bonus}</div>
                             {card.bonus_requirement && (
-                              <div className="text-xs text-gray-500 mt-1">{card.bonus_requirement}</div>
+                              <div className="text-xs text-gray-500 mt-1 hidden md:block">{card.bonus_requirement}</div>
                             )}
                           </div>
                         )}
                         
-                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg">
                           <FaPercent 
-                            className="mx-auto mb-2 text-2xl"
+                            className="mx-auto mb-2 text-lg md:text-2xl"
                             style={{ color: customColors.secondary }}
                           />
-                          <div className="text-sm text-gray-600">Rewards Rate</div>
-                          <div className="font-semibold">{card.rewards_rate}</div>
+                          <div className="text-xs md:text-sm text-gray-600">Rewards Rate</div>
+                          <div className="font-semibold text-sm md:text-base">{card.rewards_rate}</div>
                           <div className="text-xs text-gray-500 mt-1">{card.rewards_type}</div>
                         </div>
 
-                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg">
                           <FaCreditCard 
-                            className="mx-auto mb-2 text-2xl"
+                            className="mx-auto mb-2 text-lg md:text-2xl"
                             style={{ color: customColors.primary }}
                           />
-                          <div className="text-sm text-gray-600">APR</div>
-                          <div className="font-semibold">{card.intro_apr || card.regular_apr}</div>
+                          <div className="text-xs md:text-sm text-gray-600">APR</div>
+                          <div className="font-semibold text-sm md:text-base">{card.intro_apr || card.regular_apr}</div>
                           <div className="text-xs text-gray-500 mt-1">
                             {card.intro_apr ? 'Intro Rate' : 'Regular Rate'}
                           </div>
@@ -795,17 +800,17 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
                         <div className="text-sm text-gray-600">
                           Best for: <span className="font-medium">{card.best_for}</span>
                         </div>
                         <button
                           onClick={() => handleApplyClick(card)}
-                          className="inline-flex items-center px-6 py-3 rounded-lg text-white font-medium hover:shadow-lg transition-all"
+                          className="w-full md:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-white font-medium hover:shadow-lg transition-all"
                           style={{ backgroundColor: customColors.primary }}
                         >
                           Apply Now
-                          <FaExternalLinkAlt className="ml-2" />
+                          <FaExternalLinkAlt className="ml-2 text-sm" />
                         </button>
                       </div>
                     </div>
@@ -860,9 +865,9 @@ export default function WhiteLabelPortal({ params }: { params: { subdomain: stri
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {cards.map((card) => (
-                  <div key={card.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <div key={card.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <img
                         src={card.card_image_url}
