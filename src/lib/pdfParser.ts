@@ -1,7 +1,13 @@
 import { parse, isValid } from 'date-fns';
 import { ParsedTransaction, CSVParseResult } from './csvParser';
 
-export interface PDFParseResult extends CSVParseResult {}
+export interface PDFParseResult extends CSVParseResult {
+  statementPeriod: {
+    startDate: Date | null;
+    endDate: Date | null;
+    statementDate: Date | null;
+  };
+}
 
 // Enhanced date formats with more variations
 const PDF_DATE_FORMATS = [
@@ -316,11 +322,16 @@ export async function parsePDFStatement(pdfBuffer: ArrayBuffer): Promise<PDFPars
     transactions: [],
     errors: [],
     warnings: [],
+    statementPeriod: {
+      startDate: null,
+      endDate: null,
+      statementDate: null
+    },
     metadata: {
       totalRows: 0,
       validRows: 0,
       invalidRows: 0,
-      detectedFormat: 'pdf',
+      detectedFormat: 'unknown',
       dateRange: {
         start: null,
         end: null
@@ -413,14 +424,39 @@ export async function parsePDFStatement(pdfBuffer: ArrayBuffer): Promise<PDFPars
     
     console.log('Detected format:', detectedFormat, 'Current year:', currentYear);
     
-    // Try multiple parsing strategies on structured text first, then fallback to full text
+    // Try multiple parsing strategies
     let transactions = tryMultipleStrategies(structuredText, currentYear);
-    
     if (transactions.length === 0) {
-      console.log('No transactions found in structured text, trying full text');
+      result.warnings.push('No transactions found in structured text, trying full text');
       transactions = tryMultipleStrategies(fullText, currentYear);
     }
-    
+
+    // Fallback: Try line-by-line regex extraction if all else fails
+    if (transactions.length === 0) {
+      result.warnings.push('No transactions found with main strategies, trying line-by-line extraction');
+      const lines = fullText.split('\n');
+      for (const line of lines) {
+        // Simple regex: date, description, amount
+        const match = line.match(/(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|\w{3} \d{1,2}(?:,? \d{4})?)\s+([^$\d\-+]+?)\s+(-?\$?[\d,]+\.?\d{2}?)/);
+        if (match) {
+          // Try to parse date and amount
+          const date = parseDate(match[1]);
+          const amount = parseAmount(match[3]);
+          if (date && amount !== null) {
+            transactions.push({
+              id: `${date.getTime()}-${transactions.length}`,
+              date,
+              description: match[2].trim(),
+              amount: Math.abs(amount),
+              type: amount < 0 ? 'credit' : 'debit',
+              merchant: match[2].trim(),
+              original_data: { line }
+            });
+          }
+        }
+      }
+    }
+
     result.metadata.totalRows = transactions.length;
     result.metadata.validRows = transactions.length;
     result.transactions = transactions;
