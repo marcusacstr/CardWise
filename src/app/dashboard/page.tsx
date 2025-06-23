@@ -1411,14 +1411,16 @@ export default function Dashboard() {
 
         {/* Top Card Recommendations - Show after analysis */}
         {result && (
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-sm border border-green-200 p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl shadow-lg border-2 border-green-300 p-8 mb-10 relative overflow-hidden">
+            {/* Enhanced visual indicator */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-blue-500"></div>
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-full mr-3">
-                  <FaCreditCard className="text-green-600 text-lg" />
+                <div className="p-3 bg-green-100 rounded-full mr-4 shadow-md">
+                  <FaCreditCard className="text-green-600 text-xl" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">
                     {useEnhancedAI ? '🤖 AI-Enhanced Recommendations' : '🎯 Your Top Recommendation'}
                   </h3>
                   <p className="text-sm text-gray-600">
