@@ -99,6 +99,10 @@ export default function DashboardContent({ user }: { user: User | null }) {
   const [useEnhancedAI, setUseEnhancedAI] = useState(true); // Always enabled
   const [statementRefreshKey, setStatementRefreshKey] = useState(0);
 
+  // Local state to persist analysis data independently of context issues
+  const [localAnalysisData, setLocalAnalysisData] = useState<any>(null);
+  const [localRecommendations, setLocalRecommendations] = useState<any[]>([]);
+
   const spendingCategories = [
     'Dining', 'Groceries', 'Gas', 'Transit', 'Travel', 'Streaming',
     'Department Stores', 'Drug Stores', 'Online Shopping', 'Other'
@@ -301,17 +305,25 @@ export default function DashboardContent({ user }: { user: User | null }) {
         recommendations: recommendations?.length,
         currentCardRewards
       });
+      
+      // Set in context (may be cleared by context issues)
       setAnalysis(analysis);
       setRecommendations(recommendations);
       setCurrentCardRewards(currentCardRewards);
       addUploadedFile(file.name);
       
+      // ALSO set in local state (persists regardless of context issues)
+      setLocalAnalysisData(analysis);
+      setLocalRecommendations(recommendations);
+      console.log('💾 Also saved to local state for persistence');
+      
       // Verify data was set
       setTimeout(() => {
         console.log('🔍 Verifying analysis data after set:', {
-          hasAnalysis: !!data.analysis,
-          transactionCount: data.analysis?.transactionCount,
-          recommendationsCount: data.recommendations?.length
+          contextHasAnalysis: !!data.analysis,
+          contextTransactionCount: data.analysis?.transactionCount,
+          localHasAnalysis: !!localAnalysisData,
+          localTransactionCount: localAnalysisData?.transactionCount
         });
       }, 100);
 
@@ -510,8 +522,13 @@ export default function DashboardContent({ user }: { user: User | null }) {
   // Check if we have analysis data to show results
   const hasStatements = data.statements && data.statements.length > 0;
   const hasManualSpending = data.manualSpending && data.manualSpending.length > 0;
-  // Show analysis if we have valid analysis data, regardless of statement fetch issues
-  const hasAnalysisData = data.analysis && data.analysis.transactionCount > 0;
+  // Show analysis if we have valid analysis data in EITHER context OR local state
+  const hasAnalysisData = (data.analysis && data.analysis.transactionCount > 0) || 
+                         (localAnalysisData && localAnalysisData.transactionCount > 0);
+  
+  // Use local analysis data if context data was cleared
+  const analysisToShow = data.analysis || localAnalysisData;
+  const recommendationsToShow = data.recommendations?.length > 0 ? data.recommendations : localRecommendations;
   
   // Debug logging
   console.log('🔍 Dashboard Debug:', {
@@ -520,9 +537,11 @@ export default function DashboardContent({ user }: { user: User | null }) {
     hasAnalysisData,
     statementsLength: data.statements?.length || 0,
     manualSpendingLength: data.manualSpending?.length || 0,
-    hasAnalysis: !!data.analysis,
-    analysisTransactionCount: data.analysis?.transactionCount || 0,
-    analysisKeys: data.analysis ? Object.keys(data.analysis) : []
+    contextHasAnalysis: !!data.analysis,
+    contextAnalysisTransactionCount: data.analysis?.transactionCount || 0,
+    localHasAnalysis: !!localAnalysisData,
+    localAnalysisTransactionCount: localAnalysisData?.transactionCount || 0,
+    usingAnalysis: analysisToShow === data.analysis ? 'context' : 'local'
   });
 
   const forceRefresh = async () => {
@@ -806,30 +825,30 @@ export default function DashboardContent({ user }: { user: User | null }) {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
                   <p className="text-sm font-medium opacity-90">Total Transactions</p>
-                  <p className="text-2xl font-bold">{data.analysis.transactionCount}</p>
+                  <p className="text-2xl font-bold">{analysisToShow.transactionCount}</p>
                 </div>
                 <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
                   <p className="text-sm font-medium opacity-90">Total Spent</p>
                   <p className="text-2xl font-bold">
                     {formatCurrency(
-                      analysisTimePeriod === '12months' ? data.analysis.totalSpent * 12 :
-                      analysisTimePeriod === 'ytd' ? data.analysis.totalSpent * (new Date().getMonth() + 1) :
-                      data.analysis.totalSpent
+                      analysisTimePeriod === '12months' ? analysisToShow.totalSpent * 12 :
+                      analysisTimePeriod === 'ytd' ? analysisToShow.totalSpent * (new Date().getMonth() + 1) :
+                      analysisToShow.totalSpent
                     )}
                   </p>
                 </div>
                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg">
                   <p className="text-sm font-medium opacity-90">Avg Transaction</p>
-                  <p className="text-2xl font-bold">{formatCurrency(data.analysis.averageTransactionAmount)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(analysisToShow.averageTransactionAmount)}</p>
                 </div>
                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 rounded-lg">
                   <p className="text-sm font-medium opacity-90">Top Category</p>
-                  <p className="text-lg font-bold">{data.analysis.categoryBreakdown[0]?.category || 'N/A'}</p>
+                  <p className="text-lg font-bold">{analysisToShow.categoryBreakdown[0]?.category || 'N/A'}</p>
                   <p className="text-sm opacity-90">
                     {formatCurrency(
-                      analysisTimePeriod === '12months' ? (data.analysis.categoryBreakdown[0]?.amount || 0) * 12 :
-                      analysisTimePeriod === 'ytd' ? (data.analysis.categoryBreakdown[0]?.amount || 0) * (new Date().getMonth() + 1) :
-                      data.analysis.categoryBreakdown[0]?.amount || 0
+                      analysisTimePeriod === '12months' ? (analysisToShow.categoryBreakdown[0]?.amount || 0) * 12 :
+                      analysisTimePeriod === 'ytd' ? (analysisToShow.categoryBreakdown[0]?.amount || 0) * (new Date().getMonth() + 1) :
+                      analysisToShow.categoryBreakdown[0]?.amount || 0
                     )}
                   </p>
                 </div>
@@ -839,7 +858,7 @@ export default function DashboardContent({ user }: { user: User | null }) {
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-4">Spending by Category</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {data.analysis.categoryBreakdown
+                  {analysisToShow.categoryBreakdown
                     .sort((a, b) => b.amount - a.amount)
                     .map((category, index) => {
                       const adjustedAmount = 
@@ -875,18 +894,18 @@ export default function DashboardContent({ user }: { user: User | null }) {
             {/* Enhanced Recommendations */}
             {data.recommendations.length > 0 && (
               <EnhancedRecommendations
-                transactions={data.analysis?.transactions || []}
+                transactions={analysisToShow?.transactions || []}
                 userProfile={{
                   annual_income: 75000,
                   credit_score: 'good',
-                  monthly_spending: {
-                    groceries: data.analysis?.categoryBreakdown?.find(c => c.category === 'Groceries')?.amount || 0,
-                    dining: data.analysis?.categoryBreakdown?.find(c => c.category === 'Dining')?.amount || 0,
-                    travel: data.analysis?.categoryBreakdown?.find(c => c.category === 'Travel')?.amount || 0,
-                    gas: data.analysis?.categoryBreakdown?.find(c => c.category === 'Gas')?.amount || 0,
-                    streaming: data.analysis?.categoryBreakdown?.find(c => c.category === 'Streaming')?.amount || 0,
-                    general: data.analysis?.totalSpent || 0
-                  },
+                                      monthly_spending: {
+                      groceries: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Groceries')?.amount || 0,
+                      dining: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Dining')?.amount || 0,
+                      travel: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Travel')?.amount || 0,
+                      gas: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Gas')?.amount || 0,
+                      streaming: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Streaming')?.amount || 0,
+                      general: analysisToShow?.totalSpent || 0
+                    },
                   travel_frequency: 'occasionally',
                   redemption_preference: 'flexible',
                   current_cards: [],
