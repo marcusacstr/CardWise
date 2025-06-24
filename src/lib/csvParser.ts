@@ -105,11 +105,7 @@ const COLUMN_MAPPINGS: { [key: string]: { [key: string]: string[] } } = {
 };
 
 function detectDateFormat(dateString: string): string | null {
-  const formats = [
-    'MM/dd/yyyy', 'MM/dd/yy', 'yyyy-MM-dd', 'dd/MM/yyyy', 'dd/MM/yy',
-    'MMM dd, yyyy', 'MMM dd yyyy', 'MM-dd-yyyy', 'MM-dd-yy'
-  ];
-  for (const format of formats) {
+  for (const format of DATE_FORMATS) {
     try {
       const parsed = parse(dateString, format, new Date());
       if (isValid(parsed)) {
@@ -150,12 +146,23 @@ function parseDate(dateString: string, preferredFormat?: string): Date | null {
   return null;
 }
 
-function parseAmount(amountStr: string): number | null {
-  if (!amountStr) return null;
-  const clean = amountStr.replace(/[$,\s]/g, '').replace(/[()]/g, '-');
-  const parsed = parseFloat(clean);
-  if (isNaN(parsed)) return null;
-  return parsed;
+function parseAmount(amountString: string): number | null {
+  if (!amountString) return null;
+  
+  // Remove currency symbols, spaces, and convert parentheses to negative
+  let cleanAmount = amountString
+    .trim()
+    .replace(/[$€£¥₹₽]/g, '') // Remove currency symbols
+    .replace(/\s/g, '') // Remove spaces
+    .replace(/,/g, ''); // Remove thousands separators
+  
+  // Handle parentheses notation for negative amounts
+  if (cleanAmount.startsWith('(') && cleanAmount.endsWith(')')) {
+    cleanAmount = '-' + cleanAmount.slice(1, -1);
+  }
+  
+  const parsed = parseFloat(cleanAmount);
+  return isNaN(parsed) ? null : parsed;
 }
 
 function findColumn(headers: string[], possibleNames: string[]): string | null {
@@ -631,62 +638,6 @@ function extractStatementPeriod(csvContent: string, transactions: ParsedTransact
   };
 }
 
-// Add fuzzy matching for column names
-function fuzzyFindColumn(headers: string[], candidates: string[]): string | undefined {
-  // Lowercase and remove spaces for comparison
-  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '');
-  for (const candidate of candidates) {
-    const normCandidate = normalize(candidate);
-    for (const header of headers) {
-      const normHeader = normalize(header);
-      if (normHeader === normCandidate || normHeader.includes(normCandidate) || normCandidate.includes(normHeader)) {
-        return header;
-      }
-    }
-  }
-  return undefined;
-}
-
-function inferColumnsByDataType(data: string[][]): { dateIndex: number, descIndex: number, amountIndex: number } | null {
-  if (data.length === 0) return null;
-  const N = Math.min(10, data.length);
-  const numCols = data[0].length;
-  let dateScores = Array(numCols).fill(0);
-  let amountScores = Array(numCols).fill(0);
-  let textScores = Array(numCols).fill(0);
-  for (let rowIdx = 0; rowIdx < N; rowIdx++) {
-    const row = data[rowIdx];
-    for (let col = 0; col < numCols; col++) {
-      const value = row[col]?.trim();
-      if (!value) continue;
-      // Date score
-      if (detectDateFormat(value)) dateScores[col]++;
-      // Amount score
-      const cleanValue = value.replace(/[$,\s]/g, '').replace(/[()]/g, '-');
-      if (!isNaN(parseFloat(cleanValue)) && value.match(/\d/)) amountScores[col]++;
-      // Text score
-      if (isNaN(parseFloat(cleanValue)) && value.length > 2) textScores[col]++;
-    }
-  }
-  // Debug log
-  console.log('Aggressive fallback column scores:', { dateScores, amountScores, textScores });
-  // Pick the column with the highest score for each type
-  const dateIndex = dateScores.indexOf(Math.max(...dateScores));
-  const amountIndex = amountScores.indexOf(Math.max(...amountScores));
-  // Description: not date, not amount, most text
-  let descIndex = -1;
-  let maxTextScore = -1;
-  for (let col = 0; col < numCols; col++) {
-    if (col !== dateIndex && col !== amountIndex && textScores[col] > maxTextScore) {
-      descIndex = col;
-      maxTextScore = textScores[col];
-    }
-  }
-  console.log('Aggressive fallback column indices:', { dateIndex, descIndex, amountIndex });
-  if (dateIndex === -1 || amountIndex === -1 || descIndex === -1) return null;
-  return { dateIndex, descIndex, amountIndex };
-}
-
 export function parseCSVStatements(csvContent: string): CSVParseResult {
   const result: CSVParseResult = {
     transactions: [],
@@ -715,27 +666,39 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
       header: false,
       skipEmptyLines: true
     });
+    
     if (preParseResult.errors.length > 0) {
       result.errors.push(...preParseResult.errors.map(err => err.message));
     }
+
     const rawData = preParseResult.data as string[][];
     if (rawData.length === 0) {
       result.errors.push('No data found in CSV file');
       return result;
     }
+
+    console.log('First 5 lines of CSV:', rawData.slice(0, 5));
+
     // Check if first row looks like data or headers
     const firstRow = rawData[0];
     const firstRowIsData = detectIfFirstRowIsDataFromArray(firstRow);
+    console.log('First row is data (no headers):', firstRowIsData);
+
     let data: RawTransaction[];
     let dateColumn: string, descColumn: string, amountColumn: string;
     let categoryColumn: string | undefined, mccColumn: string | undefined, balanceColumn: string | undefined;
+    
     if (firstRowIsData) {
       // CSV has no headers - create column names and convert to objects
       const numColumns = firstRow.length;
       const columnNames = [];
+      
+      // Create generic column names
       for (let i = 0; i < numColumns; i++) {
         columnNames.push(`col${i}`);
       }
+      
+      // Convert array data to objects with our column names
       data = rawData.map(row => {
         const obj: RawTransaction = {};
         for (let i = 0; i < columnNames.length; i++) {
@@ -743,19 +706,31 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
         }
         return obj;
       });
+      
       result.metadata.totalRows = data.length;
       result.metadata.detectedFormat = 'no-headers-inferred';
-      // Aggressively infer columns by data type
-      const structure = inferColumnsByDataType(rawData) || inferColumnStructureFromArray(rawData);
+      
+      // Infer column structure from the data
+      const structure = inferColumnStructureFromArray(rawData);
       if (!structure) {
         result.errors.push('Could not infer column structure from data. Expected format: Date, Description, Amount [, Category, Balance]');
         return result;
       }
+      
       dateColumn = `col${structure.dateIndex}`;
       descColumn = `col${structure.descIndex}`;
       amountColumn = `col${structure.amountIndex}`;
       categoryColumn = structure.categoryIndex !== undefined ? `col${structure.categoryIndex}` : undefined;
       balanceColumn = structure.balanceIndex !== undefined ? `col${structure.balanceIndex}` : undefined;
+      
+      console.log('Inferred structure:', {
+        dateColumn: `${dateColumn} (index ${structure.dateIndex})`,
+        descColumn: `${descColumn} (index ${structure.descIndex})`,
+        amountColumn: `${amountColumn} (index ${structure.amountIndex})`,
+        categoryColumn: categoryColumn ? `${categoryColumn} (index ${structure.categoryIndex})` : undefined,
+        balanceColumn: balanceColumn ? `${balanceColumn} (index ${structure.balanceIndex})` : undefined
+      });
+      
     } else {
       // CSV has headers, use normal parsing
       const parseResult = Papa.parse(csvContent, {
@@ -763,35 +738,56 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
         skipEmptyLines: true,
         transformHeader: (header: string) => header.trim()
       });
+
       if (parseResult.errors.length > 0) {
         result.errors.push(...parseResult.errors.map(err => err.message));
       }
+
       data = parseResult.data as RawTransaction[];
       result.metadata.totalRows = data.length;
+
       const headers = Object.keys(data[0] || {});
-      // Use fuzzy matching for columns
+      console.log('Detected headers:', headers);
+      
       const detectedFormat = detectCSVFormat(headers);
       result.metadata.detectedFormat = detectedFormat;
+      console.log('Detected format:', detectedFormat);
+
       const mappings = COLUMN_MAPPINGS[detectedFormat] || COLUMN_MAPPINGS.generic;
-      dateColumn = fuzzyFindColumn(headers, mappings.date || ['Date']) || '';
-      descColumn = fuzzyFindColumn(headers, mappings.description || ['Description']) || '';
-      amountColumn = fuzzyFindColumn(headers, mappings.amount || ['Amount']) || '';
-      categoryColumn = fuzzyFindColumn(headers, mappings.category || ['Category']);
-      mccColumn = fuzzyFindColumn(headers, mappings.mcc || ['MCC']);
-      balanceColumn = fuzzyFindColumn(headers, mappings.balance || ['Balance']);
+      
+      // Find column names
+      dateColumn = findColumn(headers, mappings.date || ['Date']) || '';
+      descColumn = findColumn(headers, mappings.description || ['Description']) || '';
+      amountColumn = findColumn(headers, mappings.amount || ['Amount']) || '';
+      categoryColumn = findColumn(headers, mappings.category || ['Category']);
+      mccColumn = findColumn(headers, mappings.mcc || ['MCC']);
+      balanceColumn = findColumn(headers, mappings.balance || ['Balance']);
+
+      console.log('Column mapping results:', {
+        dateColumn,
+        descColumn,
+        amountColumn,
+        categoryColumn,
+        mccColumn,
+        balanceColumn
+      });
+
       if (!dateColumn) {
         result.errors.push(`Could not find date column. Available headers: ${headers.join(', ')}`);
         return result;
       }
+
       if (!descColumn) {
         result.errors.push(`Could not find description column. Available headers: ${headers.join(', ')}`);
         return result;
       }
+
       if (!amountColumn) {
         result.errors.push(`Could not find amount column. Available headers: ${headers.join(', ')}`);
         return result;
       }
     }
+
     // Detect date format from first few valid rows
     let detectedDateFormat: string | null = null;
     for (let i = 0; i < Math.min(10, data.length); i++) {
