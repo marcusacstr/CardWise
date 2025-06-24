@@ -110,7 +110,12 @@ function categorizeByDescription(description: string): { category: string; confi
         /\b(restaurant|dining|food|cafe|coffee|pizza|burger|taco|sushi|bar|pub|grill|bistro|deli|bakery)\b/,
         /\b(mcdonald|subway|starbucks|chipotle|panera|domino|kfc|taco bell|wendy|burger king)\b/,
         /\b(doordash|ubereats|grubhub|postmates|seamless|deliveroo|foodpanda)\b/,
-        /\b(eat|meal|lunch|dinner|breakfast|brunch)\b/
+        /\b(eat|meal|lunch|dinner|breakfast|brunch|dunkin|tim hortons|pizza hut)\b/,
+        // Common transaction patterns
+        /restaurant|dining|food.*dining|meal|lunch|dinner|breakfast/,
+        /coffee|cafe|starbucks|dunkin|tim.*hortons/,
+        /pizza|burger|taco|sandwich|deli|bakery/,
+        /doordash|uber.*eats|grubhub|skip.*dishes|postmates/
       ],
       confidence: 0.85
     },
@@ -118,7 +123,12 @@ function categorizeByDescription(description: string): { category: string; confi
       patterns: [
         /\b(grocery|supermarket|market|kroger|safeway|whole foods|trader joe|costco|walmart|target)\b/,
         /\b(publix|wegmans|giant|harris teeter|food lion|stop shop|aldi|fresh market|sprouts)\b/,
-        /\b(produce|dairy|meat|bakery|deli|organic)\b/
+        /\b(produce|dairy|meat|bakery|deli|organic)\b/,
+        // Enhanced grocery patterns
+        /grocery|supermarket|market(?!.*place)|groceries/,
+        /whole.*foods|trader.*joe|costco|walmart|target/,
+        /kroger|safeway|publix|wegmans|giant|harris.*teeter/,
+        /metro|loblaws|sobeys|freshco|nofrills|independent/
       ],
       confidence: 0.90
     },

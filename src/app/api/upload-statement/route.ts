@@ -8,6 +8,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseCSVStatements } from '@/lib/csvParser';
 import { analyzeTransactions } from '@/lib/transactionAnalyzer';
 import { generateCardRecommendations } from '@/lib/cardRecommendations';
+import { 
+  generateEnhancedRecommendations, 
+  SpendingProfile 
+} from '@/lib/enhancedCardRecommendations';
 import { saveReport } from '@/lib/reportStorage';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -88,10 +92,32 @@ export async function POST(request: NextRequest) {
     // Analyze transactions with statement period information
     const spendingAnalysis = analyzeTransactions(parseResult.transactions, parseResult.statementPeriod);
     console.log('Spending analysis completed');
+    console.log('Category breakdown:', spendingAnalysis.categoryBreakdown.map(c => `${c.category}: $${c.amount} (${c.percentage}%)`));
 
-    // Generate card recommendations
+    // Generate enhanced card recommendations
+    const enhancedProfile: SpendingProfile = {
+      annual_income: 50000, // Default assumption
+      credit_score: 'good',
+      monthly_spending: {
+        groceries: spendingAnalysis.categoryBreakdown.find(c => c.category === 'Groceries')?.amount || 0,
+        dining: spendingAnalysis.categoryBreakdown.find(c => c.category === 'Dining')?.amount || 0,
+        travel: spendingAnalysis.categoryBreakdown.find(c => c.category === 'Travel')?.amount || 0,
+        gas: spendingAnalysis.categoryBreakdown.find(c => c.category === 'Gas')?.amount || 0,
+        streaming: spendingAnalysis.categoryBreakdown.find(c => c.category === 'Streaming')?.amount || 0,
+        general: spendingAnalysis.totalSpent || 0
+      },
+      travel_frequency: 'occasionally',
+      redemption_preference: 'flexible',
+      current_cards: [],
+      monthly_payment_behavior: 'full',
+      signup_bonus_importance: 'medium'
+    };
+
+    const enhancedRecommendations = await generateEnhancedRecommendations(enhancedProfile, 5);
+    console.log(`Generated ${enhancedRecommendations.length} enhanced card recommendations`);
+    
+    // Also keep basic recommendations for fallback
     const cardRecommendations = await generateCardRecommendations(spendingAnalysis);
-    console.log(`Generated ${cardRecommendations.recommendations.length} card recommendations`);
 
     // Save statement information to database if user is authenticated
     let statementId = null;
@@ -170,7 +196,26 @@ export async function POST(request: NextRequest) {
       userId: user?.id || null,
       statementPeriod: parseResult.statementPeriod,
       analysis: spendingAnalysis,
-      recommendations: cardRecommendations,
+      recommendations: enhancedRecommendations.map(rec => ({
+        card: {
+          id: rec.card.id,
+          name: rec.card.name,
+          issuer: rec.card.issuer,
+          annual_fee: rec.card.annual_fee,
+          image_url: rec.card.image_url,
+          application_url: rec.card.application_url
+        },
+        annual_value: Math.round(rec.annual_value),
+        net_annual_benefit: Math.round(rec.net_annual_benefit),
+        first_year_value: Math.round(rec.first_year_value),
+        ai_confidence_score: Math.round(rec.ai_confidence_score),
+        personalization_score: Math.round(rec.personalization_score),
+        risk_factors: rec.risk_factors,
+        optimization_tips: rec.optimization_tips,
+        reasoning: rec.reasoning,
+        category_breakdown: rec.category_breakdown
+      })),
+      basicRecommendations: cardRecommendations, // Keep basic ones as fallback
       metadata: parseResult.metadata,
       warnings: parseResult.warnings
     });
