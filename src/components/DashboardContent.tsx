@@ -496,6 +496,18 @@ export default function DashboardContent({ user }: { user: User | null }) {
   const hasStatements = data.statements && data.statements.length > 0;
   const hasManualSpending = data.manualSpending && data.manualSpending.length > 0;
   const hasAnalysisData = (hasStatements || hasManualSpending) && data.analysis && (data.analysis.transactionCount > 0 || data.manualSpending.length > 0);
+  
+  // Debug logging
+  console.log('🔍 Dashboard Debug:', {
+    hasStatements,
+    hasManualSpending,
+    hasAnalysisData,
+    statementsLength: data.statements?.length || 0,
+    manualSpendingLength: data.manualSpending?.length || 0,
+    hasAnalysis: !!data.analysis,
+    analysisTransactionCount: data.analysis?.transactionCount || 0,
+    analysisKeys: data.analysis ? Object.keys(data.analysis) : []
+  });
 
   const forceRefresh = async () => {
     await refreshAll();
