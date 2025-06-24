@@ -27,12 +27,41 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Processing file: ${file.name}, size: ${file.size} bytes`);
+    console.log('[API DEBUG] File type:', typeof file, 'constructor:', file.constructor.name);
 
-    // Read file content
-    const csvContent = await file.text();
+    // Read file content with multiple fallbacks
+    let csvContent: string;
+    try {
+      if (typeof file.text === 'function') {
+        csvContent = await file.text();
+        console.log('[API DEBUG] Used file.text(), result type:', typeof csvContent);
+      } else if (typeof file.arrayBuffer === 'function') {
+        const buffer = await file.arrayBuffer();
+        csvContent = new TextDecoder('utf-8').decode(buffer);
+        console.log('[API DEBUG] Used arrayBuffer + TextDecoder, result type:', typeof csvContent);
+      } else {
+        throw new Error('No supported method to read file content');
+      }
+      
+      // Ensure we have a string
+      if (typeof csvContent !== 'string') {
+        csvContent = String(csvContent);
+        console.log('[API DEBUG] Converted to string, new type:', typeof csvContent);
+      }
+      
+      console.log('[API DEBUG] Final csvContent type:', typeof csvContent, 'length:', csvContent.length);
+      console.log('[API DEBUG] Content preview:', csvContent.slice(0, 200));
+      
+    } catch (error) {
+      console.error('[API DEBUG] Error reading file:', error);
+      return NextResponse.json({ 
+        error: 'Failed to read file content', 
+        details: error instanceof Error ? error.message : String(error) 
+      }, { status: 400 });
+    }
     
     // Parse CSV with statement period extraction
-    const parseResult = parseCSVStatements(csvContent);
+    const parseResult = await parseCSVStatements(csvContent);
     
     console.log('Parse result metadata:', parseResult.metadata);
     console.log('Statement period:', parseResult.statementPeriod);

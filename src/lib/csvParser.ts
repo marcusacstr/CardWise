@@ -638,7 +638,31 @@ function extractStatementPeriod(csvContent: string, transactions: ParsedTransact
   };
 }
 
-export function parseCSVStatements(csvContent: string): CSVParseResult {
+export async function parseCSVStatements(csvContent: string): Promise<CSVParseResult> {
+  console.log('[CSV PARSER DEBUG] Input type:', typeof csvContent);
+  console.log('[CSV PARSER DEBUG] Input length:', csvContent ? csvContent.length : 0);
+  console.log('[CSV PARSER DEBUG] Input preview:', csvContent ? csvContent.slice(0, 200) : 'null/undefined');
+  
+  // Handle case where a Blob is passed instead of a string
+  if (typeof csvContent === 'object' && csvContent && 'text' in csvContent) {
+    console.log('[CSV PARSER DEBUG] Detected Blob object, converting to string...');
+    try {
+      // If it's a Blob, convert it to string
+      const text = await (csvContent as any).text();
+      console.log('[CSV PARSER DEBUG] Successfully converted Blob to string, length:', text.length);
+      return parseCSVStatements(text); // Recursive call with string
+    } catch (error) {
+      console.log('[CSV PARSER DEBUG] Failed to convert Blob:', error);
+      throw new Error('Failed to convert Blob to string: ' + String(error));
+    }
+  }
+  
+  // Ensure we have a string
+  if (typeof csvContent !== 'string') {
+    console.log('[CSV PARSER DEBUG] Converting non-string input to string');
+    csvContent = String(csvContent);
+  }
+  
   const result: CSVParseResult = {
     transactions: [],
     errors: [],
@@ -662,13 +686,38 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
 
   try {
     // First, parse without headers to check if first row contains data
-    const preParseResult = Papa.parse(csvContent, {
-      header: false,
-      skipEmptyLines: true
-    });
+    let preParseResult;
+    try {
+      preParseResult = Papa.parse(csvContent, {
+        header: false,
+        skipEmptyLines: true
+      });
+      console.log('[CSV PARSER DEBUG] Papa.parse succeeded');
+    } catch (papaError) {
+      console.log('[CSV PARSER DEBUG] Papa.parse failed:', papaError);
+      // Fallback to manual parsing
+      const lines = csvContent.trim().split(/\r?\n/).filter(line => line.trim());
+      preParseResult = {
+        data: lines.map(line => line.split(',')),
+        errors: [],
+        meta: {}
+      };
+      console.log('[CSV PARSER DEBUG] Using fallback manual parsing');
+    }
+    
+    // Ensure preParseResult has the expected structure
+    if (!preParseResult || !preParseResult.data || !Array.isArray(preParseResult.errors)) {
+      console.log('[CSV PARSER DEBUG] Invalid preParseResult structure:', preParseResult);
+      result.errors.push('CSV parsing failed: Invalid parser result');
+      return result;
+    }
+    
+    console.log('[CSV PARSER DEBUG] Papa.parse result:', preParseResult);
+    console.log('[CSV PARSER DEBUG] Papa.parse data length:', preParseResult.data?.length || 0);
+    console.log('[CSV PARSER DEBUG] Papa.parse errors:', preParseResult.errors);
     
     if (preParseResult.errors.length > 0) {
-      result.errors.push(...preParseResult.errors.map(err => err.message));
+      result.errors.push(...preParseResult.errors.map(err => err.message || String(err)));
     }
 
     const rawData = preParseResult.data as string[][];
@@ -733,14 +782,28 @@ export function parseCSVStatements(csvContent: string): CSVParseResult {
       
     } else {
       // CSV has headers, use normal parsing
-      const parseResult = Papa.parse(csvContent, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: (header: string) => header.trim()
-      });
+      let parseResult;
+      try {
+        parseResult = Papa.parse(csvContent, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (header: string) => header.trim()
+        });
+        console.log('[CSV PARSER DEBUG] Papa.parse (headers) succeeded');
+      } catch (papaError) {
+        console.log('[CSV PARSER DEBUG] Papa.parse (headers) failed:', papaError);
+        result.errors.push('CSV parsing with headers failed');
+        return result;
+      }
+
+      if (!parseResult || !parseResult.data || !Array.isArray(parseResult.errors)) {
+        console.log('[CSV PARSER DEBUG] Invalid parseResult structure:', parseResult);
+        result.errors.push('CSV parsing failed: Invalid parser result');
+        return result;
+      }
 
       if (parseResult.errors.length > 0) {
-        result.errors.push(...parseResult.errors.map(err => err.message));
+        result.errors.push(...parseResult.errors.map(err => err.message || String(err)));
       }
 
       data = parseResult.data as RawTransaction[];

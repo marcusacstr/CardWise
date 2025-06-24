@@ -266,56 +266,39 @@ export default function DashboardContent({ user }: { user: User | null }) {
     setError(null);
 
     try {
-      let parseResult;
+      // Use the API route for file upload and processing
+      const formData = new FormData();
+      formData.append('file', file);
       
-      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-        parseResult = await parseCSVStatements(file);
-      } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        parseResult = await parsePDFStatement(file);
-      } else {
-        throw new Error('Unsupported file type. Please upload a CSV or PDF file.');
+      const response = await fetch('/api/upload-statement', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process file');
       }
-
-      if (!parseResult.transactions || parseResult.transactions.length === 0) {
-        throw new Error('No transactions found in the uploaded file.');
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to analyze file');
       }
-
-      // Analyze transactions
-      const analysis = await analyzeTransactions(parseResult.transactions);
       
-      // Calculate current card rewards
-      const currentCardRewardsData = await calculateCurrentCardRewards(analysis, currentCard.id);
+      // Extract data from API response
+      const analysis = result.analysis;
+      const recommendations = result.recommendations;
+      const currentCardRewards = result.analysis.totalSpent; // or calculate properly
       
-      // Update current card with calculated rewards
-      setCurrentCard(prev => ({
-        ...prev,
-        estimatedAnnualRewards: currentCardRewardsData.annualRewards
-      }));
+      // Refresh all data to get the saved statement FIRST
+      await refreshAll();
 
-      // Get recommendations
-      const recommendations = await generateCardRecommendations(analysis, currentCardRewardsData.annualRewards);
-
-      // Update context with new data
+      // Update context with new data AFTER refreshing
       setAnalysis(analysis);
-      setRecommendations(recommendations.recommendations);
-      setCurrentCardRewards(currentCardRewardsData.annualRewards);
+      setRecommendations(recommendations);
+      setCurrentCardRewards(currentCardRewards);
       addUploadedFile(file.name);
-
-      // Save report to database
-      try {
-        await saveReport(analysis, recommendations, file.name);
-        
-        // Also save user recommendations separately for quick access
-        await saveUserRecommendations(user.id, recommendations.recommendations);
-        
-        // Refresh all data
-        await refreshAll();
-      } catch (saveError) {
-        console.warn('Failed to save report:', saveError);
-      }
-
-      // Save to session storage for persistence
-      await saveCurrentSession();
 
       // Clear the file input
       setFile(null);
