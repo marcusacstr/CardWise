@@ -118,6 +118,13 @@ export function SpendingDataProvider({ children, user }: { children: React.React
         }
       } else if (statements.length === 0) {
         console.log('⚠️ No statements found but there may be auth/fetch issues, NOT clearing analysis data');
+        console.log('🔍 Context protection details:', {
+          statementsLength: statements.length,
+          hasError: !!responseData.error,
+          authenticated: responseData.authenticated,
+          currentAnalysis: !!data.analysis,
+          currentAnalysisTransactionCount: data.analysis?.transactionCount
+        });
       }
       
       setError(null);

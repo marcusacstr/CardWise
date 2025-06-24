@@ -295,10 +295,25 @@ export default function DashboardContent({ user }: { user: User | null }) {
       await refreshAll();
 
       // Update context with new data AFTER refreshing
+      console.log('🚀 Setting analysis data:', {
+        analysis: analysis,
+        transactionCount: analysis?.transactionCount,
+        recommendations: recommendations?.length,
+        currentCardRewards
+      });
       setAnalysis(analysis);
       setRecommendations(recommendations);
       setCurrentCardRewards(currentCardRewards);
       addUploadedFile(file.name);
+      
+      // Verify data was set
+      setTimeout(() => {
+        console.log('🔍 Verifying analysis data after set:', {
+          hasAnalysis: !!data.analysis,
+          transactionCount: data.analysis?.transactionCount,
+          recommendationsCount: data.recommendations?.length
+        });
+      }, 100);
 
       // Clear the file input
       setFile(null);
