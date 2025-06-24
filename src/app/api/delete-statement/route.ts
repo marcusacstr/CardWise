@@ -53,8 +53,15 @@ export async function GET(request: NextRequest) {
     // Get the current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
+    console.log('🔍 GET /api/delete-statement - Debug:', {
+      hasUser: !!user,
+      userId: user?.id,
+      userError: userError?.message,
+      requestHeaders: Object.fromEntries(request.headers.entries())
+    });
+    
     if (userError || !user) {
-      console.log('GET /api/delete-statement: User not authenticated');
+      console.log('❌ GET /api/delete-statement: User not authenticated');
       return NextResponse.json({ 
         statements: [],
         authenticated: false,
@@ -69,8 +76,16 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
+    console.log('🔍 Statements query result:', {
+      statementsFound: statements?.length || 0,
+      hasError: !!fetchError,
+      errorCode: fetchError?.code,
+      errorMessage: fetchError?.message,
+      statements: statements?.map(s => ({ id: s.id, filename: s.filename, created_at: s.created_at }))
+    });
+
     if (fetchError) {
-      console.error('Error fetching statements:', fetchError);
+      console.error('❌ Error fetching statements:', fetchError);
       return NextResponse.json({ 
         statements: [],
         error: 'Failed to fetch statements',
@@ -78,13 +93,15 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    console.log(`✅ Successfully fetched ${statements?.length || 0} statements for user ${user.id}`);
+    
     return NextResponse.json({ 
       statements: statements || [],
       authenticated: true
     });
 
   } catch (error) {
-    console.error('Fetch statements error:', error);
+    console.error('❌ Fetch statements error:', error);
     return NextResponse.json(
       { 
         statements: [],
