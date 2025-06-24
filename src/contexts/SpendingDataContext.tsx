@@ -96,36 +96,16 @@ export function SpendingDataProvider({ children, user }: { children: React.React
         statements
       }));
       
-      // Only clear analysis data if we're sure there are no statements
-      // Don't clear if there was an authentication or fetch error
-      if (statements.length === 0 && !responseData.error && responseData.authenticated !== false) {
-        console.log('🗑️ No statements found and no errors, clearing all analysis data');
-        setData(prev => ({
-          ...prev,
-          analysis: null,
-          recommendations: [],
-          currentCardRewards: 0,
-          uploadedFiles: []
-        }));
-        
-        // Also clear session data from database
-        try {
-          const { clearUserSession } = await import('@/lib/userSession');
-          await clearUserSession(user.id);
-          console.log('🗑️ Cleared user session data');
-        } catch (sessionError) {
-          console.warn('Could not clear session data:', sessionError);
-        }
-      } else if (statements.length === 0) {
-        console.log('⚠️ No statements found but there may be auth/fetch issues, NOT clearing analysis data');
-        console.log('🔍 Context protection details:', {
-          statementsLength: statements.length,
-          hasError: !!responseData.error,
-          authenticated: responseData.authenticated,
-          currentAnalysis: !!data.analysis,
-          currentAnalysisTransactionCount: data.analysis?.transactionCount
-        });
-      }
+      // TEMPORARILY DISABLED: Don't auto-clear analysis data to preserve working functionality
+      // This was causing the context to clear perfectly valid analysis data
+      console.log('📊 Statements fetched, preserving existing analysis data');
+      console.log('🔍 Statement fetch results:', {
+        statementsLength: statements.length,
+        hasError: !!responseData.error,
+        authenticated: responseData.authenticated,
+        currentAnalysis: !!data.analysis,
+        currentAnalysisTransactionCount: data.analysis?.transactionCount
+      });
       
       setError(null);
     } catch (err) {
@@ -226,26 +206,16 @@ export function SpendingDataProvider({ children, user }: { children: React.React
     setError(null);
   }, []);
 
-  // Force refresh - completely reset all data
+  // Force refresh - refresh data without clearing analysis
   const forceRefresh = useCallback(async () => {
     if (!user) return;
     
-    console.log('🔄 Force refreshing all data');
+    console.log('🔄 Force refreshing statements data (preserving analysis)');
     
-    // Clear all local data
-    setData(defaultData);
+    // Only clear statements, not analysis
     setError(null);
     
-    // Clear session data from database
-    try {
-      const { clearUserSession } = await import('@/lib/userSession');
-      await clearUserSession(user.id);
-      console.log('🗑️ Cleared user session data');
-    } catch (sessionError) {
-      console.warn('Could not clear session data:', sessionError);
-    }
-    
-    // Refresh all data
+    // Refresh statements data
     await refreshAll();
   }, [user, refreshAll]);
 
