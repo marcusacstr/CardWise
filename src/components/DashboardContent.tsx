@@ -299,13 +299,15 @@ export default function DashboardContent({ user }: { user: User | null }) {
       await refreshAll();
 
       // Update context with new data AFTER refreshing
-      console.log('🚀 Setting analysis data:', {
-        analysis: analysis,
-        transactionCount: analysis?.transactionCount,
-        recommendations: recommendations?.length,
-        currentCardRewards,
-        categoryBreakdown: analysis?.categoryBreakdown?.map(c => `${c.category}: $${c.amount.toFixed(2)} (${c.percentage.toFixed(1)}%)`)
-      });
+      console.log('🚀 Setting analysis data:');
+      console.log('- Transaction Count:', analysis?.transactionCount);
+      console.log('- Recommendations:', recommendations?.length);
+      console.log('- Category Breakdown:', analysis?.categoryBreakdown);
+      if (analysis?.categoryBreakdown) {
+        console.log('- Categories:', analysis.categoryBreakdown.map(c => `${c.category}: $${c.amount?.toFixed(2)} (${c.percentage?.toFixed(1)}%)`));
+      } else {
+        console.log('- No category breakdown found');
+      }
       
       // Set in context (may be cleared by context issues)
       setAnalysis(analysis);
@@ -542,8 +544,14 @@ export default function DashboardContent({ user }: { user: User | null }) {
     contextAnalysisTransactionCount: data.analysis?.transactionCount || 0,
     localHasAnalysis: !!localAnalysisData,
     localAnalysisTransactionCount: localAnalysisData?.transactionCount || 0,
-    usingAnalysis: analysisToShow === data.analysis ? 'context' : 'local'
+    usingAnalysis: analysisToShow === data.analysis ? 'context' : 'local',
+    analysisToShowCategoryCount: analysisToShow?.categoryBreakdown?.length || 0
   });
+  
+  // Additional category debugging
+  if (analysisToShow?.categoryBreakdown) {
+    console.log('🏷️ Categories to render:', analysisToShow.categoryBreakdown.map(c => `${c.category}: $${c.amount} (${c.percentage}%)`));
+  }
 
   const forceRefresh = async () => {
     await refreshAll();
