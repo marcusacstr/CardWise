@@ -495,7 +495,8 @@ export default function DashboardContent({ user }: { user: User | null }) {
   // Check if we have analysis data to show results
   const hasStatements = data.statements && data.statements.length > 0;
   const hasManualSpending = data.manualSpending && data.manualSpending.length > 0;
-  const hasAnalysisData = (hasStatements || hasManualSpending) && data.analysis && (data.analysis.transactionCount > 0 || data.manualSpending.length > 0);
+  // Show analysis if we have valid analysis data, regardless of statement fetch issues
+  const hasAnalysisData = data.analysis && data.analysis.transactionCount > 0;
   
   // Debug logging
   console.log('🔍 Dashboard Debug:', {
