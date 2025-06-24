@@ -303,7 +303,8 @@ export default function DashboardContent({ user }: { user: User | null }) {
         analysis: analysis,
         transactionCount: analysis?.transactionCount,
         recommendations: recommendations?.length,
-        currentCardRewards
+        currentCardRewards,
+        categoryBreakdown: analysis?.categoryBreakdown?.map(c => `${c.category}: $${c.amount.toFixed(2)} (${c.percentage.toFixed(1)}%)`)
       });
       
       // Set in context (may be cleared by context issues)
@@ -892,7 +893,7 @@ export default function DashboardContent({ user }: { user: User | null }) {
             </div>
 
             {/* Enhanced Recommendations */}
-            {data.recommendations.length > 0 && (
+            {recommendationsToShow.length > 0 && (
               <EnhancedRecommendations
                 transactions={analysisToShow?.transactions || []}
                 userProfile={{
