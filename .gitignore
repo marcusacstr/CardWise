@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -26,6 +27,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env.development
 
 # vercel
 .vercel
@@ -33,6 +35,28 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Supabase
+.temp/
+
+# Production env files (these contain secrets)
+.env.production
+
+# Large binary files and archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Large images (keep only small icons)
+*.png
+!public/images/cards/*.svg
+!public/travel-icon.svg
+
+# Backup files
+*.backup
+*.bak
+*.old
 
 # uploads
 /public/uploads/*
