@@ -12,7 +12,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck, FaFileAlt, FaToggleOn, FaToggleOff, FaInfoCircle, FaChevronDown, FaChevronUp, FaTrash, FaSync } from 'react-icons/fa';
-import EnhancedRecommendations from '@/components/EnhancedRecommendations';
+
 import StatementManager from '@/components/StatementManager';
 import { useSpendingData } from '@/contexts/SpendingDataContext';
 
@@ -899,114 +899,30 @@ export default function DashboardContent({ user }: { user: User | null }) {
                 </div>
               </div>
 
-              {/* Spending Insights */}
-              {analysisToShow.spendingInsights && analysisToShow.spendingInsights.length > 0 && (
-                <div className="mt-8">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">💡 Spending Insights</h4>
-                  <div className="space-y-3">
-                    {analysisToShow.spendingInsights.slice(0, 5).map((insight, index) => (
-                      <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-start space-x-3">
-                          <div className="text-blue-600 mt-1">
-                            {insight.type === 'high_spending' && '💰'}
-                            {insight.type === 'unusual_merchant' && '🏪'}
-                            {insight.type === 'category_trend' && '📈'}
-                            {insight.type === 'savings_opportunity' && '💡'}
-                          </div>
-                          <div className="flex-1">
-                            <h5 className="font-medium text-blue-900">{insight.title}</h5>
-                            <p className="text-blue-700 text-sm mt-1">{insight.description}</p>
-                            {insight.amount && (
-                              <p className="text-blue-600 text-sm font-medium mt-1">
-                                Amount: {formatCurrency(insight.amount)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              {/* Top Merchants */}
-              {analysisToShow.merchantAnalysis && analysisToShow.merchantAnalysis.length > 0 && (
-                <div className="mt-8">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">🏪 Top Merchants</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {analysisToShow.merchantAnalysis.slice(0, 6).map((merchant, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4 border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900 truncate">{merchant.merchant}</span>
-                          <span className="text-sm text-gray-500">{merchant.transactionCount} visits</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-green-600">{formatCurrency(merchant.amount)}</span>
-                          <span className="text-sm text-gray-500">{merchant.category}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ width: `${merchant.percentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Enhanced Recommendations */}
+            {/* Card Recommendations */}
             {recommendationsToShow.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">🎯 Recommended Cards</h3>
-                <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-gray-900 mb-6">Recommended Credit Cards</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {recommendationsToShow.slice(0, 3).map((rec, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-semibold text-lg text-gray-900">{rec.card?.name || rec.name}</h4>
-                          <p className="text-gray-600">{rec.card?.issuer || rec.issuer}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-500">Annual Fee</p>
-                          <p className="font-medium">{formatCurrency(rec.card?.annual_fee || rec.annualFee || 0)}</p>
-                        </div>
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-lg text-gray-900">{rec.card?.name || rec.name}</h4>
+                        <p className="text-gray-600">{rec.card?.issuer || rec.issuer}</p>
                       </div>
                       
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-500">Annual Fee</p>
+                        <p className="font-medium">{formatCurrency(rec.card?.annual_fee || rec.annualFee || 0)}</p>
+                      </div>
+
                       {rec.net_annual_benefit && (
                         <div className="mb-3">
-                          <p className="text-sm text-gray-600">Estimated Annual Benefit</p>
-                          <p className="text-xl font-bold text-green-600">{formatCurrency(rec.net_annual_benefit)}</p>
-                        </div>
-                      )}
-                      
-                      {rec.reasoning?.primary_benefits && (
-                        <div className="mb-3">
-                          <p className="text-sm font-medium text-gray-700 mb-1">Key Benefits:</p>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {rec.reasoning.primary_benefits.slice(0, 3).map((benefit, i) => (
-                              <li key={i} className="flex items-start space-x-2">
-                                <span className="text-green-500 mt-1">•</span>
-                                <span>{benefit}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {rec.optimization_tips && rec.optimization_tips.length > 0 && (
-                        <div className="mb-3">
-                          <p className="text-sm font-medium text-gray-700 mb-1">Optimization Tips:</p>
-                          <ul className="text-sm text-blue-600 space-y-1">
-                            {rec.optimization_tips.slice(0, 2).map((tip, i) => (
-                              <li key={i} className="flex items-start space-x-2">
-                                <span className="text-blue-500 mt-1">💡</span>
-                                <span>{tip}</span>
-                              </li>
-                            ))}
-                          </ul>
+                          <p className="text-sm text-gray-600">Est. Annual Benefit</p>
+                          <p className="text-lg font-bold text-green-600">{formatCurrency(rec.net_annual_benefit)}</p>
                         </div>
                       )}
                       
