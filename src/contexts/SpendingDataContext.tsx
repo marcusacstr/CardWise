@@ -96,9 +96,10 @@ export function SpendingDataProvider({ children, user }: { children: React.React
         statements
       }));
       
-      // Clear analysis data if no statements remain
-      if (statements.length === 0) {
-        console.log('🗑️ No statements found, clearing all analysis data');
+      // Only clear analysis data if we're sure there are no statements
+      // Don't clear if there was an authentication or fetch error
+      if (statements.length === 0 && !responseData.error && responseData.authenticated !== false) {
+        console.log('🗑️ No statements found and no errors, clearing all analysis data');
         setData(prev => ({
           ...prev,
           analysis: null,
@@ -115,6 +116,8 @@ export function SpendingDataProvider({ children, user }: { children: React.React
         } catch (sessionError) {
           console.warn('Could not clear session data:', sessionError);
         }
+      } else if (statements.length === 0) {
+        console.log('⚠️ No statements found but there may be auth/fetch issues, NOT clearing analysis data');
       }
       
       setError(null);
