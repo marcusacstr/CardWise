@@ -482,15 +482,25 @@ function inferColumnStructureFromArray(data: string[][]): {
   amountIndex: number; 
   categoryIndex?: number; 
   balanceIndex?: number;
+  altAmountIndex?: number;
 } | null {
   if (data.length === 0) return null;
-  
   const firstRow = data[0];
+  // Special handling for 5-column, no-header CSVs (like Marcus's)
+  if (firstRow.length === 5) {
+    return {
+      dateIndex: 0,
+      descIndex: 1,
+      amountIndex: 2,
+      altAmountIndex: 3,
+      balanceIndex: 4
+    };
+  }
   let dateIndex = -1;
   let descIndex = -1;
   let amountIndex = -1;
   let balanceIndex = -1;
-  
+
   // Find date column (should parse as a date)
   for (let i = 0; i < firstRow.length; i++) {
     const value = firstRow[i]?.trim();
@@ -741,13 +751,9 @@ export async function parseCSVStatements(csvContent: string): Promise<CSVParseRe
       // CSV has no headers - create column names and convert to objects
       const numColumns = firstRow.length;
       const columnNames = [];
-      
-      // Create generic column names
       for (let i = 0; i < numColumns; i++) {
         columnNames.push(`col${i}`);
       }
-      
-      // Convert array data to objects with our column names
       data = rawData.map(row => {
         const obj: RawTransaction = {};
         for (let i = 0; i < columnNames.length; i++) {
@@ -755,23 +761,20 @@ export async function parseCSVStatements(csvContent: string): Promise<CSVParseRe
         }
         return obj;
       });
-      
       result.metadata.totalRows = data.length;
       result.metadata.detectedFormat = 'no-headers-inferred';
-      
       // Infer column structure from the data
       const structure = inferColumnStructureFromArray(rawData);
       if (!structure) {
         result.errors.push('Could not infer column structure from data. Expected format: Date, Description, Amount [, Category, Balance]');
         return result;
       }
-      
       dateColumn = `col${structure.dateIndex}`;
       descColumn = `col${structure.descIndex}`;
       amountColumn = `col${structure.amountIndex}`;
       categoryColumn = structure.categoryIndex !== undefined ? `col${structure.categoryIndex}` : undefined;
       balanceColumn = structure.balanceIndex !== undefined ? `col${structure.balanceIndex}` : undefined;
-      
+      const altAmountIndex = structure.altAmountIndex;
       console.log('Inferred structure:', {
         dateColumn: `${dateColumn} (index ${structure.dateIndex})`,
         descColumn: `${descColumn} (index ${structure.descIndex})`,
@@ -779,7 +782,75 @@ export async function parseCSVStatements(csvContent: string): Promise<CSVParseRe
         categoryColumn: categoryColumn ? `${categoryColumn} (index ${structure.categoryIndex})` : undefined,
         balanceColumn: balanceColumn ? `${balanceColumn} (index ${structure.balanceIndex})` : undefined
       });
-      
+      // Move the forEach loop here so structure is in scope
+      data.forEach((row, index) => {
+        try {
+          const dateStr = row[dateColumn];
+          const descStr = row[descColumn];
+          let amount: number | null = null;
+          if (altAmountIndex !== undefined) {
+            const debit = parseAmount(row[`col${structure.amountIndex}`]);
+            const credit = parseAmount(row[`col${altAmountIndex}`]);
+            if (debit !== null && credit !== null) {
+              amount = credit - debit;
+            } else if (debit !== null) {
+              amount = -Math.abs(debit);
+            } else if (credit !== null) {
+              amount = Math.abs(credit);
+            }
+          } else {
+            const amountStr = row[amountColumn];
+            amount = parseAmount(amountStr);
+          }
+          if (!dateStr || !descStr || amount === null) {
+            result.warnings.push(`Row ${index + 1}: Missing required data`);
+            result.metadata.invalidRows++;
+            console.log('[CSV PARSER DEBUG] Skipping row with missing data:', row);
+            return;
+          }
+          const parsedDate = parseDate(dateStr, detectedDateFormat || undefined);
+          if (!parsedDate) {
+            result.warnings.push(`Row ${index + 1}: Invalid date format: ${dateStr}`);
+            result.metadata.invalidRows++;
+            return;
+          }
+          // Add debug log for each parsed row
+          console.log('[CSV PARSER DEBUG] Parsed row:', {
+            date: dateStr,
+            desc: descStr,
+            amount,
+            balance: balanceColumn ? row[balanceColumn] : undefined
+          });
+          // Update date range
+          if (!minDate || parsedDate < minDate) minDate = parsedDate;
+          if (!maxDate || parsedDate > maxDate) maxDate = parsedDate;
+          const transaction: ParsedTransaction = {
+            id: `${parsedDate.getTime()}-${index}`,
+            date: parsedDate,
+            description: cleanDescription(descStr),
+            amount: Math.abs(amount),
+            type: amount < 0 ? 'credit' : 'debit',
+            merchant: extractMerchant(descStr),
+            original_data: row
+          };
+          if (categoryColumn && row[categoryColumn] && row[categoryColumn].trim()) {
+            transaction.category = row[categoryColumn].trim();
+          } else {
+            transaction.category = categorizeTransaction(cleanDescription(descStr));
+          }
+          if (balanceColumn && row[balanceColumn]) {
+            const balanceAmount = parseAmount(row[balanceColumn]);
+            if (balanceAmount !== null) {
+              transaction.balance = balanceAmount;
+            }
+          }
+          result.transactions.push(transaction);
+          result.metadata.validRows++;
+        } catch (error) {
+          result.warnings.push(`Row ${index + 1}: Error processing transaction - ${error}`);
+          result.metadata.invalidRows++;
+        }
+      });
     } else {
       // CSV has headers, use normal parsing
       let parseResult;
@@ -869,49 +940,59 @@ export async function parseCSVStatements(csvContent: string): Promise<CSVParseRe
       try {
         const dateStr = row[dateColumn];
         const descStr = row[descColumn];
-        const amountStr = row[amountColumn];
-
-        if (!dateStr || !descStr || !amountStr) {
+        let amount: number | null = null;
+        // For no-header, 5-column CSVs, use altAmountIndex logic
+        if (typeof structure !== 'undefined' && structure.altAmountIndex !== undefined) {
+          const debit = parseAmount(row[`col${structure.amountIndex}`]);
+          const credit = parseAmount(row[`col${structure.altAmountIndex}`]);
+          if (debit !== null && credit !== null) {
+            amount = credit - debit;
+          } else if (debit !== null) {
+            amount = -Math.abs(debit);
+          } else if (credit !== null) {
+            amount = Math.abs(credit);
+          }
+        } else {
+          const amountStr = row[amountColumn];
+          amount = parseAmount(amountStr);
+        }
+        if (!dateStr || !descStr || amount === null) {
           result.warnings.push(`Row ${index + 1}: Missing required data`);
           result.metadata.invalidRows++;
+          console.log('[CSV PARSER DEBUG] Skipping row with missing data:', row);
           return;
         }
-
         const parsedDate = parseDate(dateStr, detectedDateFormat || undefined);
         if (!parsedDate) {
           result.warnings.push(`Row ${index + 1}: Invalid date format: ${dateStr}`);
           result.metadata.invalidRows++;
           return;
         }
-
-        const parsedAmount = parseAmount(amountStr);
-        if (parsedAmount === null) {
-          result.warnings.push(`Row ${index + 1}: Invalid amount format: ${amountStr}`);
-          result.metadata.invalidRows++;
-          return;
-        }
-
+        // Add debug log for each parsed row
+        console.log('[CSV PARSER DEBUG] Parsed row:', {
+          date: dateStr,
+          desc: descStr,
+          amount,
+          balance: balanceColumn ? row[balanceColumn] : undefined
+        });
         // Update date range
         if (!minDate || parsedDate < minDate) minDate = parsedDate;
         if (!maxDate || parsedDate > maxDate) maxDate = parsedDate;
-
         const transaction: ParsedTransaction = {
           id: `${parsedDate.getTime()}-${index}`,
           date: parsedDate,
           description: cleanDescription(descStr),
-          amount: Math.abs(parsedAmount),
-          type: parsedAmount < 0 ? 'credit' : 'debit',
+          amount: Math.abs(amount),
+          type: amount < 0 ? 'credit' : 'debit',
           merchant: extractMerchant(descStr),
           original_data: row
         };
-
         // Add category - use provided category or auto-categorize
         if (categoryColumn && row[categoryColumn] && row[categoryColumn].trim()) {
           transaction.category = row[categoryColumn].trim();
         } else {
           transaction.category = categorizeTransaction(cleanDescription(descStr));
         }
-
         // Add MCC if available
         if (mccColumn && row[mccColumn]) {
           const validMCC = validateMCC(row[mccColumn]);
@@ -919,7 +1000,6 @@ export async function parseCSVStatements(csvContent: string): Promise<CSVParseRe
             transaction.mcc = validMCC;
           }
         }
-
         // Add balance if available
         if (balanceColumn && row[balanceColumn]) {
           const balanceAmount = parseAmount(row[balanceColumn]);
@@ -927,10 +1007,8 @@ export async function parseCSVStatements(csvContent: string): Promise<CSVParseRe
             transaction.balance = balanceAmount;
           }
         }
-
         result.transactions.push(transaction);
         result.metadata.validRows++;
-
       } catch (error) {
         result.warnings.push(`Row ${index + 1}: Error processing transaction - ${error}`);
         result.metadata.invalidRows++;

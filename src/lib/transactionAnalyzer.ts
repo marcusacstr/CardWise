@@ -74,6 +74,7 @@ export function categorizeTransactionWithMCC(
   if (mcc) {
     const mccCategory = getMCCCategory(mcc);
     if (mccCategory !== 'Other') {
+      console.log('[CATEGORIZATION] Used MCC', mcc, '->', mccCategory);
       return {
         category: mccCategory,
         confidence: 0.95, // Very high confidence for MCC
@@ -84,6 +85,7 @@ export function categorizeTransactionWithMCC(
 
   // Priority 2: Use existing manual category if provided
   if (existingCategory && existingCategory.trim() !== '' && existingCategory !== 'Other') {
+    console.log('[CATEGORIZATION] Used manual category', existingCategory);
     return {
       category: existingCategory,
       confidence: 0.90, // High confidence for manual categorization
@@ -93,6 +95,7 @@ export function categorizeTransactionWithMCC(
 
   // Priority 3: Use enhanced description-based categorization
   const descriptionResult = categorizeByDescription(description);
+  console.log('[CATEGORIZATION] Used description for', description, '->', descriptionResult.category);
   return {
     category: descriptionResult.category,
     confidence: descriptionResult.confidence,
@@ -103,6 +106,18 @@ export function categorizeTransactionWithMCC(
 function categorizeByDescription(description: string): { category: string; confidence: number } {
   const desc = description.toLowerCase();
   
+  // Expanded merchant/keyword patterns for Canadian/US brands
+  if (/walmart|wal-mart|walmart\.ca/.test(desc)) return { category: 'Groceries', confidence: 0.95 };
+  if (/costco|costco\.ca|wholesale club/.test(desc)) return { category: 'Groceries', confidence: 0.95 };
+  if (/safeway|loblaws|metro|sobeys|nofrills|no frills|freshco|superstore|food basics|giant tiger|foodland/.test(desc)) return { category: 'Groceries', confidence: 0.95 };
+  if (/amazon|amzn|amazon\.ca/.test(desc)) return { category: 'Shopping', confidence: 0.95 };
+  if (/tesla/.test(desc)) return { category: 'Transit', confidence: 0.90 };
+  if (/shoppers drug mart|shoppers|rexall|london drugs|cvs|walgreens|rite aid/.test(desc)) return { category: 'Healthcare', confidence: 0.90 };
+  if (/tim hortons|starbucks|dunkin|coffee/.test(desc)) return { category: 'Dining', confidence: 0.90 };
+  if (/spotify|netflix|disney|crave|apple music|youtube/.test(desc)) return { category: 'Streaming', confidence: 0.95 };
+  if (/uber|lyft|taxi|cab|transit|bus|train|skytrain|go transit|via rail/.test(desc)) return { category: 'Transit', confidence: 0.90 };
+  if (/shell|esso|petro-canada|petrocanada|petro canada|chevron|husky|esso|mobil|bp|sunoco|marathon|valero/.test(desc)) return { category: 'Gas', confidence: 0.95 };
+
   // Enhanced pattern matching with confidence scoring
   const categoryPatterns = {
     'Dining': {
