@@ -12,7 +12,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { FaUpload, FaEdit, FaChartLine, FaCreditCard, FaTimes, FaPlus, FaCalendarAlt, FaSignOutAlt, FaUser, FaCog, FaBuilding, FaCheck, FaFileAlt, FaToggleOn, FaToggleOff, FaInfoCircle, FaChevronDown, FaChevronUp, FaTrash, FaSync } from 'react-icons/fa';
-
+import EnhancedRecommendations from '@/components/EnhancedRecommendations';
 import StatementManager from '@/components/StatementManager';
 import { useSpendingData } from '@/contexts/SpendingDataContext';
 
@@ -299,15 +299,12 @@ export default function DashboardContent({ user }: { user: User | null }) {
       await refreshAll();
 
       // Update context with new data AFTER refreshing
-      console.log('🚀 Setting analysis data:');
-      console.log('- Transaction Count:', analysis?.transactionCount);
-      console.log('- Recommendations:', recommendations?.length);
-      console.log('- Category Breakdown:', analysis?.categoryBreakdown);
-      if (analysis?.categoryBreakdown) {
-        console.log('- Categories:', analysis.categoryBreakdown.map(c => `${c.category}: $${c.amount?.toFixed(2)} (${c.percentage?.toFixed(1)}%)`));
-      } else {
-        console.log('- No category breakdown found');
-      }
+      console.log('🚀 Setting analysis data:', {
+        analysis: analysis,
+        transactionCount: analysis?.transactionCount,
+        recommendations: recommendations?.length,
+        currentCardRewards
+      });
       
       // Set in context (may be cleared by context issues)
       setAnalysis(analysis);
@@ -544,14 +541,8 @@ export default function DashboardContent({ user }: { user: User | null }) {
     contextAnalysisTransactionCount: data.analysis?.transactionCount || 0,
     localHasAnalysis: !!localAnalysisData,
     localAnalysisTransactionCount: localAnalysisData?.transactionCount || 0,
-    usingAnalysis: analysisToShow === data.analysis ? 'context' : 'local',
-    analysisToShowCategoryCount: analysisToShow?.categoryBreakdown?.length || 0
+    usingAnalysis: analysisToShow === data.analysis ? 'context' : 'local'
   });
-  
-  // Additional category debugging
-  if (analysisToShow?.categoryBreakdown) {
-    console.log('🏷️ Categories to render:', analysisToShow.categoryBreakdown.map(c => `${c.category}: $${c.amount} (${c.percentage}%)`));
-  }
 
   const forceRefresh = async () => {
     await refreshAll();
@@ -884,7 +875,7 @@ export default function DashboardContent({ user }: { user: User | null }) {
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="text-lg font-bold text-green-600">{formatCurrency(adjustedAmount)}</span>
-                              <span className="text-sm text-gray-500">({category.transactionCount || category.count} transactions)</span>
+                              <span className="text-sm text-gray-500">({category.count} transactions)</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                               <div 
@@ -898,44 +889,31 @@ export default function DashboardContent({ user }: { user: User | null }) {
                     })}
                 </div>
               </div>
-
-
             </div>
 
-            {/* Card Recommendations */}
-            {recommendationsToShow.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Recommended Credit Cards</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {recommendationsToShow.slice(0, 3).map((rec, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="mb-3">
-                        <h4 className="font-semibold text-lg text-gray-900">{rec.card?.name || rec.name}</h4>
-                        <p className="text-gray-600">{rec.card?.issuer || rec.issuer}</p>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-500">Annual Fee</p>
-                        <p className="font-medium">{formatCurrency(rec.card?.annual_fee || rec.annualFee || 0)}</p>
-                      </div>
-
-                      {rec.net_annual_benefit && (
-                        <div className="mb-3">
-                          <p className="text-sm text-gray-600">Est. Annual Benefit</p>
-                          <p className="text-lg font-bold text-green-600">{formatCurrency(rec.net_annual_benefit)}</p>
-                        </div>
-                      )}
-                      
-                      <button
-                        onClick={() => handleCardSelect(rec)}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium"
-                      >
-                        Learn More
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Enhanced Recommendations */}
+            {data.recommendations.length > 0 && (
+              <EnhancedRecommendations
+                transactions={analysisToShow?.transactions || []}
+                userProfile={{
+                  annual_income: 75000,
+                  credit_score: 'good',
+                                      monthly_spending: {
+                      groceries: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Groceries')?.amount || 0,
+                      dining: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Dining')?.amount || 0,
+                      travel: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Travel')?.amount || 0,
+                      gas: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Gas')?.amount || 0,
+                      streaming: analysisToShow?.categoryBreakdown?.find(c => c.category === 'Streaming')?.amount || 0,
+                      general: analysisToShow?.totalSpent || 0
+                    },
+                  travel_frequency: 'occasionally',
+                  redemption_preference: 'flexible',
+                  current_cards: [],
+                  monthly_payment_behavior: 'full',
+                  signup_bonus_importance: 'medium'
+                }}
+                onRecommendationSelect={handleCardSelect}
+              />
             )}
           </div>
         )}
